@@ -1,0 +1,1223 @@
+<?php
+
+namespace eureka2\OAuth\Client;
+
+use Symfony\Component\HttpClient\HttpClient;
+use eureka2\OAuth\Exception\OAuthClientAccessTokenException;
+use eureka2\OAuth\Exception\OAuthClientException;
+use eureka2\OAuth\Storage\TokenStorageFactory;
+use eureka2\OAuth\Token\JWT;
+
+/**
+ *
+ * This class serves two main purposes:
+ *
+ * 	1)	Implement the OAuth protocol to retrieve a token from a server to
+ * 		authorize the access to an API on behalf of the current user.
+ *
+ * 	2)	Perform calls to a Web services API using a token previously
+ * 		obtained using this class or a token provided some other way by the
+ * 	 	Web services provider.
+ *
+ * 	 	Regardless of your purposes, you always need to start calling
+ * 	 	the class initialize function after initializing setup variables.
+ * 		After you are done with the class,
+ * 	 	always call the finalize function at the end.
+ *
+ * 	 	This class supports either OAuth protocol versions 1.0, 1.0a, 2.0 and OpenID.
+ * 		It abstracts the differences between these protocol versions,
+ * 		so the class usage is the same independently of the OAuth version of the server.
+ *
+ * 		The OAuthBuiltinProviders class provides built-in support to several popular OAuth providers,
+ * 		so you do not have to manually configure all the details to access those providers.
+ *
+ * 		If you need to access one provider that is not yet directly
+ * 		supported by the OAuthBuiltinProviders class,
+ * 		you need to configure it explicitly setting the variables: 
+ * 			oauth_version,
+ * 			url_parameters,
+ * 			authorization_header,
+ * 			request_token_endpoint,
+ * 			authorization_endpoint,
+ * 			reauthentication_parameter,
+ * 			pin_dialog_url,
+ * 			offline_access_parameter,
+ * 			append_state_to_redirect_uri,
+ * 			token_endpoint.
+ * 			scope,
+ * 			oauth_username,
+ * 			oauth_password,
+ * 			grant_type and
+ * 			token_endpoint.
+ *
+ * 		Before proceeding to the actual OAuth authorization process, you
+ * 		need to have registered your application with the OAuth provider.
+ * 		The registration provides you values to set the variables
+ * 		client_id and client_secret.
+ * 		Some servers also provide an additional value to set the api_key variable.
+ * 		You also need to set the variable redirect_uri before calling the authenticate function
+ * 		to make the class perform the necessary interactions with the OAuth server.
+ *
+ * 		The OAuth protocol involves multiple steps that include redirection
+ * 		to the OAuth server. There it asks permission to the current user to
+ * 		grant your application access to APIs on his/her behalf.
+ *
+ * 		When there is a redirection, the class will set the exit variable,
+ * 		then your script should exit immediately without outputting anything.
+ *
+ * 		When the OAuth access token is successfully obtained, the following
+ * 		variables are set by the class with the obtained values:
+ * 			accessToken,
+ * 			accessTokenSecret,
+ * 			accessTokenExpiry,
+ * 			accessTokenType.
+ *
+ * 		You may want to store these values to use them later when calling the server APIs.
+ * 		Once you get the access token, you can call the server APIs using the callAPI function.
+ * 		Check the access_token_error variable to determine if there was an error when trying to to call the API.
+ *
+ * 		If for some reason the user has revoked the access to your
+ * 		application, you need to ask the user to authorize your application again.
+ * 		First you may need to call the function resetAccessToken to reset the value of
+ * 		the access token that may be cached in session variables.
+ *
+ */
+abstract class AbstractOAuthClient implements OAuthClientInterface {
+	
+	protected $oauthUserAgent = 'OAuth Client (https://www.eureka-soft.fr)';
+
+	/**
+	 *
+	 * 	@var boolean string $debug
+	 * 	Control whether debug output is enabled
+	 * 	Set this variable to true if you
+	 * 	need to check what is going on during calls to the class. When
+	 * 	enabled, the debug output goes either to the variable
+	 * 	@link debug_output and the PHP error log.
+	 *
+	 */
+	protected $debug = false;
+
+	/**
+	 *
+	 * 	@var boolean $debugHttp
+	 * 	Control whether the dialog with the remote Web server
+	 * 	should also be logged.
+	 * 	Set this variable to true if you
+	 * 	want to inspect the data exchange with the OAuth server.
+	 *
+	 */
+	protected $debugHttp = false;
+
+	/**
+	 *
+	 * 	@var string $logFileName
+	 * 	Name of the file to store log messages
+	 * 	Set this variable to the path of a file to which log messages
+	 * 	will be appended instead of sending to PHP error log when the
+	 * 	@link debug variable is set to true.
+	 *
+	 */
+	protected $logFileName = '';
+
+	/**
+	 *
+	 * 	@var boolean $exit
+	 * 	Determine if the current script should be exited.
+	 * 	Check this variable after calling the
+	 * 	authenticate function and exit your script
+	 * 	immediately if the variable is set to true.
+	 *
+	 */
+	protected $exit = false;
+
+	/**
+	 *
+	 * 	@var string $debug_output
+	 * 	Capture the debug output generated by the class
+	 * 	Inspect this variable if you need to see what happened during
+	 * 	the class function calls.
+	 *
+	 */
+	protected $debugOutput = '';
+
+	/**
+	 *
+	 * 	@var string $debugPrefix
+	 * 	Mark the lines of the debug output to identify actions
+	 * 	performed by this class.
+	 * 	Change this variable if you prefer the debug output lines to
+	 * 	be prefixed with a different text.
+	 *
+	 */
+	protected $debugPrefix = 'OAuth client: ';
+
+	/**
+	 *
+	 * 	@var string $accessToken
+	 * 	Access token obtained from the OAuth server
+	 *
+	 * 	Check this variable to get the obtained access token upon
+	 * 	successful OAuth authorization.
+	 *
+	 */
+	protected $accessToken = '';
+
+	/**
+	 *
+	 * 	@var string $accessTokenSecret
+	 * 	Access token secret obtained from the OAuth server
+	 *
+	 * 	If the OAuth protocol version is 1.0 or 1.0a, check this
+	 * 	variable to get the obtained access token secret upon successful
+	 * 	OAuth authorization.
+	 *
+	 */
+	protected $accessTokenSecret = '';
+
+	/**
+	 *
+	 * 	@var string $accessTokenExpiry
+	 * 	Timestamp of the expiry of the access token obtained from
+	 * 	the OAuth server.
+	 *
+	 * 	Check this variable to get the obtained access token expiry
+	 * 	time upon successful OAuth authorization. If this variable is
+	 * 	empty, that means no expiry time was set.
+	 *
+	 */
+	protected $accessTokenExpiry = '';
+
+	/**
+	 *
+	 * 	@var string $accessTokenType
+	 * 	Type of access token obtained from the OAuth server.
+	 *
+	 * 	Check this variable to get the obtained access token type
+	 * 	upon successful OAuth authorization.
+	 *
+	 */
+	protected $accessTokenType = '';
+
+	/**
+	 *
+	 * 	@var array $accessTokenResponse
+	 * 	The original response for the access token request
+	 *
+	 * 	Check this variable if the OAuth server returns custom
+	 * 	parameters in the request to obtain the access token.
+	 *
+	 */
+	protected $accessTokenResponse;
+
+	/**
+	 *
+	 * 	@var string $refreshToken
+	 * 	Refresh token obtained from the OAuth server
+	 *
+	 * 	Check this variable to get the obtained refresh token upon
+	 * 	successful OAuth authorization.
+	 *
+	 */
+	protected $refreshToken = '';
+
+	/**
+	 *
+	 * 	@var object $idToken
+	 * 	The id_token value from OAuth servers compatible with OpenID Connect.
+	 *
+	 * 	Check this variable if the OAuth server returns id_token values.
+	 *
+	 */
+	protected $idToken = null;
+
+	/**
+	 *
+	 * 	@var integer $responseStatus
+	 * 	HTTP response status returned by the server when calling an  API
+	 *
+	 * 	Check this variable after calling the callAPI function if the API calls and you
+	 * 	need to process the error depending the response status.
+	 * 	200 means no error. 
+	 * 	0 means the server response was not retrieved.
+	 *
+	 */
+	protected $responseStatus = 0;
+
+	/**
+	 *
+	 * 	@var array $responseHeaders
+	 * 	HTTP response headers returned by the server when calling an API
+	 *
+	 * 	Check this variable after calling the
+	 * 	callAPI function if the API calls and you
+	 * 	need to process the error depending the response headers.
+	 *
+	 */
+	protected $responseHeaders = [];
+
+	/**
+	 *
+	 * 	@var array $responseBody
+	 * 	HTTP response body returned by the server when calling an API
+	 *
+	 * 	Check this variable after calling the
+	 * 	callAPI function if the API calls and you
+	 * 	need to process the error depending the response headers.
+	 *
+	 */
+	protected $responseBody = [];
+
+	protected $responseTime = 0;
+
+	protected $strategy = null;
+	protected $provider = null;
+	protected $storage = null;
+
+	public function __construct($provider = "") {
+		$this->strategy = new OAuthClientStrategy();
+		$this->provider = new OAuthProvider($provider);
+	}
+
+	protected function isDebug() {
+		return $this->debug;
+	}
+
+	protected function isDebugHttp() {
+		return $this->debugHttp;
+	}
+
+	public function shouldExit() {
+		return $this->exit;
+	}
+
+	public function getAccessToken() {
+		return $this->accessToken;
+	}
+
+	protected function getAccessTokenSecret() {
+		return $this->accessTokenSecret;
+	}
+
+	protected function getAccessTokenExpiry() {
+		return $this->accessTokenExpiry;
+	}
+
+	protected function getAccessTokenType() {
+		return $this->accessTokenType;
+	}
+
+	protected function getAccessTokenResponse() {
+		return $this->accessTokenResponse;
+	}
+
+	protected function getRefreshToken() {
+		return $this->refreshToken;
+	}
+
+	protected function getIdToken() {
+		return $this->idToken;
+	}
+
+	protected function getResponseStatus() {
+		return $this->responseStatus;
+	}
+
+	protected function getResponseHeaders() {
+		return $this->responseHeaders;
+	}
+
+	protected function getResponseHeader($header) {
+		if (!isset($this->responseHeaders[$header])) {
+			return null;
+		}
+		$responseHeader = $this->responseHeaders[$header];
+		if (is_array($responseHeader) && count($responseHeader) == 1) {
+			return $responseHeader[0];
+		}
+		return $responseHeader;
+	}
+
+	protected function getResponseBody() {
+		return $this->responseBody;
+	}
+
+	protected function getOauthUserAgent() {
+		return $this->oauthUserAgent;
+	}
+
+	protected function getResponseTime() {
+		return $this->responseTime;
+	}
+
+	public function getProvider() {
+		return $this->provider;
+	}
+
+	public function setDebug($debug) {
+		$this->debug = $debug;
+		return $this;
+	}
+
+	public function setDebugHttp($debugHttp) {
+		$this->debugHttp = $debugHttp;
+		return $this;
+	}
+
+	protected function setExit($exit) {
+		$this->exit = $exit;
+		return $this;
+	}
+
+	public function setRedirectUri($redirect_uri) {
+		$this->provider->setRedirectUri($redirect_uri);
+		return $this;
+	}
+
+	public function setClientId($client_id) {
+		$this->provider->setClientId($client_id);
+		return $this;
+	}
+
+	public function setClientSecret($client_secret) {
+		$this->provider->setClientSecret($client_secret);
+		return $this;
+	}
+
+	public function setAccessToken($accessToken) {
+		$this->accessToken = $accessToken;
+		return $this;
+	}
+
+	public function setAccessTokenSecret($accessTokenSecret) {
+		$this->accessTokenSecret = $accessTokenSecret;
+		return $this;
+	}
+
+	protected function setAccessTokenExpiry($accessTokenExpiry) {
+		$this->accessTokenExpiry = $accessTokenExpiry;
+		return $this;
+	}
+
+	protected function setAccessTokenType($accessTokenType) {
+		$this->accessTokenType = $accessTokenType;
+		return $this;
+	}
+
+	protected function setAccessTokenResponse($accessTokenResponse) {
+		$this->accessTokenResponse = $accessTokenResponse;
+		return $this;
+	}
+
+	protected function setRefreshToken($refreshToken) {
+		$this->refreshToken = $refreshToken;
+		return $this;
+	}
+
+	protected function setIdToken($idToken) {
+		$this->idToken = $idToken;
+		return $this;
+	}
+
+	protected function setResponseStatus($responseStatus) {
+		$this->responseStatus = $responseStatus;
+		return $this;
+	}
+
+	protected function setResponseHeaders($responseHeaders) {
+		$this->responseHeaders = $responseHeaders;
+		return $this;
+	}
+
+	protected function setResponseBody($responseBody) {
+		$this->responseBody = $responseBody;
+		return $this;
+	}
+
+	protected function setOauthUserAgent($oauthUserAgent) {
+		$this->oauthUserAgent = $oauthUserAgent;
+		return $this;
+	}
+
+	protected function setResponseTime($responseTime) {
+		$this->responseTime = $responseTime;
+		return $this;
+	}
+
+	public function trace($message) {
+		if ($this->isDebug()) {
+			$message = $this->debugPrefix . $message;
+			$this->debugOutput .= $message . "\n";
+			if (!empty($this->logFileName)) {
+				error_log($message . "\n", 3, $this->logFileName);
+			} else {
+				error_log($message);
+			}
+		}
+		return true;
+	}
+
+	protected function getAuthorizationEndpoint($redirectUri = '', $state = '', $nonce = '') {
+		$url = (($this->strategy->isOffline() && !empty($this->strategy->getOfflineAccessParameter()))
+			? $this->provider->getAuthorizationEndpoint() . '&' . $this->strategy->getOfflineAccessParameter()
+			: (($redirectUri === 'oob' && !empty($this->strategy->getPinDialogUrl()))
+				? $this->strategy->getPinDialogUrl()
+				: ($this->strategy->shouldReauthenticate()
+					? $this->provider->getAuthorizationEndpoint() . '&' . $this->strategy->getReauthenticationParameter()
+					: $this->provider->getAuthorizationEndpoint())));
+		if (empty($url)) {
+			throw new OAuthClientException('the authorization endpoint ' . ($this->strategy->isOffline() ? 'for offline access ' : ($this->strategy->shouldReauthenticate() ? 'for reautentication' : '')) . 'is not defined for this provider');
+		}
+		$url = str_replace(
+				['{NONCE}',         '{REDIRECT_URI}',        '{STATE}',         '{CLIENT_ID}',                             '{API_KEY}',                             '{SCOPE}',                              '{REALM}'],
+				[urlencode($nonce), urlencode($redirectUri), urlencode($state), urlencode($this->provider->getClientId()), urlencode($this->provider->getApiKey()), urlencode($this->strategy->getScope()), urlencode($this->strategy->getRealm())],
+				$url);
+		return $url;
+	}
+
+	protected function getTokenEndpoint() {
+		return str_replace('{API_KEY}', $this->provider->getApiKey(), $this->provider->getTokenEndpoint());
+	}
+
+	protected function getRevocationEndpoint($token) {
+		$endPoint = $this->provider->getRevocationEndpoint();
+		if (empty($endPoint)) {
+			$endPoint = $this->provider->getEndSessionEndpoint();
+		}
+		return str_replace('{TOKEN}', $token, $endPoint);
+	}
+
+	protected function getRequestState() {
+		if (isset($_GET['error'])) {
+			$this->trace('it was returned the request state error ' . $_GET['error']);
+			return false;
+		}
+		$check = (!empty($this->strategy->getAppendStateToRedirectUri()) ? $this->strategy->getAppendStateToRedirectUri() : 'state');
+		$state = (isset($_GET[$check]) ? $_GET[$check] : null);
+		return $state;
+	}
+
+	protected function getRequestCode() {
+		return $_GET['code'];
+	}
+
+	protected function getRequestError() {
+		return $_GET['error'];
+	}
+
+	protected function getRequestDenied() {
+		return $_GET['denied'];
+	}
+
+	protected function getRequestToken() {
+		return $_GET['oauth_token'];
+	}
+
+	protected function getRequestVerifier() {
+		return $_GET['oauth_verifier'];
+	}
+
+	protected function retrieveRedirectURI() {
+		if (!empty($this->provider->getRedirectUri())) {
+			$redirectUri = $this->provider->getRedirectUri();
+		} else {
+			$redirectUri = $this->makeUriFromGlobals();
+		}
+		return $redirectUri;
+	}
+
+	/**
+	 * 	Redirect the user browser to a given page.
+	 *
+	 * 	This function is meant to be only be called from inside the
+	 * 	class. By default it issues HTTP 302 response status and sets the
+	 * 	redirection location to a given URL. Sub-classes may override this
+	 * 	function to implement a different way to redirect the user
+	 * 	browser.
+	 *
+	 * 	@param string $url the full URL of the page to redirect.
+	 *
+	 */
+	protected function redirect($url) {
+		header('HTTP/1.0 302 OAuth Redirection');
+		header('Location: ' . $url);
+	}
+
+	protected function verifySignature($jwt) {
+		$header = JWT::decode($jwt);
+		if (preg_match("/^RS(\d+)$/", $header->alg, $m)) {
+			$digests = array_map(function($digest) {
+				return strtolower($digest);
+			}, openssl_get_md_methods());
+			if (in_array('sha'.$m[1], $digests)) {
+				$jwks = $this->provider->getJwksUri();
+				if (empty($jwks)) {
+					throw new OAuthClientException(
+						sprintf(
+							'jwks_uri is required for signature type: %s',
+							$header->alg
+						)
+					);
+				}
+				$options = [
+					'resource' => 'OAuth jwks',
+					'fail_on_access_error' => true
+				];
+				if (($response = $this->sendOAuthRequest($jwks, 'GET', [], $options)) === false) {
+					return false;
+				}
+				return JWT::verifyRSASignature($header, $response->keys, $jwt);
+			}
+		} elseif (preg_match("/^HS(\d+)$/", $header->alg, $m)) {
+			$algos = array_map(function($algo) {
+				return strtolower($algo);
+			}, function_exists('hash_hmac_algos') ? hash_hmac_algos() : hash_algos());
+			if (in_array('sha'.$m[1], $algos)) {
+				return JWT::verifyHMACsignature($header, $jwt, $this->provider->getClientSecret());
+			}
+		}
+		throw new OAuthClientException(
+			sprintf(
+				'No support for signature type: %s',
+				$header->alg
+			)
+		);
+	}
+
+	protected function verifyClaims($jwt) {
+		$claims = JWT::decode($jwt, 1);
+		if ($claims->aud != $this->provider->getClientId()) {
+			return false;
+		}
+		if (property_exists($claims, 'nonce') && $claims->nonce != $this->storage->getStoredNonce()) {
+			return false;
+		}
+		if (!property_exists($claims, 'exp') || $claims->exp < time() - 300) {
+			return false;
+		}
+		if (property_exists($claims, 'nbf') && $claims->nbf > time() + 300) {
+			return false;
+		}
+		return $claims;
+	}
+
+	protected function buildBaseString($url, $method, $values) {
+		$uri = strtok($url, '?');
+		$baseString = $method . '&' . str_replace(['%7E', '+'], ['~', ' '], rawurlencode($uri)) . '&';
+		$signValues = $values;
+		$parts = parse_url($url);
+		if (isset($parts['query'])) {
+			parse_str($parts['query'], $query);
+			foreach ($query as $parameter => $value) {
+				$signValues[$parameter] = $value;
+			}
+		}
+		ksort($signValues);
+		$baseString .= str_replace(['%7E', '+'], ['~', ' '], http_build_query($signValues));
+		return $baseString;
+	}
+
+	protected function sign(&$url, $method, $parameters, $oauth, $requestContentType, $hasFiles, $postValuesInUri, &$authorization, &$postValues) {
+		$values = [
+			'oauth_consumer_key' => $this->provider->getClientId(),
+			'oauth_nonce' => md5(uniqid(rand(), true)),
+			'oauth_signature_method' => $this->strategy->getSignatureMethod(),
+			'oauth_timestamp' => time(),
+			'oauth_version' => '1.0',
+		];
+		if ($hasFiles) {
+			$valueParameters = [];
+		} else {
+			if (($this->strategy->isUrlParameters() || $method !== 'POST') && $requestContentType === 'application/x-www-form-urlencoded' && count($parameters)) {
+				$url .= (strpos($url, '?') === false ? '?' : '&') . http_build_query($parameters);
+				$parameters = [];
+			}
+			$valueParameters = (($requestContentType !== 'application/x-www-form-urlencoded') ? [] : $parameters);
+		}
+		$headerValues = ($method === 'GET' ? array_merge($values, $oauth, $valueParameters) : array_merge($values, $oauth));
+		$values = array_merge($values, $oauth, $valueParameters);
+		$key  = str_replace(['%7E', '+'], ['~', ' '], rawurlencode($this->provider->getClientSecret()));
+		$key .= '&' . str_replace(['%7E', '+'], ['~', ' '], rawurlencode($this->getAccessTokenSecret()));
+		switch ($this->strategy->getSignatureMethod()) {
+			case 'PLAINTEXT':
+				$values['oauth_signature'] = $key;
+				break;
+			case 'HMAC-SHA1':
+				$baseString = $this->buildBaseString($url, $method, $values);
+				$signature = hash_hmac ('sha1', $baseString, $key);
+				$headerValues['oauth_signature'] = $values['oauth_signature'] = base64_encode($signature);
+				break;
+			case 'RSA-SHA1':
+				if (empty($this->strategy->getSignatureCertificateFile())) {
+					throw new OAuthClientException(
+						sprintf(
+							"the signature certificate file is required for the '%s' signature method.",
+							$this->strategy->getSignatureMethod()
+						)
+					);
+				}
+				$privateKey = openssl_pkey_get_private('file://' . $this->strategy->getSignatureCertificateFile()); 
+				$baseString = $this->buildBaseString($url, $method, $values);
+				openssl_sign($baseString, $signature, $privateKey);
+				openssl_free_key($privateKey);
+				$headerValues['oauth_signature'] = $values['oauth_signature'] = base64_encode($signature);
+				break;
+			default:
+				throw new OAuthClientException(
+					sprintf(
+						'%s signature method is not supported',
+						$this->strategy->getSignatureMethod()
+					)
+				);
+		}
+		if ($this->strategy->isAuthorizationInHeader()) {
+			$authorization = 'OAuth';
+			if (!empty($headerValues)) {
+				$authorization .= ' ' . str_replace(['%7E', '+'], ['~', ' '], http_build_query($headerValues, null, ','));
+			}
+			$postValues = $parameters;
+		} else {
+			if ($method !== 'POST' || $postValuesInUri) {
+				$url .= (strpos($url, '?') === false ? '?' : '&') . http_build_query($postValues);
+				$postValues = [];
+			} else {
+				$postValues = $values;
+			}
+		}
+		return true;
+	}
+
+	protected function sendHttpRequest($url, $method, $requestHeaders, $requestBody, $options = []) {
+		try {
+			$http = HttpClient::create(
+				['headers' => [
+					'User-Agent' => $this->oauthUserAgent,
+				],
+				'max_redirects' => $options['max_redirects'] ?? 0
+			]);
+			$response = $http->request($method, $url, [
+				'headers' => $requestHeaders,
+				'body' => $requestBody
+			]);
+			$this->setResponseStatus($response->getStatusCode());
+			$this->setResponseHeaders($response->getHeaders());
+			$this->setResponseBody($response->getContent());
+		} catch (\Exception $e) {
+			throw new OAuthClientException(
+				sprintf(
+					"error while running the HTTP request %s %s : %s",
+					$method,
+					$url,
+					$e->getMessage()
+				)
+			);
+		}
+	}
+
+	protected function sendOAuthRequest($url, $method, $parameters, $options, $oauth = null) {
+		$this->setResponseStatus(0);
+		$this->trace('Accessing the ' . $options['resource'] . ' at ' . $url);
+		$postFiles = [];
+		$method = strtoupper($method);
+		$authorization = '';
+		$requestContentType = (isset($options['request_content_type']) ? strtolower(trim(strtok($options['request_content_type'], ';'))) : (($method === 'POST' || isset($oauth)) ? 'application/x-www-form-urlencoded' : ''));
+		$files = (isset($options['files']) ? $options['files'] : []);
+		if (count($files) > 0) {
+			foreach ($files as $name => $value) {
+				if (!isset($parameters[$name])) {
+					throw new OAuthClientException(
+						sprintf(
+							'it was not specified a file parameter named %s',
+							$name
+						)
+					);
+				}
+				unset($parameters[$name]);
+			}
+			if ($method !== 'POST') {
+				$this->trace('For uploading files the method should be POST not ' . $method);
+				$method = 'POST';
+			}
+			if ($requestContentType !== 'multipart/form-data') {
+				if (isset($options['request_content_type'])) {
+					throw new OAuthClientException('the request content type for uploading files should be multipart/form-data');
+				}
+				$requestContentType = 'multipart/form-data';
+			}
+			$postFiles = $files;
+		}
+		if (isset($oauth)) {
+			if (!$this->sign($url, $method, $parameters, $oauth, $requestContentType, count($files) !== 0, isset($options['post_values_in_uri']) && $options['post_values_in_uri'], $authorization, $post_values)) {
+				return false;
+			}
+		} else {
+			$postValues = $parameters;
+			if (count($parameters)) {
+				switch ($requestContentType) {
+					case 'application/x-www-form-urlencoded':
+					case 'multipart/form-data':
+					case 'application/json':
+					case 'application/javascript':
+						break;
+					default:
+						$url .= (strpos($url, '?') === false ? '?' : '&') . http_build_query($parameters);
+				}
+			}
+		}
+		if (empty($authorization) && !strcasecmp($this->getAccessTokenType(), 'Bearer')) {
+			$authorization = 'Bearer ' . $this->getAccessToken();
+		}
+		$requestHeaders = $options['headers'] ?? [];
+		$requestBody = null;
+		switch ($requestContentType) {
+			case 'application/x-www-form-urlencoded':
+				if (isset($options['body'])) {
+					throw new OAuthClientException('the request body is defined automatically from the parameters');
+				}
+				$requestHeaders['Content-Type'] = $requestContentType;
+				$requestBody = $postValues;
+				break;
+			case 'multipart/form-data':
+				if (isset($options['body'])) {
+					throw new OAuthClientException('the request body is defined automatically from the parameters');
+				}
+				$requestHeaders['Content-Type'] = $requestContentType;
+				$requestBody = array_merge($postFiles, $postValues);
+				break;
+			case 'application/json':
+			case 'application/javascript':
+				$requestHeaders['Content-Type'] = $requestContentType;
+				$requestBody = isset($options['body'])
+								? $options['body']
+								: $parameters;
+				break;
+			default:
+				if (!isset($options['body'])) {
+					if (isset($options['request_content_type'])) {
+						throw new OAuthClientException('it was not specified the body value of the of the API call request');
+					}
+					break;
+				}
+				$requestHeaders['Content-Type'] = $requestContentType;
+				$requestBody = $options['body'];
+				break;
+		}
+		$requestHeaders['Accept'] = (isset($options['accept']) ? $options['accept'] : '*/**');
+		$requestHeaders['Accept-Language'] = (isset($options['accept_language']) ? $options['accept_language'] : '*');
+		switch ($authentication = (isset($options['authentication']) ? strtolower($options['authentication']) : '')) {
+			case 'basic':
+				$requestHeaders['Authorization'] = 'Basic ' . base64_encode($this->provider->getClientId() . ':' . ($this->strategy->getTokenWithApiKey() ? $this->provider->getApiKey() : $this->provider->getClientSecret()));
+				break;
+			case '':
+				if (!empty($authorization)) {
+					$requestHeaders['Authorization'] = $authorization;
+				}
+				break;
+			case 'none':
+				break;
+			default:
+				throw new OAuthClientException($authentication . ' is not a supported authentication mechanism to retrieve an access token');
+		}
+		$this->sendHttpRequest($url, $method, $requestHeaders, $requestBody, $options);
+		if ($this->getResponseStatus() < 200 || $this->getResponseStatus() >= 300) {
+			if (isset($options['fail_on_access_error']) && $options['fail_on_access_error']) {
+				$reason = '';
+				if ($this->getResponseStatus() == 400) {
+					$body = $this->convertResponseBody($options);
+					if (isset($body['error'])) {
+						$reason .= $body['error'];
+					}
+					if (isset($body['error_description'])) {
+						$reason .= '(' . $body['error_description'] . ')';
+					}
+				}
+				throw new OAuthClientAccessTokenException(
+					sprintf(
+						'it was not possible to access the %s: it was returned an unexpected response status %d %s',
+						$options['resource'],
+						$this->getResponseStatus(),
+						$reason
+					)
+				);
+			}
+		}
+		$this->setResponseTime((isset($this->response_headers['date']) ? strtotime(is_array($this->responseHeaders['date']) ? $this->responseHeaders['date'][0] : $this->responseHeaders['date']) : time()));
+		return $this->convertResponseBody($options);
+	}
+
+	protected function convertResponseBody($options) {
+		$data = $this->getResponseBody();
+		$contentType = (isset($options['response_content_type']) ? $options['response_content_type'] : ($this->getResponseHeader('content-type') !== null ? strtolower(trim(strtok($this->getResponseHeader('content-type'), ';'))) : 'unspecified'));
+		$contentType = preg_replace('/^(.+\\/).+\\+(.+)$/', '\\1\\2', $contentType);
+		$response = null;
+		switch ($contentType) {
+			case 'text/javascript':
+			case 'application/json':
+			case 'application/javascript':
+				$object = json_decode($data, isset($options['convert_json_to_array']) && $options['convert_json_to_array']);
+				if (!isset($object)) {
+					throw new OAuthClientException('it was not returned a valid JSON definition of the ' . $options['resource'] . ' values');
+				}
+				$response = $object;
+				break;
+			case 'application/x-json-access-token':
+				$object = json_decode($data);
+				if (gettype($object) !== 'object') {
+					throw new OAuthClientException('the access token response is not in the JSON format');
+				}
+				$response = ['response' => $object];
+				if (isset($object->access_token) && isset($object->access_token->token)) {
+					$response['access_token'] = $object->access_token->token;
+				}
+				break;
+			case 'application/x-www-form-urlencoded':
+			case 'text/plain':
+			case 'text/html':
+				parse_str($data, $response);
+				break;
+			case 'text/xml':
+				if (isset($options['decode_xml_response'])) {
+					switch (strtolower($options['decode_xml_response'])) {
+						case 'simplexml':
+							$this->trace('Decoding XML response with simplexml');
+							try {
+								$data = new \SimpleXMLElement($data);
+							} catch (Exception $exception) {
+								throw new OAuthClientException('Could not parse XML response: ' . $exception->getMessage());
+							}
+							break;
+						default:
+							throw new OAuthClientException($options['decode_xml_response'] . ' is not a supported method to decode XML responses');
+					}
+				}
+			default:
+				$response = $data;
+				break;
+		}
+		return $response ?? false;
+	}
+
+	protected function isThereAStoredAccessToken() {
+		return $this->storage->getStoredAccessToken() !== null;
+	}
+
+	protected function isAccessTokenExpired() {
+		return !empty($this->getAccessTokenExpiry())
+			&& strcmp($this->getAccessTokenExpiry(), gmstrftime('%Y-%m-%d %H:%M:%S')) <= 0
+			&& empty($this->getRefreshToken());
+	}
+
+	protected function isStoredAccessTokenValid() {
+		if (!$this->isThereAStoredAccessToken()) {
+			return false;
+		}
+		$accessToken = $this->storage->getStoredAccessToken();
+		if (isset($accessToken['value']) && !empty($accessToken['value'])) {
+			$this->setAccessToken($accessToken['value']);
+			if (isset($accessToken['expiry'])) {
+				$this->setAccessTokenExpiry($accessToken['expiry']);
+				$expired = strcmp($accessToken['expiry'], gmstrftime('%Y-%m-%d %H:%M:%S')) < 0;
+			} else {
+				$this->setAccessTokenExpiry('');
+				$expired = false;
+			}
+			if ($this->isDebug()) {
+				if ($expired) {
+					$this->trace('The OAuth access token expired on ' . $this->getAccessTokenExpiry() . ' UTC');
+				} elseif (!empty($this->getAccessToken())) {
+					$this->trace('The OAuth access token ' . $this->getAccessToken() . ' is valid');
+					if (!empty($this->getAccessTokenExpiry())) {
+						$this->trace('The OAuth access token expires on ' . $this->getAccessTokenExpiry());
+					}
+				} else {
+					$this->trace('The OAuth access token value was not retrieved before.');
+				}
+			}
+			if (isset($accessToken['type'])) {
+				$this->setAccessTokenType($accessToken['type']);
+				if (!empty($this->getAccessTokenType()) && !$expired && $this->isDebug()) {
+					$this->trace('The OAuth access token is of type ' . $this->getAccessTokenType());
+				}
+			} else {
+				$this->setAccessTokenType($this->strategy->getDefaultAccessTokenType());
+				if (!empty($this->getAccessTokenType()) && !$expired && $this->isDebug()) {
+					$this->trace('Assumed the default for OAuth access token type which is ' . $this->getAccessTokenType());
+				}
+			}
+			if (isset($accessToken['secret']) && !empty($accessToken['secret'])) {
+				$this->setAccessTokenSecret($accessToken['secret']);
+				if ($this->isDebug() && !$expired && !empty($this->getAccessTokenSecret())) {
+					$this->trace('The OAuth access token secret is ' . $this->getAccessTokenSecret());
+				}
+			}
+			if (isset($accessToken['refresh'])) {
+				$this->setRefreshToken($accessToken['refresh']);
+			} else {
+				$this->setRefreshToken('');
+			}
+			if (isset($accessToken['id_token']) && !empty($accessToken['id_token'])) {
+				$this->setIdToken($accessToken['id_token']);
+			} else {
+				$this->setIdToken(null);
+			}
+			$this->setAccessTokenResponse((($this->strategy->shouldStoreAccessTokenResponse() && isset($accessToken['response'])) ? $accessToken['response'] : null));
+			return true;
+		}
+		return false;
+	}
+
+	abstract public function callAPI($url, $method, $parameters, $options);
+
+	protected function checkTokenBeforeCall($options) {
+		$version = intval($this->provider->getOauthVersion());
+		$twoLegged = ($version === 1 && isset($options['2legged']) && $options['2legged']);
+		if (empty($this->getAccessToken()) && !$twoLegged) {
+			if (!$this->isThereAStoredAccessToken()) {
+				return false;
+			}
+			if (!$this->isStoredAccessTokenValid()) {
+				throw new OAuthClientException('the access token is not set to a valid value');
+			}
+		}
+		return true;
+	}
+
+	public function initialize($options = []) {
+		$this->storage = TokenStorageFactory::create($this, $options['storage'] ?? [ 'type' => 'session' ]);
+		if (strlen($this->provider->getName()) === 0) {
+			return true;
+		}
+		$configuration = [];
+		if (isset($options['provider']) && isset($options['provider']['discovery_endpoint'])) {
+			$configuration = array_merge($configuration, $this->discover($options['provider']['discovery_endpoint']));
+		}
+		if (isset($options['provider'])) {
+			$configuration = array_merge($configuration, $options['provider']);
+		}
+		$builtinProperties = OAuthBuiltinProviders::PROVIDERS[$this->provider->getName()] ?? [];
+		$configuration = array_merge($builtinProperties['configuration'], $configuration);
+		$this->provider->bind($configuration);
+		$strategy = $builtinProperties['strategy'];
+		if (isset($options['strategy'])) {
+			$strategy = array_merge($strategy, $options['strategy']);
+		}
+		$this->strategy->bind($strategy);
+		$this->storage->initialize();
+		return true;
+	}
+
+	protected function discover($discoveryEndpoint) {
+		$url = $discoveryEndpoint . '/.well-known/openid-configuration';
+		$options = [
+			'resource' => 'Openid configuration',
+			'accept' => 'application/json'
+		];
+		$response = $this->sendOAuthRequest($url, 'GET', [], $options);
+		if ($response === false || isset($response->error)) {
+			throw new OAuthClientException(
+				sprintf(
+					"Can't discover the openid configuration at %s, reason : %s",
+					$discoveryEndpoint,
+					$response->error ?? 'send request error'
+				)
+			);
+		}
+		$configuration = [
+			'oauth_version' => '2.0',
+			'authorization_endpoint' => $response->authorization_endpoint . '?response_type=code&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={SCOPE}&state={STATE}',
+			'token_endpoint' => $response->token_endpoint,
+			'discovery_endpoint' => $discoveryEndpoint,
+			'registration_endpoint' => $response->registration_endpoint ?? '',
+			'introspection_endpoint' => $response->introspection_endpoint ?? '',
+			'revocation_endpoint' => $response->revocation_endpoint ?? '',
+			'userinfo_endpoint' => $response->userinfo_endpoint ?? '',
+			'end_session_endpoint' => $response->end_session_endpoint ?? '',
+			'jwks_uri' => $response->jwks_uri ?? '',
+			'scopes_supported' => $response->scopes_supported ?? [],
+			'response_types_supported' => $response->response_types_supported ?? [],
+			'response_modes_supported' => $response->response_modes_supported ?? [],
+			'token_endpoint_auth_methods_supported' => $response->token_endpoint_auth_methods_supported ?? [],
+			'subject_types_supported' => $response->subject_types_supported ?? [],
+			'id_token_signing_alg_values_supported' => $response->id_token_signing_alg_values_supported ?? [],
+			'claims_supported' => $response->claims_supported ?? []
+		];
+		return $configuration;
+	}
+
+	protected function checkNoToken() {
+		if (!empty($this->getAccessToken()) || !empty($this->getAccessTokenSecret())) {
+			$this->trace('The authenticate function should not be called again if the OAuth token was already set manually');
+			throw new OAuthClientException('the OAuth token was already set');
+		}
+	}
+
+	public function authenticate() {
+		if (!$this->checkAccessToken($redirectUrl)) {
+			return false;
+		}
+		if (isset($redirectUrl)) {
+			$this->trace('Redirecting to OAuth authorization server : ' . $redirectUrl);
+			$this->redirect($redirectUrl);
+			$this->setExit(true);
+		}
+		return true;
+	}
+
+	abstract public function checkAccessToken(&$redirectUrl);
+
+	public function resetAccessToken() {
+		return $this->storage->resetAccessToken();
+	}
+
+	public function canRevokeToken() {
+		$token = $this->getAccessToken();
+		if (($revocationEndpoint = $this->getRevocationEndpoint($token)) === null) {
+			return false;
+		}
+		if (empty($revocationEndpoint)) {
+			return false;
+		}
+		$redirectUrl = null;
+		if (!$this->checkAccessToken($redirectUrl) || !isset($redirectUrl)) {
+			return false;
+		}
+		return true;
+	}
+
+	public function revokeToken($tokenTypeHint = 'access_token') {
+		if ($tokenTypeHint != 'access_token') {
+			throw new OAuthClientException(
+				sprintf(
+					'Revoking tokens of type %s is not supported',
+					$tokenTypeHint
+				)
+			);
+		}
+		$token = $this->getAccessToken();
+		if (($revocationEndpoint = $this->getRevocationEndpoint($token)) === null) {
+			return false;
+		}
+		if (empty($revocationEndpoint)) {
+			throw new OAuthClientException('OAuth revoke token URL is not defined');
+		}
+		$parameters = [
+			'token' => $token,
+			'token_type_hint' => $tokenTypeHint
+		];
+		$options = [
+			'resource' => 'OAuth revoke token',
+			'fail_on_access_error' => true,
+			'authentication' => 'basic',
+			'accept' => 'application/json'
+			
+		];
+		$this->trace('Revoking token of type ' . $tokenTypeHint . ': ' . $token);
+		if ($this->sendOAuthRequest($revocationEndpoint, 'POST', $parameters, $options) === false) {
+			return false;
+		}
+		if ($tokenTypeHint === 'access_token') {
+			return $this->storage->resetAccessToken();
+		}
+		return true;
+	}
+
+	public function finalize() {
+		$this->storage->finalize();
+	}
+
+	protected function makeUriFromGlobals() {
+		if (isset($_SERVER['HTTP_UPGRADE_INSECURE_REQUESTS']) && ($_SERVER['HTTP_UPGRADE_INSECURE_REQUESTS'] == 1)) {
+			$scheme = 'https';
+		} elseif (isset($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
+			$scheme = $_SERVER['HTTP_X_FORWARDED_PROTO'];
+		} elseif (isset($_SERVER['REQUEST_SCHEME'])) {
+			$scheme = $_SERVER['REQUEST_SCHEME'];
+		} elseif (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+			$scheme = 'https';
+		} else {
+			$scheme = 'http';
+		}
+		if (isset($_SERVER['HTTP_X_FORWARDED_HOST']) && !empty($_SERVER['HTTP_X_FORWARDED_HOST'])) {
+			$host = explode(':', $_SERVER['HTTP_X_FORWARDED_HOST'])[0];
+		} elseif (isset($_SERVER['HTTP_HOST']) && !empty($_SERVER['HTTP_HOST'])) {
+			$host = explode(':', $_SERVER['HTTP_HOST'])[0];
+		} elseif (isset($_SERVER['SERVER_NAME']) && !empty($_SERVER['SERVER_NAME'])) {
+			$host = $_SERVER['SERVER_NAME'];
+		} else {
+			$host = $_SERVER['SERVER_ADDR'];
+		}
+		if (isset($_SERVER['HTTP_X_FORWARDED_PORT']) && !empty($_SERVER['HTTP_X_FORWARDED_PORT'])) {
+			$port = (int)$_SERVER['HTTP_X_FORWARDED_PORT'];
+		} elseif (isset($_SERVER['HTTP_X_FORWARDED_HOST']) && !empty($_SERVER['HTTP_X_FORWARDED_HOST']) && strpos(':', $_SERVER['HTTP_X_FORWARDED_HOST']) !== false) {
+			$port = (int)explode(':', $_SERVER['HTTP_X_FORWARDED_HOST'])[1];
+		} elseif (isset($_SERVER['SERVER_PORT']) && !empty($_SERVER['SERVER_PORT'])) {
+			$port = (int)$_SERVER['SERVER_PORT'];
+		} elseif (isset($_SERVER['HTTP_HOST']) && !empty($_SERVER['HTTP_HOST']) && strpos(':', $_SERVER['HTTP_HOST']) !== false) {
+			$port = (int)explode(':', $_SERVER['HTTP_HOST'])[1];
+		} else {
+			$port = $scheme === 'https' ? 443 : 80;
+		}
+		$port = (443 == $port) || (80 == $port) ? '' : ':' . $port;
+		$requestUri = trim(strtok($_SERVER['REQUEST_URI'], '?'), '/');
+		return sprintf('%s://%s%s/%s', $scheme, $host, $port, $requestUri);
+	}
+
+	public function canLogOut() {
+		$endPoint = $this->provider->getEndSessionEndpoint();
+		if (empty($endPoint)) {
+			return false;
+		}
+		if (!$this->isStoredAccessTokenValid()) {
+			return false;
+		}
+		return true;
+	}
+
+	public function logOut($redirect = null) {
+		if (!$this->canLogOut()) {
+			return false;
+		}
+		$endPoint = $this->provider->getEndSessionEndpoint();
+		$params = [];
+		$accessToken = $this->storage->getStoredAccessToken();
+		$idToken = $accessToken['id_token'] ?? '';
+		if (!empty($idToken)) {
+			$params['id_token_hint'] = $idToken;
+		}
+		$state = $this->storage->getStoredState();
+		if (!is_null($state)) {
+			$params['state'] = $state;
+		}
+		if($redirect !== null){
+			$params['post_logout_redirect_uri'] = $redirect;
+		}
+		$endPoint .= (strpos($endPoint, '?') === false ? '?' : '&') . http_build_query($params, null, '&');
+		$this->redirect($endPoint);
+		$this->setExit(true);
+	}
+
+	public function introspectToken($token, $tokenTypeHint = '') {
+		$endpoint = $this->provider->getIntrospectionEndpoint();
+		if (empty($endpoint)) {
+			return false;
+		}
+		$parameters = [
+			'token' => $token,
+		];
+		if (!empty($tokenTypeHint)) {
+			$parameters['token_type_hint'] = $tokenTypeHint;
+		}
+		$clientId = $this->provider->getClientId();
+		$clientSecret = $this->provider->getClientSecret();
+		$parameters = http_build_query($parameters, null, '&');
+		$options = [
+			'resource' => 'OAuth introspect Token',
+			'accept' => 'application/json',
+			'headers' => [
+				'Authorization: Basic ' . base64_encode($clientId . ':' . $clientSecret)
+			]
+		];
+		return $this->sendOAuthRequest($endpoint, 'POST', $parameters, $options);
+	}
+
+}

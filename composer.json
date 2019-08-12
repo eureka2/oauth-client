@@ -1,0 +1,21 @@
+{
+	"name" : "eureka2/oauth-client",
+	"description" : "OAuth client library",
+	"type" : "library",
+	"license" : "MIT",
+    "authors": [
+        {
+            "name": "Eureka2",
+            "homepage": "https://github.com/eureka2/oauth-client"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "eureka2\\OAuth\\": "src/"
+        }
+    },
+	"require" : {
+        "php": "^7.1.3",
+        "symfony/http-client": "^4.3"
+	}
+}
