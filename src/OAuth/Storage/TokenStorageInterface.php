@@ -4,19 +4,16 @@ namespace eureka2\OAuth\Storage;
 
 interface TokenStorageInterface {
 
-	public function getStoredState();
-
 	/**
 	 * 	Store the values of the access token when it is succefully
 	 * 	retrieved from the OAuth server.
 	 *
-	 * 	This function is meant to be only be called from inside the
-	 * 	class. By default it stores access tokens in a session variable
-	 * 	named 'OAUTH_ACCESS_TOKEN'.
+	 * 	This method is meant to be only be called from inside the class.
 	 *
 	 * 	Actual implementations should create a sub-class and override this
 	 * 	function to make the access token values be stored in other types
 	 * 	of containers, like for instance databases.
+	 *
 	 * 	@param hash $accessToken Associative array with properties of the access token. 
 	 * 	The array may have set the following properties:
 	 * 	'value': string value of the access token
@@ -31,14 +28,12 @@ interface TokenStorageInterface {
 
 	/**
 	 * 	Retrieve the OAuth access token if it was already previously stored by the
-	 * 	storeAccessToken function.
+	 * 	storeAccessToken method.
 	 *
-	 * 	This function is meant to be only be called from inside the
-	 * 	class. By default it retrieves access tokens stored in a session
-	 * 	variable named 'OAUTH_ACCESS_TOKEN'.
+	 * 	This method is meant to be only be called from inside the class.
 	 *
 	 * 	Actual implementations should create a sub-class and override this
-	 * 	function to retrieve the access token values from other types of
+	 * 	method to retrieve the access token values from other types of
 	 * 	containers, like for instance databases.
 	 *
 	 * 	@return array|bool the properties of the access token in an
@@ -54,25 +49,30 @@ interface TokenStorageInterface {
 	 * 	Reset the access token to a state back when the user has
 	 * 	not yet authorized the access to the OAuth server API.
 	 *
-	 * 	Call this function if for some reason the token to access
+	 * 	Call this method if for some reason the token to access
 	 * 	the API was revoked and you need to ask the user to authorize
 	 * 	the access again.
 	 *
-	 * 	By default the class stores and retrieves access tokens in a
-	 * 	session variable named 'OAUTH_ACCESS_TOKEN'.
-	 *
-	 * 	This function must be called when the user is accessing your site
+	 * 	This method must be called when the user is accessing your site
 	 * 	pages, so it can reset the information stored in session variables
 	 * 	that cache the state of a previously retrieved access token.
 	 *
 	 * 	Actual implementations should create a sub-class and override this
-	 * 	function to reset the access token state when it is stored in
+	 * 	method to reset the access token state when it is stored in
 	 * 	other types of containers, like for instance databases.
 	 *
 	 * 	@return bool This function should return true if the access token was resetted successfully.
 	 *
 	 */
 	public function resetAccessToken();
+
+	public function getStoredState();
+
+	public function getStoredNonce();
+	
+	public function storeUser($user);
+
+	public function getStoredUser();
 
 	public function initialize();
 

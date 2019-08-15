@@ -287,10 +287,16 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 		return $this->debugHttp;
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function shouldExit() {
 		return $this->exit;
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function getAccessToken() {
 		return $this->accessToken;
 	}
@@ -350,6 +356,9 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 		return $this->responseTime;
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function getProvider() {
 		return $this->provider;
 	}
@@ -466,7 +475,12 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 					? $this->provider->getAuthorizationEndpoint() . '&' . $this->strategy->getReauthenticationParameter()
 					: $this->provider->getAuthorizationEndpoint())));
 		if (empty($url)) {
-			throw new OAuthClientException('the authorization endpoint ' . ($this->strategy->isOffline() ? 'for offline access ' : ($this->strategy->shouldReauthenticate() ? 'for reautentication' : '')) . 'is not defined for this provider');
+			throw new OAuthClientException(
+				sprintf(
+					'the authorization endpoint %s is not defined for this provider',
+					($this->strategy->isOffline() ? 'for offline access ' : ($this->strategy->shouldReauthenticate() ? 'for reautentication' : ''))
+				)
+			);
 		}
 		$url = str_replace(
 				['{NONCE}',         '{REDIRECT_URI}',        '{STATE}',         '{CLIENT_ID}',                             '{API_KEY}',                             '{SCOPE}',                              '{REALM}'],
@@ -966,6 +980,9 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 		return false;
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	abstract public function callAPI($url, $method, $parameters, $options);
 
 	protected function checkTokenBeforeCall($options) {
@@ -982,6 +999,9 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 		return true;
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function initialize($options = []) {
 		$this->storage = TokenStorageFactory::create($this, $options['storage'] ?? [ 'type' => 'session' ]);
 		if (strlen($this->provider->getName()) === 0) {
@@ -1051,6 +1071,9 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 		}
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function authenticate() {
 		if (!$this->checkAccessToken($redirectUrl)) {
 			return false;
@@ -1065,6 +1088,9 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 
 	abstract public function checkAccessToken(&$redirectUrl);
 
+	/**
+	 * @inheritdoc
+	 */
 	public function resetAccessToken() {
 		return $this->storage->resetAccessToken();
 	}
@@ -1084,6 +1110,9 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 		return true;
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function revokeToken($tokenTypeHint = 'access_token') {
 		if ($tokenTypeHint != 'access_token') {
 			throw new OAuthClientException(
@@ -1121,6 +1150,9 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 		return true;
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function finalize() {
 		$this->storage->finalize();
 	}
@@ -1162,6 +1194,9 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 		return sprintf('%s://%s%s/%s', $scheme, $host, $port, $requestUri);
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function canLogOut() {
 		$endPoint = $this->provider->getEndSessionEndpoint();
 		if (empty($endPoint)) {
@@ -1173,6 +1208,9 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 		return true;
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function logOut($redirect = null) {
 		if (!$this->canLogOut()) {
 			return false;
@@ -1196,6 +1234,9 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 		$this->setExit(true);
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function introspectToken($token, $tokenTypeHint = '') {
 		$endpoint = $this->provider->getIntrospectionEndpoint();
 		if (empty($endpoint)) {

@@ -1,7 +1,5 @@
 <?php require('../../vendor/autoload.php');
 
-use eureka2\Http\HttpClientException;
-use eureka2\Http\HttpClientPHPException;
 use eureka2\OAuth\Client\OAuthClientFactory;
 use eureka2\OAuth\Exception\OAuthClientAccessTokenException;
 use eureka2\OAuth\Exception\OAuthClientAuthorizationException;

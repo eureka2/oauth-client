@@ -9,7 +9,8 @@ class OAuthBuiltinProviders {
 			'configuration' => [
 				'oauth_version' => '2.0',
 				'authorization_endpoint' => 'https://www.facebook.com/dialog/oauth?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={SCOPE}&state={STATE}',
-				'token_endpoint' => 'https://graph.facebook.com/oauth/access_token'
+				'token_endpoint' => 'https://graph.facebook.com/oauth/access_token',
+				'user_id_field' => 'id'
 			],
 			'strategy' => [
 				'reauthentication_parameter' => 'auth_type=reauthenticate'

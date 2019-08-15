@@ -20,9 +20,10 @@ class TokenStorageFactory {
 			case 'pdo':
 			case 'database':
 				return new PdoTokenStorage($client, $storage);
-			case 'filesystem':
-				return new FilesystemTokenStorage($client, $storage);
-				break;
+			case 'apcu':
+				if (function_exists('apcu_store')) {
+					return new ApcuTokenStorage($client);
+				}
 			default:
 				throw new OAuthClientException(
 					sprintf(

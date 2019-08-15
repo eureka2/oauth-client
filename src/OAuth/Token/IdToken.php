@@ -28,9 +28,9 @@ class IdToken {
 	protected $claims = [];
 
 	public function __construct($idToken) {
-		$this->idToken = $idToken;
+		$this->idToken = $idToken ?? '';
 		$claims = JWT::decode($idToken, 1);
-		$this->claims = array_merge(self::CLAIMS, $claims);
+		$this->claims = array_merge(self::CLAIMS, (array)$claims);
 	}
 
 	public function get() {

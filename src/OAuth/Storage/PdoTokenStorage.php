@@ -9,6 +9,66 @@ class PdoTokenStorage
 	extends AbstractTokenStorage 
 	implements TokenStorageInterface, TokenStorageManagementInterface {
 
+	const CREATE_TABLE = [
+		'sqlite' => 
+			"CREATE TABLE oauth_session (
+			id integer NOT NULL primary key autoincrement,
+			session char(32) NOT NULL DEFAULT '',
+			state char(32) NOT NULL DEFAULT '',
+			nonce char(64) NOT NULL DEFAULT '',
+			access_token text NOT NULL DEFAULT '',
+			expiry datetime DEFAULT NULL,
+			type char(12) NOT NULL DEFAULT '',
+			provider char(20) NOT NULL DEFAULT '',
+			creation datetime NOT NULL DEFAULT '2000-01-01 00:00:00',
+			access_token_secret text NOT NULL DEFAULT '',
+			authorized char(1) DEFAULT NULL,
+			user text DEFAULT NULL,
+			refresh_token text NOT NULL DEFAULT '',
+			scope text NOT NULL DEFAULT '',
+			id_token text NOT NULL DEFAULT '',
+			access_token_response text DEFAULT NULL
+			);",
+		'mysql' => 
+			"CREATE TABLE oauth_session (
+			id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+			session VARCHAR(32) NOT NULL DEFAULT '',
+			state VARCHAR(32) NOT NULL DEFAULT '',
+			nonce VARCHAR(64) NOT NULL DEFAULT '',
+			access_token TEXT NOT NULL DEFAULT '',
+			expiry DATETIME DEFAULT NULL,
+			type VARCHAR(12) NOT NULL DEFAULT '',
+			provider VARCHAR(20) NOT NULL DEFAULT '',
+			creation DATETIME NOT NULL DEFAULT '2000-01-01 00:00:00',
+			access_token_secret TEXT NOT NULL DEFAULT '',
+			authorized TINYINT(1) DEFAULT NULL,
+			user TEXT DEFAULT NULL,
+			refresh_token TEXT NOT NULL DEFAULT '',
+			scope TEXT NOT NULL DEFAULT '',
+			id_token TEXT NOT NULL DEFAULT '',
+			access_token_response TEXT DEFAULT NULL
+			) ENGINE=INNODB;",
+		'pgsql' => 
+			"CREATE TABLE oauth_session (
+			id serial PRIMARY KEY,
+			session VARCHAR(32) NOT NULL DEFAULT '',
+			state VARCHAR(32) NOT NULL DEFAULT '',
+			nonce VARCHAR(64) NOT NULL DEFAULT '',
+			access_token TEXT NOT NULL DEFAULT '',
+			expiry datetime DEFAULT NULL,
+			type VARCHAR(12) NOT NULL DEFAULT '',
+			provider VARCHAR(20) NOT NULL DEFAULT '',
+			creation datetime NOT NULL DEFAULT '2000-01-01 00:00:00',
+			access_token_secret TEXT NOT NULL DEFAULT '',
+			authorized BOOLEAN DEFAULT NULL,
+			user TEXT DEFAULT NULL,
+			refresh_token TEXT NOT NULL DEFAULT '',
+			scope TEXT NOT NULL DEFAULT '',
+			id_token TEXT NOT NULL DEFAULT '',
+			access_token_response TEXT DEFAULT NULL
+			);"
+	];
+
 	private $pdo = null;
 
 	public function createOAuthSession(&$session) {
@@ -33,7 +93,7 @@ class PdoTokenStorage
 			$sessionId, \PDO::PARAM_STR,
 			$provider, \PDO::PARAM_STR
 		];
-		if (!$this->query('SELECT id, session, state, nonce, access_token, access_token_secret, expiry, authorized, type, provider, creation, refresh_token, id_token, access_token_response, user FROM oauth_session WHERE session=? AND provider=?', $parameters, $results)) {
+		if (!$this->query('SELECT id, session, state, nonce, access_token, access_token_secret, expiry, authorized, type, provider, creation, refresh_token, scope, id_token, access_token_response, user FROM oauth_session WHERE session=? AND provider=?', $parameters, $results)) {
 			return false;
 		}
 		if (count($results) === 0) {
@@ -58,12 +118,13 @@ class PdoTokenStorage
 			$session->getProvider(), \PDO::PARAM_STR,
 			$session->getCreation(), \PDO::PARAM_STR,
 			$token->getRefresh(), \PDO::PARAM_STR,
+			$token->getScope(), \PDO::PARAM_STR,
 			"".$token->getIdToken(), \PDO::PARAM_STR,
 			json_encode($token->getResponse()), \PDO::PARAM_STR,
 			$session->getUser(), \PDO::PARAM_STR,
 			$session->getid(), \PDO::PARAM_INT
 		];
-		return $this->query('UPDATE oauth_session SET session=?, state=?, nonce=?, access_token=?, access_token_secret=?, expiry=?, authorized=?, type=?, provider=?, creation=?, refresh_token=?, id_token=?, access_token_response=?, user=? WHERE id=?', $parameters, $results);
+		return $this->query('UPDATE oauth_session SET session=?, state=?, nonce=?, access_token=?, access_token_secret=?, expiry=?, authorized=?, type=?, provider=?, creation=?, refresh_token=?, scope=?, id_token=?, access_token_response=?, user=? WHERE id=?', $parameters, $results);
 	}
 
 	public function resetAccessToken() {
@@ -92,8 +153,9 @@ class PdoTokenStorage
 			'authorized' => $session[7],
 			'type' => $session[8],
 			'refresh' => $session[11],
-			'id_token' => $session[12],
-			'response' => (isset($session[13]) ? json_decode($session[13]) : null)
+			'scope' => $session[12],
+			'id_token' => $session[13],
+			'response' => (isset($session[14]) ? json_decode($session[14]) : null)
 		]);
 		$oauthSession = new OAuthSessionValue();
 		$oauthSession->setId($session[0]);
@@ -103,7 +165,51 @@ class PdoTokenStorage
 		$oauthSession->setAccessToken($accessToken);
 		$oauthSession->setProvider($session[9]);
 		$oauthSession->setCreation($session[10]);
-		$oauthSession->setUser($session[14]);
+		$oauthSession->setUser($session[15]);
+	}
+
+	private function tableExists() {
+		try {
+			$result = $this->pdo->query("SELECT 1 FROM oauth_session LIMIT 1");
+		} catch (\Exception $e) {
+			return false;
+		}
+		return $result !== false;
+	}
+
+	private function createTable() {
+		try {
+			$driver = $this->pdo->getAttribute(\PDO::ATTR_DRIVER_NAME);
+			if (!isset(self::CREATE_TABLE[$driver])) {
+			throw new OAuthClientException(
+				sprintf(
+					'The database driver %s is not supported',
+					$driver
+				)
+			);
+			}
+			$this->pdo->setAttribute( \PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION );
+			$sql = self::CREATE_TABLE[$driver];
+			$this->pdo->exec($sql);
+		} catch(\Exception $e) {
+			throw new OAuthClientException(
+				sprintf(
+					'Unable to create the token storage table : %s',
+					$e->getMessage()
+				)
+			);
+		}
+		try {
+			 $sql = "CREATE UNIQUE INDEX oauth_session_index ON oauth_session(session, provider)";
+			 $this->pdo->exec($sql);
+		} catch(\Exception $e) {
+			throw new OAuthClientException(
+				sprintf(
+					'Unable to create the token storage table index : %s',
+					$e->getMessage()
+				)
+			);
+		}
 	}
 
 	private function connect() {
@@ -132,6 +238,9 @@ class PdoTokenStorage
 					$e->getMessage()
 				)
 			);
+		}
+		if (!$this->tableExists()) {
+			$this->createTable();
 		}
 	}
 

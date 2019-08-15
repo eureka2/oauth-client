@@ -86,6 +86,9 @@ abstract class AbstractTokenStorage
 
 	abstract public function saveOAuthSession($session);
 
+	/**
+	 * @inheritdoc
+	 */
 	public function storeAccessToken($accessToken) {
 		$session = null;
 		if (!$this->setupSession($session)) {
@@ -95,7 +98,10 @@ abstract class AbstractTokenStorage
 		return $this->saveOAuthSession($session);
 	}
 
-	public function setUser($user) {
+	/**
+	 * @inheritdoc
+	 */
+	public function storeUser($user) {
 		$session = null;
 		if (!$this->setupSession($session)) {
 			return false;
@@ -104,6 +110,9 @@ abstract class AbstractTokenStorage
 		return $this->saveOAuthSession($session);
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function getStoredAccessToken() {
 		$session = null;
 		if (!$this->setupSession($session)) {
@@ -114,6 +123,9 @@ abstract class AbstractTokenStorage
 		return $accessToken;
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function getStoredState() {
 		$session = null;
 		if (!$this->setupSession($session)) {
@@ -122,6 +134,9 @@ abstract class AbstractTokenStorage
 		return $session->getState();
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function getStoredNonce() {
 		$session = null;
 		if (!$this->setupSession($session)) {
@@ -130,6 +145,9 @@ abstract class AbstractTokenStorage
 		return $session->getNonce();
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function getStoredUser() {
 		$session = null;
 		if (!$this->setupSession($session)) {
@@ -138,9 +156,15 @@ abstract class AbstractTokenStorage
 		return $session->getUser();
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function initialize() {
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function finalize() {
 	}
 

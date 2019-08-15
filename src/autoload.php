@@ -1,7 +1,7 @@
 <?php
 
 spl_autoload_register(function ($class) {
-	$prefixes = ['eureka2\\OAuth\\'];
+	$prefixes = ['eureka2\\'];
 	foreach($prefixes as $prefix) {
 		if (strpos($class, $prefix) === 0) {
 			$filename = str_replace('\\', DIRECTORY_SEPARATOR, substr($class, strlen($prefix))) . '.php';
