@@ -95,7 +95,7 @@ class OAuth1Client extends AbstractOAuthClient implements OAuthClientInterface {
 
 	public function checkAccessToken(&$redirectUrl) {
 		$this->checkNoToken();
-		$one_a = ($this->provider->getOauthVersion() === '1.0a');
+		$version1a = ($this->provider->getProtocol() == 'oauth' && $this->provider->getVersion() === '1.0a');
 		$this->trace('Checking the OAuth token authorization state');
 		if (($accessToken = $this->storage->getStoredAccessToken()) === null) {
 			return false;
@@ -114,7 +114,7 @@ class OAuth1Client extends AbstractOAuthClient implements OAuthClientInterface {
 						$this->trace('The OAuth token is not yet authorized');
 					}
 				}
-				if ($one_a && $this->provider->getRedirectUri() === 'oob' && strlen($this->strategy->getPin())) {
+				if ($version1a && $this->provider->getRedirectUri() === 'oob' && strlen($this->strategy->getPin())) {
 					$this->trace('Checking the pin');
 					$this->setAccessTokenSecret($accessToken['secret']);
 					$oauth = [
@@ -129,7 +129,7 @@ class OAuth1Client extends AbstractOAuthClient implements OAuthClientInterface {
 					$this->trace('Checking the OAuth token and verifier');
 					$token = $this->getRequestToken();
 					$verifier = $this->getRequestVerifier();
-					if (!isset($token) || ($one_a && !isset($verifier))) {
+					if (!isset($token) || ($version1a && !isset($verifier))) {
 						$denied = $this->getRequestDenied();
 						if (isset($denied) && $denied === $accessToken['value']) {
 							$this->trace('The authorization request was denied');
@@ -146,7 +146,7 @@ class OAuth1Client extends AbstractOAuthClient implements OAuthClientInterface {
 						$oauth = [
 							'oauth_token' => $token,
 						];
-						if ($one_a) {
+						if ($version1a) {
 							$oauth['oauth_verifier'] = $verifier;
 						}
 						if (!$this->requestAnOAuthAccessToken($oauth, $accessToken)) {
@@ -233,7 +233,7 @@ class OAuth1Client extends AbstractOAuthClient implements OAuthClientInterface {
 			default:
 				$url .= (strpos($url, '?') === false ? '?' : '&') . 'oauth_token=' . $accessToken['value'];
 		}
-		if (!$one_a) {
+		if (!$version1a) {
 			$url .= '&oauth_callback=' . urlencode($this->retrieveRedirectURI());
 		}
 		$redirectUrl = $url;

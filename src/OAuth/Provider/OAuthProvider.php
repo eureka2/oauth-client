@@ -1,6 +1,6 @@
 <?php
 
-namespace eureka2\OAuth\Client;
+namespace eureka2\OAuth\Provider;
 
 use eureka2\OAuth\Exception\OAuthClientException;
 
@@ -10,7 +10,10 @@ class OAuthProvider {
 	private $name = '';
 
 	/** @var string */
-	private $oauth_version = '2.0';
+	private $protocol = 'oauth';
+
+	/** @var string */
+	private $version = '2.0';
 
 	/** @var string */
 	private $client_id = '';
@@ -24,7 +27,34 @@ class OAuthProvider {
 	/** @var string */
 	private $discovery_endpoint = '';
 
-	/** @var string */
+	/**
+	 *
+	 * 	@var string $authorization_endpoint
+	 * 	URL of the OAuth server to redirect the browser so the user
+	 * 	can grant access to your application.
+	 * 	Set this variable to the OAuth request token URL when you are
+	 * 	not accessing one of the built-in supported OAuth servers.
+	 * 	For OAuth 1.0a servers that return the login dialog URL
+	 * 	automatically, set this variable to 'automatic'
+	 * 	For OAuth 1.0a servers that support 2 legged authentication set
+	 * 	this variable to '2legged'
+	 * 	For certain servers, the dialog URL can have certain marks that
+	 * 	will act as template placeholders which will be replaced with
+	 * 	values defined before redirecting the users browser. Currently it
+	 * 	supports the following placeholder marks:
+	 * 	{REDIRECT_URI} - URL to redirect when returning from the OAuth
+	 * 	server authorization page
+	 * 	{CLIENT_ID} - client application identifier registered at the
+	 * 	server
+	 * 	{SCOPE} - scope of the requested permissions to the granted by the
+	 * 	OAuth server with the user permissions
+	 * 	{STATE} - identifier of the OAuth session state
+	 * 	{API_KEY} - API key to access the server
+	 * 	{REALM} - realm name for OpenID Connect
+	 * 	{NONCE} - unique identifier to made all redirects be unique for
+	 * 	OpenID Connect
+	 *
+	 */
 	private $authorization_endpoint = '';
 
 	/** @var string */
@@ -39,7 +69,21 @@ class OAuthProvider {
 	/** @var string */
 	private $revocation_endpoint = '';
 
-	/** @var string */
+	/**
+	 *
+	 * 	@var string $request_token_endpoint
+	 * 	URL of the OAuth server to request the initial token for OAuth 1.0 and 1.0a servers.
+	 *
+	 * 	Set this variable to the OAuth request token URL when you are
+	 * 	not accessing one of the built-in supported OAuth servers.
+	 *
+	 * 	For OAuth 1.0 and 1.0a servers, the request token URL can have
+	 * 	certain marks that will act as template placeholders which will be
+	 * 	replaced with given values before requesting the authorization
+	 * 	token. Currently it supports the following placeholder marks:
+	 * 	{SCOPE} - scope of the requested permissions to the granted by the OAuth server with the user permissions
+	 *
+	 */
 	private $request_token_endpoint = '';
 
 	/** @var string */
@@ -92,8 +136,12 @@ class OAuthProvider {
 		return $this->name;
 	}
 
-	public function getOauthVersion() {
-		return $this->oauth_version;
+	public function getProtocol() {
+		return $this->protocol;
+	}
+
+	public function getVersion() {
+		return $this->version;
 	}
 
 	public function getClientId() {
@@ -184,8 +232,13 @@ class OAuthProvider {
 		return $this->api_key;
 	}
 
-	public function setOauthVersion($oauth_version) {
-		$this->oauth_version = $oauth_version;
+	public function setVersion($version) {
+		$this->version = $version;
+		return $this;
+	}
+
+	public function setProtocol($protocol) {
+		$this->protocol = $protocol;
 		return $this;
 	}
 
@@ -301,7 +354,8 @@ class OAuthProvider {
 
 	public function bind($configuration) {
 		$types = [
-			'oauth_version' => 'string',
+			'protocol' => 'string',
+			'version' => 'string',
 			'discovery_endpoint' => 'string',
 			'authorization_endpoint' => 'string',
 			'token_endpoint' => 'string',
@@ -323,7 +377,8 @@ class OAuthProvider {
 			'api_key' => 'string'
 		];
 		$required = [
-			'oauth_version' => '',
+			'protocol' => '',
+			'version' => '',
 			'authorization_endpoint' => [],
 			'token_endpoint' => []
 		];
@@ -340,7 +395,7 @@ class OAuthProvider {
 			unset($required[$property]);
 		}
 		foreach ($required as $property => $value) {
-			if (count($value) && in_array($this->getOauthVersion(), $value)) {
+			if (count($value) && in_array($this->getVersion(), $value)) {
 				throw new OAuthClientException('OAuthProvider: the property "' . $property . '" must be defined');
 			}
 		}

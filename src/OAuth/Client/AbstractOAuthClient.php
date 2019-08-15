@@ -5,6 +5,8 @@ namespace eureka2\OAuth\Client;
 use Symfony\Component\HttpClient\HttpClient;
 use eureka2\OAuth\Exception\OAuthClientAccessTokenException;
 use eureka2\OAuth\Exception\OAuthClientException;
+use eureka2\OAuth\Provider\OAuthBuiltinProviders;
+use eureka2\OAuth\Provider\OAuthProvider;
 use eureka2\OAuth\Storage\TokenStorageFactory;
 use eureka2\OAuth\Token\JWT;
 
@@ -34,7 +36,8 @@ use eureka2\OAuth\Token\JWT;
  * 		If you need to access one provider that is not yet directly
  * 		supported by the OAuthBuiltinProviders class,
  * 		you need to configure it explicitly setting the variables: 
- * 			oauth_version,
+ * 			protocol,
+ * 			version,
  * 			url_parameters,
  * 			authorization_header,
  * 			request_token_endpoint,
@@ -557,64 +560,6 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 		header('Location: ' . $url);
 	}
 
-	protected function verifySignature($jwt) {
-		$header = JWT::decode($jwt);
-		if (preg_match("/^RS(\d+)$/", $header->alg, $m)) {
-			$digests = array_map(function($digest) {
-				return strtolower($digest);
-			}, openssl_get_md_methods());
-			if (in_array('sha'.$m[1], $digests)) {
-				$jwks = $this->provider->getJwksUri();
-				if (empty($jwks)) {
-					throw new OAuthClientException(
-						sprintf(
-							'jwks_uri is required for signature type: %s',
-							$header->alg
-						)
-					);
-				}
-				$options = [
-					'resource' => 'OAuth jwks',
-					'fail_on_access_error' => true
-				];
-				if (($response = $this->sendOAuthRequest($jwks, 'GET', [], $options)) === false) {
-					return false;
-				}
-				return JWT::verifyRSASignature($header, $response->keys, $jwt);
-			}
-		} elseif (preg_match("/^HS(\d+)$/", $header->alg, $m)) {
-			$algos = array_map(function($algo) {
-				return strtolower($algo);
-			}, function_exists('hash_hmac_algos') ? hash_hmac_algos() : hash_algos());
-			if (in_array('sha'.$m[1], $algos)) {
-				return JWT::verifyHMACsignature($header, $jwt, $this->provider->getClientSecret());
-			}
-		}
-		throw new OAuthClientException(
-			sprintf(
-				'No support for signature type: %s',
-				$header->alg
-			)
-		);
-	}
-
-	protected function verifyClaims($jwt) {
-		$claims = JWT::decode($jwt, 1);
-		if ($claims->aud != $this->provider->getClientId()) {
-			return false;
-		}
-		if (property_exists($claims, 'nonce') && $claims->nonce != $this->storage->getStoredNonce()) {
-			return false;
-		}
-		if (!property_exists($claims, 'exp') || $claims->exp < time() - 300) {
-			return false;
-		}
-		if (property_exists($claims, 'nbf') && $claims->nbf > time() + 300) {
-			return false;
-		}
-		return $claims;
-	}
-
 	protected function buildBaseString($url, $method, $values) {
 		$uri = strtok($url, '?');
 		$baseString = $method . '&' . str_replace(['%7E', '+'], ['~', ' '], rawurlencode($uri)) . '&';
@@ -915,12 +860,6 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 		return $this->storage->getStoredAccessToken() !== null;
 	}
 
-	protected function isAccessTokenExpired() {
-		return !empty($this->getAccessTokenExpiry())
-			&& strcmp($this->getAccessTokenExpiry(), gmstrftime('%Y-%m-%d %H:%M:%S')) <= 0
-			&& empty($this->getRefreshToken());
-	}
-
 	protected function isStoredAccessTokenValid() {
 		if (!$this->isThereAStoredAccessToken()) {
 			return false;
@@ -986,8 +925,8 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	abstract public function callAPI($url, $method, $parameters, $options);
 
 	protected function checkTokenBeforeCall($options) {
-		$version = intval($this->provider->getOauthVersion());
-		$twoLegged = ($version === 1 && isset($options['2legged']) && $options['2legged']);
+		$version = intval($this->provider->getVersion());
+		$twoLegged = ($this->provider->getProtocol() == 'oauth' && $version === 1 && isset($options['2legged']) && $options['2legged']);
 		if (empty($this->getAccessToken()) && !$twoLegged) {
 			if (!$this->isThereAStoredAccessToken()) {
 				return false;
@@ -1027,41 +966,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	}
 
 	protected function discover($discoveryEndpoint) {
-		$url = $discoveryEndpoint . '/.well-known/openid-configuration';
-		$options = [
-			'resource' => 'Openid configuration',
-			'accept' => 'application/json'
-		];
-		$response = $this->sendOAuthRequest($url, 'GET', [], $options);
-		if ($response === false || isset($response->error)) {
-			throw new OAuthClientException(
-				sprintf(
-					"Can't discover the openid configuration at %s, reason : %s",
-					$discoveryEndpoint,
-					$response->error ?? 'send request error'
-				)
-			);
-		}
-		$configuration = [
-			'oauth_version' => '2.0',
-			'authorization_endpoint' => $response->authorization_endpoint . '?response_type=code&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={SCOPE}&state={STATE}',
-			'token_endpoint' => $response->token_endpoint,
-			'discovery_endpoint' => $discoveryEndpoint,
-			'registration_endpoint' => $response->registration_endpoint ?? '',
-			'introspection_endpoint' => $response->introspection_endpoint ?? '',
-			'revocation_endpoint' => $response->revocation_endpoint ?? '',
-			'userinfo_endpoint' => $response->userinfo_endpoint ?? '',
-			'end_session_endpoint' => $response->end_session_endpoint ?? '',
-			'jwks_uri' => $response->jwks_uri ?? '',
-			'scopes_supported' => $response->scopes_supported ?? [],
-			'response_types_supported' => $response->response_types_supported ?? [],
-			'response_modes_supported' => $response->response_modes_supported ?? [],
-			'token_endpoint_auth_methods_supported' => $response->token_endpoint_auth_methods_supported ?? [],
-			'subject_types_supported' => $response->subject_types_supported ?? [],
-			'id_token_signing_alg_values_supported' => $response->id_token_signing_alg_values_supported ?? [],
-			'claims_supported' => $response->claims_supported ?? []
-		];
-		return $configuration;
+		throw new OAuthClientException('the discover method is not available for this protocol');
 	}
 
 	protected function checkNoToken() {
@@ -1232,33 +1137,6 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 		$endPoint .= (strpos($endPoint, '?') === false ? '?' : '&') . http_build_query($params, null, '&');
 		$this->redirect($endPoint);
 		$this->setExit(true);
-	}
-
-	/**
-	 * @inheritdoc
-	 */
-	public function introspectToken($token, $tokenTypeHint = '') {
-		$endpoint = $this->provider->getIntrospectionEndpoint();
-		if (empty($endpoint)) {
-			return false;
-		}
-		$parameters = [
-			'token' => $token,
-		];
-		if (!empty($tokenTypeHint)) {
-			$parameters['token_type_hint'] = $tokenTypeHint;
-		}
-		$clientId = $this->provider->getClientId();
-		$clientSecret = $this->provider->getClientSecret();
-		$parameters = http_build_query($parameters, null, '&');
-		$options = [
-			'resource' => 'OAuth introspect Token',
-			'accept' => 'application/json',
-			'headers' => [
-				'Authorization: Basic ' . base64_encode($clientId . ':' . $clientSecret)
-			]
-		];
-		return $this->sendOAuthRequest($endpoint, 'POST', $parameters, $options);
 	}
 
 }

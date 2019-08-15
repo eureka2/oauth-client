@@ -8,53 +8,6 @@ class OAuthClientStrategy {
 
 	/**
 	 *
-	 * 	@var string $request_token_url
-	 * 	URL of the OAuth server to request the initial token for OAuth 1.0 and 1.0a servers.
-	 *
-	 * 	Set this variable to the OAuth request token URL when you are
-	 * 	not accessing one of the built-in supported OAuth servers.
-	 *
-	 * 	For OAuth 1.0 and 1.0a servers, the request token URL can have
-	 * 	certain marks that will act as template placeholders which will be
-	 * 	replaced with given values before requesting the authorization
-	 * 	token. Currently it supports the following placeholder marks:
-	 * 	{SCOPE} - scope of the requested permissions to the granted by the OAuth server with the user permissions
-	 *
-	 */
-	private $request_token_url = '';
-
-	/**
-	 *
-	 * 	@var string $authorization_endpoint
-	 * 	URL of the OAuth server to redirect the browser so the user
-	 * 	can grant access to your application.
-	 * 	Set this variable to the OAuth request token URL when you are
-	 * 	not accessing one of the built-in supported OAuth servers.
-	 * 	For OAuth 1.0a servers that return the login dialog URL
-	 * 	automatically, set this variable to 'automatic'
-	 * 	For OAuth 1.0a servers that support 2 legged authentication set
-	 * 	this variable to '2legged'
-	 * 	For certain servers, the dialog URL can have certain marks that
-	 * 	will act as template placeholders which will be replaced with
-	 * 	values defined before redirecting the users browser. Currently it
-	 * 	supports the following placeholder marks:
-	 * 	{REDIRECT_URI} - URL to redirect when returning from the OAuth
-	 * 	server authorization page
-	 * 	{CLIENT_ID} - client application identifier registered at the
-	 * 	server
-	 * 	{SCOPE} - scope of the requested permissions to the granted by the
-	 * 	OAuth server with the user permissions
-	 * 	{STATE} - identifier of the OAuth session state
-	 * 	{API_KEY} - API key to access the server
-	 * 	{REALM} - realm name for OpenID Connect
-	 * 	{NONCE} - unique identifier to made all redirects be unique for
-	 * 	OpenID Connect
-	 *
-	 */
-	private $authorization_endpoint = '';
-
-	/**
-	 *
 	 * 	@var string $reauthentication_parameter
 	 * 	URL of the OAuth server to redirect the browser so the user
 	 * 	can grant access to your application.
@@ -376,10 +329,6 @@ class OAuthClientStrategy {
 	 */
 	private $get_token_with_api_key = false;
 
-	public function getRequestTokenUrl() {
-		return $this->request_token_url;
-	}
-
 	public function getReauthenticationParameter() {
 		return $this->reauthentication_parameter;
 	}
@@ -398,10 +347,6 @@ class OAuthClientStrategy {
 
 	public function getAppendStateToRedirectUri() {
 		return $this->append_state_to_redirect_uri;
-	}
-
-	public function getRevocationEndpoint() {
-		return $this->revocation_endpoint;
 	}
 
 	public function isUrlParameters() {
@@ -484,11 +429,6 @@ class OAuthClientStrategy {
 		return $this->get_token_with_api_key;
 	}
 
-	public function setRequestTokenUrl($request_token_url) {
-		$this->request_token_url = $request_token_url;
-		return $this;
-	}
-
 	public function setReauthenticationParameter($reauthentication_parameter) {
 		$this->reauthentication_parameter = $reauthentication_parameter;
 		return $this;
@@ -511,11 +451,6 @@ class OAuthClientStrategy {
 
 	public function setAppendStateToRedirectUri($append_state_to_redirect_uri) {
 		$this->append_state_to_redirect_uri = $append_state_to_redirect_uri;
-		return $this;
-	}
-
-	public function setRevocationEndpoint($revocation_endpoint) {
-		$this->revocation_endpoint = $revocation_endpoint;
 		return $this;
 	}
 
@@ -621,7 +556,6 @@ class OAuthClientStrategy {
 
 	public function bind($properties) {
 		$types = [
-			'request_token_url' => 'string',
 			'reauthentication_parameter' => 'string',
 			'pin_dialog_url' => 'string',
 			'offline' => 'boolean',
@@ -641,7 +575,6 @@ class OAuthClientStrategy {
 			'get_token_with_api_key' => 'boolean',
 			'access_token_content_type' => 'string',
 			'access_token_language' => 'string',
-			'revocation_endpoint' => 'string',
 			'oauth_username' => 'string',
 			'oauth_password' => 'string',
 			'realm' => 'string',

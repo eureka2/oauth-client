@@ -4,8 +4,67 @@ namespace eureka2\OAuth\Client;
 
 use eureka2\OAuth\Exception\OAuthClientAuthorizationException;
 use eureka2\OAuth\Exception\OAuthClientException;
+use eureka2\OAuth\Token\JWT;
 
 class OAuth2Client extends AbstractOAuthClient implements OAuthClientInterface {
+
+	protected function verifyClaims($jwt) {
+		$claims = JWT::decode($jwt, 1);
+		if ($claims->aud != $this->provider->getClientId()) {
+			return false;
+		}
+		if (property_exists($claims, 'nonce') && $claims->nonce != $this->storage->getStoredNonce()) {
+			return false;
+		}
+		if (!property_exists($claims, 'exp') || $claims->exp < time() - 300) {
+			return false;
+		}
+		if (property_exists($claims, 'nbf') && $claims->nbf > time() + 300) {
+			return false;
+		}
+		return $claims;
+	}
+
+	protected function verifySignature($jwt) {
+		$header = JWT::decode($jwt);
+		if (preg_match("/^RS(\d+)$/", $header->alg, $m)) {
+			$digests = array_map(function($digest) {
+				return strtolower($digest);
+			}, openssl_get_md_methods());
+			if (in_array('sha'.$m[1], $digests)) {
+				$jwks = $this->provider->getJwksUri();
+				if (empty($jwks)) {
+					throw new OAuthClientException(
+						sprintf(
+							'jwks_uri is required for signature type: %s',
+							$header->alg
+						)
+					);
+				}
+				$options = [
+					'resource' => 'OAuth jwks',
+					'fail_on_access_error' => true
+				];
+				if (($response = $this->sendOAuthRequest($jwks, 'GET', [], $options)) === false) {
+					return false;
+				}
+				return JWT::verifyRSASignature($header, $response->keys, $jwt);
+			}
+		} elseif (preg_match("/^HS(\d+)$/", $header->alg, $m)) {
+			$algos = array_map(function($algo) {
+				return strtolower($algo);
+			}, function_exists('hash_hmac_algos') ? hash_hmac_algos() : hash_algos());
+			if (in_array('sha'.$m[1], $algos)) {
+				return JWT::verifyHMACsignature($header, $jwt, $this->provider->getClientSecret());
+			}
+		}
+		throw new OAuthClientException(
+			sprintf(
+				'No support for signature type: %s',
+				$header->alg
+			)
+		);
+	}
 
 	protected function requestAnOAuthAccessToken($code, $refresh) {
 		$redirectUri = $this->retrieveRedirectURI();
@@ -191,6 +250,12 @@ class OAuth2Client extends AbstractOAuthClient implements OAuthClientInterface {
 			$url .= (strcspn($url, '?') < strlen($url) ? '&' : '?') . (strlen($this->strategy->getAccessTokenParameter()) ? $this->strategy->getAccessTokenParameter() : 'access_token') . '=' . urlencode($this->getAccessToken());
 		}
 		return $this->sendOAuthRequest($url, $method, $parameters, $options);
+	}
+
+	protected function isAccessTokenExpired() {
+		return !empty($this->getAccessTokenExpiry())
+			&& strcmp($this->getAccessTokenExpiry(), gmstrftime('%Y-%m-%d %H:%M:%S')) <= 0
+			&& empty($this->getRefreshToken());
 	}
 
 	public function checkAccessToken(&$redirectUrl) {
