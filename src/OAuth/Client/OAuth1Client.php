@@ -240,4 +240,90 @@ class OAuth1Client extends AbstractOAuthClient implements OAuthClientInterface {
 		return true;
 	}
 
+	protected function buildBaseString($url, $method, $values) {
+		$uri = strtok($url, '?');
+		$baseString = $method . '&' . str_replace(['%7E', '+'], ['~', ' '], rawurlencode($uri)) . '&';
+		$signValues = $values;
+		$parts = parse_url($url);
+		if (isset($parts['query'])) {
+			parse_str($parts['query'], $query);
+			foreach ($query as $parameter => $value) {
+				$signValues[$parameter] = $value;
+			}
+		}
+		ksort($signValues);
+		$baseString .= str_replace(['%7E', '+'], ['~', ' '], http_build_query($signValues));
+		return $baseString;
+	}
+
+	protected function sign(&$url, $method, $parameters, $oauth, $requestContentType, $hasFiles, $postValuesInUri, &$authorization, &$postValues) {
+		$values = [
+			'oauth_consumer_key' => $this->provider->getClientId(),
+			'oauth_nonce' => md5(uniqid(rand(), true)),
+			'oauth_signature_method' => $this->strategy->getSignatureMethod(),
+			'oauth_timestamp' => time(),
+			'oauth_version' => '1.0',
+		];
+		if ($hasFiles) {
+			$valueParameters = [];
+		} else {
+			if (($this->strategy->isUrlParameters() || $method !== 'POST') && $requestContentType === 'application/x-www-form-urlencoded' && count($parameters)) {
+				$url .= (strpos($url, '?') === false ? '?' : '&') . http_build_query($parameters);
+				$parameters = [];
+			}
+			$valueParameters = (($requestContentType !== 'application/x-www-form-urlencoded') ? [] : $parameters);
+		}
+		$headerValues = ($method === 'GET' ? array_merge($values, $oauth, $valueParameters) : array_merge($values, $oauth));
+		$values = array_merge($values, $oauth, $valueParameters);
+		$key  = str_replace(['%7E', '+'], ['~', ' '], rawurlencode($this->provider->getClientSecret()));
+		$key .= '&' . str_replace(['%7E', '+'], ['~', ' '], rawurlencode($this->getAccessTokenSecret()));
+		switch ($this->strategy->getSignatureMethod()) {
+			case 'PLAINTEXT':
+				$values['oauth_signature'] = $key;
+				break;
+			case 'HMAC-SHA1':
+				$baseString = $this->buildBaseString($url, $method, $values);
+				$signature = hash_hmac ('sha1', $baseString, $key);
+				$headerValues['oauth_signature'] = $values['oauth_signature'] = base64_encode($signature);
+				break;
+			case 'RSA-SHA1':
+				if (empty($this->strategy->getSignatureCertificateFile())) {
+					throw new OAuthClientException(
+						sprintf(
+							"the signature certificate file is required for the '%s' signature method.",
+							$this->strategy->getSignatureMethod()
+						)
+					);
+				}
+				$privateKey = openssl_pkey_get_private('file://' . $this->strategy->getSignatureCertificateFile()); 
+				$baseString = $this->buildBaseString($url, $method, $values);
+				openssl_sign($baseString, $signature, $privateKey);
+				openssl_free_key($privateKey);
+				$headerValues['oauth_signature'] = $values['oauth_signature'] = base64_encode($signature);
+				break;
+			default:
+				throw new OAuthClientException(
+					sprintf(
+						'%s signature method is not supported',
+						$this->strategy->getSignatureMethod()
+					)
+				);
+		}
+		if ($this->strategy->isAuthorizationInHeader()) {
+			$authorization = 'OAuth';
+			if (!empty($headerValues)) {
+				$authorization .= ' ' . str_replace(['%7E', '+'], ['~', ' '], http_build_query($headerValues, null, ','));
+			}
+			$postValues = $parameters;
+		} else {
+			if ($method !== 'POST' || $postValuesInUri) {
+				$url .= (strpos($url, '?') === false ? '?' : '&') . http_build_query($postValues);
+				$postValues = [];
+			} else {
+				$postValues = $values;
+			}
+		}
+		return true;
+	}
+
 }

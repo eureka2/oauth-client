@@ -80,10 +80,19 @@ abstract class AbstractTokenStorage
 		return true;
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	abstract public function createOAuthSession(&$session);
 
+	/**
+	 * @inheritdoc
+	 */
 	abstract public function getOAuthSession($session, $provider, &$oauthSession);
 
+	/**
+	 * @inheritdoc
+	 */
 	abstract public function saveOAuthSession($session);
 
 	/**

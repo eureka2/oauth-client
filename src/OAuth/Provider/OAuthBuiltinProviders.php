@@ -6,11 +6,16 @@ class OAuthBuiltinProviders {
 
 	const PROVIDERS = [
 		'Facebook' => [
-			'configuration' => [
-				'protocol' => 'oauth',
-				'version' => '2.0',
+			'protocol' => [
+				'name' => 'oauth',
+				'version' => '2.0'
+			],
+			'endpoints' => [
 				'authorization_endpoint' => 'https://www.facebook.com/dialog/oauth?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={SCOPE}&state={STATE}',
 				'token_endpoint' => 'https://graph.facebook.com/oauth/access_token',
+				'userinfo_endpoint' => 'https://graph.facebook.com/v2.3/me?fields=id,first_name,gender,last_name,link,locale,name,timezone,updated_time,verified,email'
+			],
+			'mapping' => [
 				'user_id_field' => 'id'
 			],
 			'strategy' => [
@@ -18,12 +23,16 @@ class OAuthBuiltinProviders {
 			]
 		],
 		'github' => [
-			'configuration' => [
-				'protocol' => 'oauth',
-				'version' => '2.0',
+			'protocol' => [
+				'name' => 'oauth',
+				'version' => '2.0'
+			],
+			'endpoints' => [
 				'authorization_endpoint' => 'https://github.com/login/oauth/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={SCOPE}&state={STATE}',
 				'token_endpoint' => 'https://github.com/login/oauth/access_token',
-				'userinfo_endpoint' => 'https://api.github.com/user',
+				'userinfo_endpoint' => 'https://api.github.com/user'
+			],
+			'mapping' => [
 				'user_id_field' => 'id'
 			],
 			'strategy' => [
@@ -31,9 +40,11 @@ class OAuthBuiltinProviders {
 			]
 		],
 		'Gitlab' => [
-			'configuration' => [
-				'protocol' => 'openid',
-				'version' => '1.0',
+			'protocol' => [
+				'name' => 'openid',
+				'version' => '1.0'
+			],
+			'endpoints' => [
 				'authorization_endpoint' => 'https://gitlab.com/oauth/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&scope={SCOPE}&state={STATE}',
 				'token_endpoint' => 'https://gitlab.com/oauth/token',
 				'jwks_uri' => 'https://gitlab.com/oauth/discovery/keys'
@@ -42,9 +53,11 @@ class OAuthBuiltinProviders {
 			]
 		],
 		'Google' => [
-			'configuration' => [
-				'protocol' => 'oauth',
-				'version' => '2.0',
+			'protocol' => [
+				'name' => 'oauth',
+				'version' => '2.0'
+			],
+			'endpoints' => [
 				'authorization_endpoint' => 'https://accounts.google.com/o/oauth2/auth?response_type=code&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={SCOPE}&state={STATE}',
 				'token_endpoint' => 'https://accounts.google.com/o/oauth2/token',
 				'revocation_endpoint' => 'https://accounts.google.com/o/oauth2/revoke',
@@ -55,46 +68,52 @@ class OAuthBuiltinProviders {
 			]
 		],
 		"Google1" => [
-			'configuration' => [
-				'protocol' => 'oauth',
-				"version" => "1.0a",
+			'protocol' => [
+				'name' => 'oauth',
+				"version" => "1.0a"
+			],
+			'endpoints' => [
 				"authorization_endpoint" => "https://www.google.com/accounts/OAuthAuthorizeToken",
 				"token_endpoint" => "https://www.google.com/accounts/OAuthGetAccessToken",
 				"request_token_endpoint" => "https://www.google.com/accounts/OAuthGetRequestToken?scope={SCOPE}"
 			]
 		],
 		'franceconnect' => [
-			'configuration' => [
-				'protocol' => 'oauth',
-				'version' => '2.0',
+			'protocol' => [
+				'name' => 'oauth',
+				'version' => '2.0'
+			],
+			'endpoints' => [
 				'authorization_endpoint' => 'https://app.franceconnect.gouv.fr/api/v1/authorize?response_type=code&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={SCOPE}&state={STATE}&nonce={NONCE}',
 				'token_endpoint' => 'https://app.franceconnect.gouv.fr/api/v1/token',
 				'end_session_endpoint' => 'https://app.franceconnect.gouv.fr/api/v1/logout',
 				'userinfo_endpoint' => 'https://app.franceconnect.gouv.fr/api/v1/userinfo?schema=openid'
-
 			],
 			'strategy' => [
 				'offline_access_parameter' => 'access_type=offline&approval_prompt=force'
 			]
 		],
 		'franceconnectSandbox' => [
-			'configuration' => [
-				'protocol' => 'oauth',
-				'version' => '2.0',
+			'protocol' => [
+				'name' => 'oauth',
+				'version' => '2.0'
+			],
+			'endpoints' => [
 				'authorization_endpoint' => 'https://fcp.integ01.dev-franceconnect.fr/api/v1/authorize?response_type=code&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={SCOPE}&state={STATE}&nonce={NONCE}',
 				'token_endpoint' => 'https://fcp.integ01.dev-franceconnect.fr/api/v1/token',
 				'end_session_endpoint' => 'https://fcp.integ01.dev-franceconnect.fr/api/v1/logout',
 				'userinfo_endpoint' => 'https://fcp.integ01.dev-franceconnect.fr/api/v1/userinfo?schema=openid'
-
 			],
 			'strategy' => [
 				'offline_access_parameter' => 'access_type=offline&approval_prompt=force'
 			]
 		],
 		'LinkedIn' => [
-			'configuration' => [
-				'protocol' => 'oauth',
-				'version' => '2.0',
+			'protocol' => [
+				'name' => 'oauth',
+				'version' => '2.0'
+			],
+			'endpoints' => [
 				'authorization_endpoint' => 'https://www.linkedin.com/oauth/v2/authorization?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={SCOPE}&response_type=code&state={STATE}',
 				'token_endpoint' => 'https://www.linkedin.com/oauth/v2/accessToken'
 			],
@@ -103,9 +122,11 @@ class OAuthBuiltinProviders {
 			]
 		],
 		'Microsoft' => [
-			'configuration' => [
-				'protocol' => 'openid',
-				'version' => '1.0',
+			'protocol' => [
+				'name' => 'openid',
+				'version' => '1.0'
+			],
+			'endpoints' => [
 				'authorization_endpoint' => 'https://login.live.com/oauth20_authorize.srf?client_id={CLIENT_ID}&scope={SCOPE}&response_type=code&redirect_uri={REDIRECT_URI}&state={STATE}',
 				'token_endpoint' => 'https://login.live.com/oauth20_token.srf',
 				'revocation_endpoint' => 'https://login.microsoftonline.com/common/oauth2/logout',
@@ -115,9 +136,11 @@ class OAuthBuiltinProviders {
 			]
 		],
 		'Orange' => [
-			'configuration' => [
-				'protocol' => 'oauth',
-				'version' => '2.0',
+			'protocol' => [
+				'name' => 'oauth',
+				'version' => '2.0'
+			],
+			'endpoints' => [
 				'authorization_endpoint' => 'https://api.orange.com/openidconnect/fr/v1/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={SCOPE}&response_type=code&state={STATE}',
 				'token_endpoint' => 'https://api.orange.com/oauth/v2/token'
 			],
@@ -125,9 +148,11 @@ class OAuthBuiltinProviders {
 			]
 		],
 		'Paypal' => [
-			'configuration' => [
-				'protocol' => 'oauth',
-				'version' => '2.0',
+			'protocol' => [
+				'name' => 'oauth',
+				'version' => '2.0'
+			],
+			'endpoints' => [
 				'authorization_endpoint' => 'https://www.paypal.com/webapps/auth/protocol/openidconnect/v1/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&state={STATE}&scope={SCOPE}',
 				'token_endpoint' => 'https://api.paypal.com/v1/identity/openidconnect/tokenservice'
 			],
@@ -135,9 +160,11 @@ class OAuthBuiltinProviders {
 			]
 		],
 		// 'PaypalSandbox' => [
-			// 'configuration' => [
-				// 'protocol' => 'oauth',
-				// 'version' => '2.0',
+			// 'protocol' => [
+				// 'name' => 'oauth',
+				// 'version' => '2.0'
+			// ],
+			// 'endpoints' => [
 				// 'authorization_endpoint' => 'https://www.sandbox.paypal.com/webapps/auth/protocol/openidconnect/v1/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&state={STATE}&scope={SCOPE}',
 				// 'token_endpoint' => 'https://api.sandbox.paypal.com/v1/identity/openidconnect/tokenservice'
 			// ],
@@ -145,9 +172,11 @@ class OAuthBuiltinProviders {
 			// ]
 		// ],
 		'PaypalSandbox' => [
-			'configuration' => [
-				'protocol' => 'oauth',
-				'version' => '2.0',
+			'protocol' => [
+				'name' => 'oauth',
+				'version' => '2.0'
+			],
+			'endpoints' => [
 				'authorization_endpoint' => 'https://www.sandbox.paypal.com/signin/authorize?flowEntry=static&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&state={STATE}&scope={SCOPE}',
 				'token_endpoint' => 'https://api.sandbox.paypal.com/v1/oauth2/token'
 			],
@@ -159,9 +188,11 @@ class OAuthBuiltinProviders {
 			]
 		],
 		'Twitter' => [
-			'configuration' => [
-				'protocol' => 'oauth',
-				'version' => '1.0a',
+			'protocol' => [
+				'name' => 'oauth',
+				'version' => '1.0a'
+			],
+			'endpoints' => [
 				'authorization_endpoint' => 'https://api.twitter.com/oauth/authenticate',
 				'request_token_endpoint' => 'https://api.twitter.com/oauth/request_token',
 				'token_endpoint' => 'https://api.twitter.com/oauth/access_token'
@@ -171,9 +202,11 @@ class OAuthBuiltinProviders {
 			]
 		],
 		'Yahoo' => [
-			'configuration' => [
-				'protocol' => 'oauth',
-				'version' => '1.0a',
+			'protocol' => [
+				'name' => 'oauth',
+				'version' => '1.0a'
+			],
+			'endpoints' => [
 				'authorization_endpoint' => 'https://api.login.yahoo.com/oauth/v2/request_auth',
 				'request_token_endpoint' => 'https://api.login.yahoo.com/oauth/v2/get_request_token',
 				'token_endpoint' => 'https://api.login.yahoo.com/oauth/v2/get_token'

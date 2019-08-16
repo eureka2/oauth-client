@@ -5,6 +5,11 @@ namespace eureka2\OAuth\Client;
 class OpenIDClient extends OAuth2Client
 	implements OAuthClientInterface, OpenIDClientInterface {
 
+	/**
+	 * Obtaining OpenID provider configuration information
+	 *
+	 * @param string $discoveryEndpoint The discovery endpoint
+	 */
 	protected function discover($discoveryEndpoint) {
 		$url = $discoveryEndpoint . '/.well-known/openid-configuration';
 		$options = [

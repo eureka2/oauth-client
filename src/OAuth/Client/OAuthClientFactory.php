@@ -9,7 +9,7 @@ class OAuthClientFactory {
 
 	public static function create($provider, $protocol = null, $version = null) {
 		if (isset(OAuthBuiltinProviders::PROVIDERS[$provider])) {
-			$pprotocol = OAuthBuiltinProviders::PROVIDERS[$provider]['configuration']['protocol'];
+			$pprotocol = OAuthBuiltinProviders::PROVIDERS[$provider]['protocol']['name'];
 			if ($protocol === null) {
 				$protocol = $pprotocol;
 			} elseif ($protocol != $pprotocol) {
@@ -20,7 +20,7 @@ class OAuthClientFactory {
 					)
 				);
 			}
-			$pversion = OAuthBuiltinProviders::PROVIDERS[$provider]['configuration']['version'];
+			$pversion = OAuthBuiltinProviders::PROVIDERS[$provider]['protocol']['version'];
 			if ($version === null) {
 				$version = $pversion;
 			} elseif ($version != $pversion) {

@@ -8,6 +8,9 @@ class ApcuTokenStorage
 	extends AbstractTokenStorage
 	implements TokenStorageInterface, TokenStorageManagementInterface {
 
+	/**
+	 * @inheritdoc
+	 */
 	public function createOAuthSession(&$session) {
 		$session = null;
 		$this->initializeOAuthSession($session);
@@ -15,6 +18,9 @@ class ApcuTokenStorage
 		return true;
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function getOAuthSession($sessionId, $provider, &$oauthSession) {
 		if (empty($this->getSessionCookie()) || !apcu_exists($this->getSessionCookie())) {
 			$oauthSession = null;
@@ -27,11 +33,17 @@ class ApcuTokenStorage
 		return true;
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function saveOAuthSession($session) {
 		apcu_store($this->getSessionCookie(), $session);
 		return true;
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function resetAccessToken() {
 		$provider = $this->client->getProvider()->getName();
 		$this->client->trace('Resetting the access token status for OAuth provider ' . $provider);

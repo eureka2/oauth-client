@@ -161,10 +161,13 @@ class OAuth2Client extends AbstractOAuthClient implements OAuthClientInterface {
 			if (property_exists($claims, 'sub')) {
 				$this->storage->storeUser($claims->sub);
 			}
-		} elseif (empty($this->storage->getStoredUser()) && !empty($this->provider->getUserinfoEndpoint())) {
+		} 
+		if (empty($this->storage->getStoredUser()) &&
+			!empty($this->provider->getUserIdField()) &&
+			!empty($this->provider->getUserinfoEndpoint())) {
 			if (($user = $this->callAPI($this->provider->getUserinfoEndpoint(), 'GET', [], ['fail_on_access_error' => true, 'convert_json_to_array' => true])) !== false) {
 				$field = $this->provider->getUserIdField();
-				if (!empty($field) && isset($user[$field])) {
+				if (isset($user[$field])) {
 					$this->storage->storeUser($user[$field]);
 				}
 			}

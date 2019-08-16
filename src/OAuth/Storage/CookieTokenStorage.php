@@ -34,6 +34,9 @@ class CookieTokenStorage
 		setcookie($this->getCookieName(), '', time() - 3600);
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function createOAuthSession(&$session) {
 		$session = null;
 		$this->initializeOAuthSession($session);
@@ -43,6 +46,9 @@ class CookieTokenStorage
 		return true;
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function getOAuthSession($sessionId, $provider, &$oauthSession) {
 		$value = $this->unserialize();
 		if (!isset($value)) {
@@ -54,11 +60,17 @@ class CookieTokenStorage
 		return true;
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function saveOAuthSession($session) {
 		$this->serialize($session);
 		return true;
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function resetAccessToken() {
 		$this->client->trace('Resetting the access token status for the OAuth provider ' . $provider);
 		$this->deleteCookie();
