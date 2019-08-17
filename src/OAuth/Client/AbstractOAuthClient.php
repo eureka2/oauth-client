@@ -3,12 +3,12 @@
 namespace eureka2\OAuth\Client;
 
 use Symfony\Component\HttpClient\HttpClient;
+use eureka2\OAuth\Request\OAuthRequest;
 use eureka2\OAuth\Exception\OAuthClientAccessTokenException;
 use eureka2\OAuth\Exception\OAuthClientException;
 use eureka2\OAuth\Provider\OAuthBuiltinProviders;
 use eureka2\OAuth\Provider\OAuthProvider;
 use eureka2\OAuth\Storage\TokenStorageFactory;
-use eureka2\OAuth\Token\JWT;
 
 /**
  *
@@ -587,7 +587,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 		);
 	}
 
-	protected function sendHttpRequest($url, $method, $requestHeaders, $requestBody, $options = []) {
+	protected function sendHttpRequest($oauthRequest, $options = []) {
 		try {
 			$http = HttpClient::create(
 				['headers' => [
@@ -595,10 +595,14 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 				],
 				'max_redirects' => $options['max_redirects'] ?? 0
 			]);
-			$response = $http->request($method, $url, [
-				'headers' => $requestHeaders,
-				'body' => $requestBody
-			]);
+			$response = $http->request(
+				$oauthRequest->getMethod(),
+				$oauthRequest->getUrl(),
+				[
+					'headers' => $oauthRequest->getHeaders(),
+					'body' => $oauthRequest->getBody()
+				]
+			);
 			$this->setResponseStatus($response->getStatusCode());
 			$this->setResponseHeaders($response->getHeaders());
 			$this->setResponseBody($response->getContent());
@@ -606,17 +610,15 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 			throw new OAuthClientException(
 				sprintf(
 					"error while running the HTTP request %s %s : %s",
-					$method,
-					$url,
+					$oauthRequest->getMethod(),
+					$oauthRequest->getUrl(),
 					$e->getMessage()
 				)
 			);
 		}
 	}
 
-	protected function sendOAuthRequest($url, $method, $parameters, $options, $oauth = null) {
-		$this->setResponseStatus(0);
-		$this->trace('Accessing the ' . $options['resource'] . ' at ' . $url);
+	protected function prepareOAuthRequest($url, $method, $parameters, $options, $oauth = null) {
 		$postFiles = [];
 		$method = strtoupper($method);
 		$authorization = '';
@@ -718,7 +720,16 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 			default:
 				throw new OAuthClientException($authentication . ' is not a supported authentication mechanism to retrieve an access token');
 		}
-		$this->sendHttpRequest($url, $method, $requestHeaders, $requestBody, $options);
+		return new OAuthRequest($url, $method, $requestHeaders, $requestBody);
+	}
+
+	protected function sendOAuthRequest($url, $method, $parameters, $options, $oauth = null) {
+		$this->setResponseStatus(0);
+		$this->trace('Accessing the ' . $options['resource'] . ' at ' . $url);
+		if (($request = $this->prepareOAuthRequest($url, $method, $parameters, $options, $oauth)) === false) {
+			return false;
+		}
+		$this->sendHttpRequest($request);
 		if ($this->getResponseStatus() < 200 || $this->getResponseStatus() >= 300) {
 			if (isset($options['fail_on_access_error']) && $options['fail_on_access_error']) {
 				$reason = '';
