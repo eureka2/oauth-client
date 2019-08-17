@@ -337,11 +337,17 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 		return $this->accessTokenResponse;
 	}
 
-	protected function getRefreshToken() {
+	/**
+	 * @inheritdoc
+	 */
+	public function getRefreshToken() {
 		return $this->refreshToken;
 	}
 
-	protected function getIdToken() {
+	/**
+	 * @inheritdoc
+	 */
+	public function getIdToken() {
 		return $this->idToken;
 	}
 
@@ -929,6 +935,20 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 		}
 		if (isset($options['provider']) && isset($options['provider']['mapping'])) {
 			$configuration = array_merge($configuration, $options['provider']['mapping']);
+		}
+		if (isset($options['provider']) && isset($options['provider']['registration'])) {
+			if (isset($options['provider']['registration']['client_id'])) {
+				$this->provider->setClientId($options['provider']['registration']['client_id']);
+			}
+			if (isset($options['provider']['registration']['client_secret'])) {
+				$this->provider->setClientSecret($options['provider']['registration']['client_secret']);
+			}
+			if (isset($options['provider']['registration']['redirect_uri'])) {
+				$this->provider->setRedirectUri($options['provider']['registration']['redirect_uri']);
+			}
+			if (isset($options['provider']['registration']['api_key'])) {
+				$this->provider->setApiKey($options['provider']['registration']['api_key']);
+			}
 		}
 		$this->provider->bind($configuration);
 		$strategy = $builtin['strategy'];

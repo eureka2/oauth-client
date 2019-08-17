@@ -12,11 +12,11 @@ interface OAuthClientInterface {
 	 *
 	 * 	Set the provider variable before
 	 * 	calling this function to let it initialize the class variables to
-	 * 	work with the specified server type. Alternatively, you can set
-	 * 	other class variables manually to make it work with servers that
+	 * 	work with the specified provider. Alternatively, you can set
+	 * 	other class variables manually to make it work with providers that
 	 * 	are not yet built-in supported.
 	 *
-	 * 	@options array $options class variables to work with the specified server type.
+	 * 	@options array $options class variables to work with the specified provider.
 	 *
 	 * 	@return bool This function returns true if it was able to successfully initialize the class for the specified server type.
 	 *
@@ -202,10 +202,26 @@ interface OAuthClientInterface {
 	/**
 	 *
 	 * 	Returns the obtained access token upon
-	 * 	successful OAuth authorization.
+	 * 	successful OAuth authentication.
 	 *
 	 */
 	public function getAccessToken();
+
+	/**
+	 *
+	 * 	Returns the obtained refresh token upon
+	 * 	successful OAuth authentication.
+	 *
+	 */
+	public function getRefreshToken();
+
+	/**
+	 *
+	 * 	Returns the obtained ID token upon
+	 * 	successful OpenID authentication.
+	 *
+	 */
+	public function getIdToken();
 
 	/**
 	 *

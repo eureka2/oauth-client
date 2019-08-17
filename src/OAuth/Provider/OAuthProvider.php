@@ -373,8 +373,7 @@ class OAuthProvider {
 			'subject_types_supported' => 'array',
 			'id_token_signing_alg_values_supported' => 'array',
 			'claims_supported' => 'array',
-			'user_id_field' => 'string',
-			'api_key' => 'string'
+			'user_id_field' => 'string'
 		];
 		$required = [
 			'protocol' => '',
