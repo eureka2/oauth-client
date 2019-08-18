@@ -69,24 +69,24 @@ class OAuth2Client extends AbstractOAuthClient implements OAuthClientInterface {
 	protected function requestAnOAuthAccessToken($code, $refresh) {
 		$redirectUri = $this->retrieveRedirectURI();
 		$authentication = $this->strategy->getAccessTokenAuthentication();
-		if (!empty($this->strategy->getOauthUsername())) {
+		if (!empty($this->provider->getOauthUsername())) {
 			$values = [
 				'grant_type' => 'password',
-				'username' => $this->strategy->getOauthUsername(),
-				'password' => $this->strategy->getOauthPassword(),
+				'username' => $this->provider->getOauthUsername(),
+				'password' => $this->provider->getOauthPassword(),
 				'redirect_uri' => $redirectUri
 			];
 			$authentication = 'Basic';
-		} elseif ($this->provider->getRedirectUri() === 'oob' && !empty($this->strategy->getPin())) {
+		} elseif ($this->provider->getRedirectUri() === 'oob' && !empty($this->provider->getPin())) {
 			$values = [
 				'grant_type' => 'pin',
-				'pin' => $this->strategy->getPin(),
+				'pin' => $this->provider->getPin(),
 				'scope' => $this->strategy->getScope(),
 			];
 		} elseif ($refresh) {
 			$values = [
-				'refresh_token' => $this->getRefreshToken(),
 				'grant_type' => 'refresh_token',
+				'refresh_token' => $this->getRefreshToken(),
 				'scope' => $this->strategy->getScope(),
 			];
 			if (!empty($this->strategy->getRefreshTokenAuthentication())) {
@@ -278,13 +278,13 @@ class OAuth2Client extends AbstractOAuthClient implements OAuthClientInterface {
 		$redirectUrl = null;
 		switch ($this->strategy->getGrantType()) {
 			case 'authorization_code':
-				if ($this->provider->getRedirectUri() === 'oob' && !empty($this->strategy->getPin())) {
+				if ($this->provider->getRedirectUri() === 'oob' && !empty($this->provider->getPin())) {
 					$this->trace('Getting the access token using the pin');
 					if (!$this->requestAnOAuthAccessToken(null, false)) {
 						return false;
 					}
 					return true;
-				} elseif (empty($this->strategy->getOauthUsername())) {
+				} elseif (empty($this->provider->getOauthUsername())) {
 					break;
 				}
 			case 'password':

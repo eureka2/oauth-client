@@ -495,8 +495,8 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	protected function getAuthorizationEndpoint($redirectUri = '', $state = '', $nonce = '') {
 		$url = (($this->strategy->isOffline() && !empty($this->strategy->getOfflineAccessParameter()))
 			? $this->provider->getAuthorizationEndpoint() . '&' . $this->strategy->getOfflineAccessParameter()
-			: (($redirectUri === 'oob' && !empty($this->strategy->getPinDialogUrl()))
-				? $this->strategy->getPinDialogUrl()
+			: (($redirectUri === 'oob' && !empty($this->provider->getPinDialogUrl()))
+				? $this->provider->getPinDialogUrl()
 				: ($this->strategy->shouldReauthenticate()
 					? $this->provider->getAuthorizationEndpoint() . '&' . $this->strategy->getReauthenticationParameter()
 					: $this->provider->getAuthorizationEndpoint())));
@@ -510,7 +510,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 		}
 		$url = str_replace(
 				['{NONCE}',         '{REDIRECT_URI}',        '{STATE}',         '{CLIENT_ID}',                             '{API_KEY}',                             '{SCOPE}',                              '{REALM}'],
-				[urlencode($nonce), urlencode($redirectUri), urlencode($state), urlencode($this->provider->getClientId()), urlencode($this->provider->getApiKey()), urlencode($this->strategy->getScope()), urlencode($this->strategy->getRealm())],
+				[urlencode($nonce), urlencode($redirectUri), urlencode($state), urlencode($this->provider->getClientId()), urlencode($this->provider->getApiKey()), urlencode($this->strategy->getScope()), urlencode($this->provider->getRealm())],
 				$url);
 		return $url;
 	}
@@ -528,33 +528,33 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	}
 
 	protected function getRequestState() {
-		if (isset($_GET['error'])) {
-			$this->trace('it was returned the request state error ' . $_GET['error']);
+		if (filter_has_var(INPUT_GET, 'error')) {
+			$this->trace('it was returned the request state error ' . filter_input(INPUT_GET, 'error'));
 			return false;
 		}
 		$check = (!empty($this->strategy->getAppendStateToRedirectUri()) ? $this->strategy->getAppendStateToRedirectUri() : 'state');
-		$state = (isset($_GET[$check]) ? $_GET[$check] : null);
+		$state = filter_input(INPUT_GET, $check);
 		return $state;
 	}
 
 	protected function getRequestCode() {
-		return $_GET['code'];
+		return filter_input(INPUT_GET, 'code');
 	}
 
 	protected function getRequestError() {
-		return $_GET['error'];
+		return filter_input(INPUT_GET, 'error');
 	}
 
 	protected function getRequestDenied() {
-		return $_GET['denied'];
+		return filter_input(INPUT_GET, 'denied');
 	}
 
 	protected function getRequestToken() {
-		return $_GET['oauth_token'];
+		return filter_input(INPUT_GET, 'oauth_token');
 	}
 
 	protected function getRequestVerifier() {
-		return $_GET['oauth_verifier'];
+		return filter_input(INPUT_GET, 'oauth_verifier');
 	}
 
 	protected function retrieveRedirectURI() {
@@ -629,7 +629,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 		$method = strtoupper($method);
 		$authorization = '';
 		$requestContentType = (isset($options['request_content_type']) ? strtolower(trim(strtok($options['request_content_type'], ';'))) : (($method === 'POST' || isset($oauth)) ? 'application/x-www-form-urlencoded' : ''));
-		$files = (isset($options['files']) ? $options['files'] : []);
+		$files = $options['files'] ?? [];
 		if (count($files) > 0) {
 			foreach ($files as $name => $value) {
 				if (!isset($parameters[$name])) {
@@ -695,9 +695,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 			case 'application/json':
 			case 'application/javascript':
 				$requestHeaders['Content-Type'] = $requestContentType;
-				$requestBody = isset($options['body'])
-								? $options['body']
-								: $parameters;
+				$requestBody = $options['body'] ?? $parameters;
 				break;
 			default:
 				if (!isset($options['body'])) {
@@ -710,8 +708,8 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 				$requestBody = $options['body'];
 				break;
 		}
-		$requestHeaders['Accept'] = (isset($options['accept']) ? $options['accept'] : '*/**');
-		$requestHeaders['Accept-Language'] = (isset($options['accept_language']) ? $options['accept_language'] : '*');
+		$requestHeaders['Accept'] = $options['accept'] ?? '*/**';
+		$requestHeaders['Accept-Language'] = $options['accept_language'] ?? '*';
 		switch ($authentication = (isset($options['authentication']) ? strtolower($options['authentication']) : '')) {
 			case 'basic':
 				$requestHeaders['Authorization'] = 'Basic ' . base64_encode($this->provider->getClientId() . ':' . ($this->strategy->getTokenWithApiKey() ? $this->provider->getApiKey() : $this->provider->getClientSecret()));
@@ -936,21 +934,8 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 		if (isset($options['provider']) && isset($options['provider']['mapping'])) {
 			$configuration = array_merge($configuration, $options['provider']['mapping']);
 		}
-		if (isset($options['provider']) && isset($options['provider']['registration'])) {
-			if (isset($options['provider']['registration']['client_id'])) {
-				$this->provider->setClientId($options['provider']['registration']['client_id']);
-			}
-			if (isset($options['provider']['registration']['client_secret'])) {
-				$this->provider->setClientSecret($options['provider']['registration']['client_secret']);
-			}
-			if (isset($options['provider']['registration']['redirect_uri'])) {
-				$this->provider->setRedirectUri($options['provider']['registration']['redirect_uri']);
-			}
-			if (isset($options['provider']['registration']['api_key'])) {
-				$this->provider->setApiKey($options['provider']['registration']['api_key']);
-			}
-		}
 		$this->provider->bind($configuration);
+		$this->initializeRegitrationOptions($options);
 		$strategy = $builtin['strategy'];
 		if (isset($options['strategy'])) {
 			$strategy = array_merge($strategy, $options['strategy']);
@@ -958,6 +943,39 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 		$this->strategy->bind($strategy);
 		$this->storage->initialize();
 		return true;
+	}
+
+	protected function initializeRegitrationOptions($options) {
+		if (isset($options['provider']) && isset($options['provider']['registration'])) {
+			if (isset($options['provider']['registration']['keys'])) {
+				if (isset($options['provider']['registration']['keys']['client_id'])) {
+					$this->provider->setClientId($options['provider']['registration']['keys']['client_id']);
+				}
+				if (isset($options['provider']['registration']['keys']['client_secret'])) {
+					$this->provider->setClientSecret($options['provider']['registration']['keys']['client_secret']);
+				}
+				if (isset($options['provider']['registration']['keys']['redirect_uri'])) {
+					$this->provider->setRedirectUri($options['provider']['registration']['keys']['redirect_uri']);
+				}
+				if (isset($options['provider']['registration']['keys']['api_key'])) {
+					$this->provider->setApiKey($options['provider']['registration']['keys']['api_key']);
+				}
+				if (isset($options['provider']['registration']['keys']['realm'])) {
+					$this->provider->setRealm($options['provider']['registration']['keys']['realm']);
+				}
+				if (isset($options['provider']['registration']['keys']['pin'])) {
+					$this->provider->setPin($options['provider']['registration']['keys']['pin']);
+				}
+			}
+			if (isset($options['provider']['registration']['credentials'])) {
+				if (isset($options['provider']['registration']['credentials']['oauth_username'])) {
+					$this->provider->setOauthUsername($options['provider']['registration']['credentials']['oauth_username']);
+				}
+				if (isset($options['provider']['registration']['credentials']['oauth_password'])) {
+					$this->provider->setOauthPassword($options['provider']['registration']['credentials']['oauth_password']);
+				}
+			}
+		}
 	}
 
 	protected function discover($discoveryEndpoint) {
@@ -1067,39 +1085,40 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	}
 
 	protected function makeUriFromGlobals() {
-		if (isset($_SERVER['HTTP_UPGRADE_INSECURE_REQUESTS']) && ($_SERVER['HTTP_UPGRADE_INSECURE_REQUESTS'] == 1)) {
+		$server = filter_input_array(INPUT_SERVER);
+		if (isset($server['HTTP_UPGRADE_INSECURE_REQUESTS']) && ($server['HTTP_UPGRADE_INSECURE_REQUESTS'] == 1)) {
 			$scheme = 'https';
-		} elseif (isset($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
-			$scheme = $_SERVER['HTTP_X_FORWARDED_PROTO'];
-		} elseif (isset($_SERVER['REQUEST_SCHEME'])) {
-			$scheme = $_SERVER['REQUEST_SCHEME'];
-		} elseif (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+		} elseif (isset($server['HTTP_X_FORWARDED_PROTO'])) {
+			$scheme = $server['HTTP_X_FORWARDED_PROTO'];
+		} elseif (isset($server['REQUEST_SCHEME'])) {
+			$scheme = $server['REQUEST_SCHEME'];
+		} elseif (isset($server['HTTPS']) && $server['HTTPS'] !== 'off') {
 			$scheme = 'https';
 		} else {
 			$scheme = 'http';
 		}
-		if (isset($_SERVER['HTTP_X_FORWARDED_HOST']) && !empty($_SERVER['HTTP_X_FORWARDED_HOST'])) {
-			$host = explode(':', $_SERVER['HTTP_X_FORWARDED_HOST'])[0];
-		} elseif (isset($_SERVER['HTTP_HOST']) && !empty($_SERVER['HTTP_HOST'])) {
-			$host = explode(':', $_SERVER['HTTP_HOST'])[0];
-		} elseif (isset($_SERVER['SERVER_NAME']) && !empty($_SERVER['SERVER_NAME'])) {
-			$host = $_SERVER['SERVER_NAME'];
+		if (isset($server['HTTP_X_FORWARDED_HOST']) && !empty($server['HTTP_X_FORWARDED_HOST'])) {
+			$host = explode(':', $server['HTTP_X_FORWARDED_HOST'])[0];
+		} elseif (isset($server['HTTP_HOST']) && !empty($server['HTTP_HOST'])) {
+			$host = explode(':', $server['HTTP_HOST'])[0];
+		} elseif (isset($server['SERVER_NAME']) && !empty($server['SERVER_NAME'])) {
+			$host = $server['SERVER_NAME'];
 		} else {
-			$host = $_SERVER['SERVER_ADDR'];
+			$host = $server['SERVER_ADDR'];
 		}
-		if (isset($_SERVER['HTTP_X_FORWARDED_PORT']) && !empty($_SERVER['HTTP_X_FORWARDED_PORT'])) {
-			$port = (int)$_SERVER['HTTP_X_FORWARDED_PORT'];
-		} elseif (isset($_SERVER['HTTP_X_FORWARDED_HOST']) && !empty($_SERVER['HTTP_X_FORWARDED_HOST']) && strpos(':', $_SERVER['HTTP_X_FORWARDED_HOST']) !== false) {
-			$port = (int)explode(':', $_SERVER['HTTP_X_FORWARDED_HOST'])[1];
-		} elseif (isset($_SERVER['SERVER_PORT']) && !empty($_SERVER['SERVER_PORT'])) {
-			$port = (int)$_SERVER['SERVER_PORT'];
-		} elseif (isset($_SERVER['HTTP_HOST']) && !empty($_SERVER['HTTP_HOST']) && strpos(':', $_SERVER['HTTP_HOST']) !== false) {
-			$port = (int)explode(':', $_SERVER['HTTP_HOST'])[1];
+		if (isset($server['HTTP_X_FORWARDED_PORT']) && !empty($server['HTTP_X_FORWARDED_PORT'])) {
+			$port = (int)$server['HTTP_X_FORWARDED_PORT'];
+		} elseif (isset($server['HTTP_X_FORWARDED_HOST']) && !empty($server['HTTP_X_FORWARDED_HOST']) && strpos(':', $server['HTTP_X_FORWARDED_HOST']) !== false) {
+			$port = (int)explode(':', $server['HTTP_X_FORWARDED_HOST'])[1];
+		} elseif (isset($server['SERVER_PORT']) && !empty($server['SERVER_PORT'])) {
+			$port = (int)$server['SERVER_PORT'];
+		} elseif (isset($server['HTTP_HOST']) && !empty($server['HTTP_HOST']) && strpos(':', $server['HTTP_HOST']) !== false) {
+			$port = (int)explode(':', $server['HTTP_HOST'])[1];
 		} else {
 			$port = $scheme === 'https' ? 443 : 80;
 		}
 		$port = (443 == $port) || (80 == $port) ? '' : ':' . $port;
-		$requestUri = trim(strtok($_SERVER['REQUEST_URI'], '?'), '/');
+		$requestUri = trim(strtok($server['REQUEST_URI'], '?'), '/');
 		return sprintf('%s://%s%s/%s', $scheme, $host, $port, $requestUri);
 	}
 

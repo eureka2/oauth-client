@@ -21,19 +21,6 @@ class OAuthClientStrategy {
 
 	/**
 	 *
-	 * 	@var string $pin_dialog_url
-	 * 	URL of the OAuth server to redirect the browser so the user
-	 * 	can grant access to your application.
-	 *
-	 * 	Set this variable when using the pin based authorization and
-	 * 	the format of the of the authorization dialog page URL is
-	 * 	different than the one set to the authorization_endpoint variable.
-	 *
-	 */
-	private $pin_dialog_url = '';
-
-	/**
-	 *
 	 * 	@var string $offline_access_parameter
 	 * 	URL of the OAuth server to redirect the browser so the user
 	 * 	can grant access to your application when offline access is
@@ -46,18 +33,6 @@ class OAuthClientStrategy {
 	 *
 	 */
 	private $offline_access_parameter = '';
-
-	/**
-	 *
-	 * 	@var string $pin
-	 * 	Value of the pin code for pin based authorization.
-	 * 	Set this value to the pin informed by the user when
-	 * 	implementing the pin based authorization.
-	 * 	Make sure the @link redirect_uri variable
-	 * 	is set to 'oob'.
-	 *
-	 */
-	private $pin = '';
 
 	/**
 	 *
@@ -140,16 +115,6 @@ class OAuthClientStrategy {
 	 *
 	 */
 	private $scope = '';
-
-	/**
-	 *
-	 * 	@var string $realm
-	 * 	Realm of authorization for OpenID Connect
-	 *
-	 * 	Set this variable to the realm value when using OpenID Connect.
-	 *
-	 */
-	private $realm = '';
 
 	/**
 	 *
@@ -279,30 +244,6 @@ class OAuthClientStrategy {
 
 	/**
 	 *
-	 * 	@var string $oauth_username
-	 * 	Define the user name to obtain authorization using a password.
-	 *
-	 * 	Set this variable to the user name of the account to
-	 * 	authorize instead of going through the interactive user
-	 * 	authorization process.
-	 *
-	 */
-	private $oauth_username = '';
-
-	/**
-	 *
-	 * 	@var string $oauth_password
-	 * 	Define the user name to obtain authorization using a password.
-	 *
-	 * 	Set this variable to the user password of the account to
-	 * 	authorize instead of going through the interactive user
-	 * 	authorization process.
-	 *
-	 */
-	private $oauth_password = '';
-
-	/**
-	 *
 	 * 	@var string $grant_type
 	 * 	Define the type of grant to obtain the OAuth 2 access token.
 	 * 	Change this variable to :
@@ -333,16 +274,8 @@ class OAuthClientStrategy {
 		return $this->reauthentication_parameter;
 	}
 
-	public function getPinDialogUrl() {
-		return $this->pin_dialog_url;
-	}
-
 	public function getOfflineAccessParameter() {
 		return $this->offline_access_parameter;
-	}
-
-	public function getPin() {
-		return $this->pin;
 	}
 
 	public function getAppendStateToRedirectUri() {
@@ -371,10 +304,6 @@ class OAuthClientStrategy {
 
 	public function getScope() {
 		return $this->scope;
-	}
-
-	public function getRealm() {
-		return $this->realm;
 	}
 
 	public function isOffline() {
@@ -413,14 +342,6 @@ class OAuthClientStrategy {
 		return $this->refresh_token_authentication;
 	}
 
-	public function getOauthUsername() {
-		return $this->oauth_username;
-	}
-
-	public function getOauthPassword() {
-		return $this->oauth_password;
-	}
-
 	public function getGrantType() {
 		return $this->grant_type;
 	}
@@ -434,18 +355,8 @@ class OAuthClientStrategy {
 		return $this;
 	}
 
-	public function setPinDialogUrl($pin_dialog_url) {
-		$this->pin_dialog_url = $pin_dialog_url;
-		return $this;
-	}
-
 	public function setOfflineAccessParameter($offline_access_parameter) {
 		$this->offline_access_parameter = $offline_access_parameter;
-		return $this;
-	}
-
-	public function setPin($pin) {
-		$this->pin = $pin;
 		return $this;
 	}
 
@@ -481,11 +392,6 @@ class OAuthClientStrategy {
 
 	public function setScope($scope) {
 		$this->scope = $scope;
-		return $this;
-	}
-
-	public function setRealm($realm) {
-		$this->realm = $realm;
 		return $this;
 	}
 
@@ -534,16 +440,6 @@ class OAuthClientStrategy {
 		return $this;
 	}
 
-	public function setOauthUsername($oauth_username) {
-		$this->oauth_username = $oauth_username;
-		return $this;
-	}
-
-	public function setOauthPassword($oauth_password) {
-		$this->oauth_password = $oauth_password;
-		return $this;
-	}
-
 	public function setGrantType($grant_type) {
 		$this->grant_type = $grant_type;
 		return $this;
@@ -557,7 +453,6 @@ class OAuthClientStrategy {
 	public function bind($properties) {
 		$types = [
 			'reauthentication_parameter' => 'string',
-			'pin_dialog_url' => 'string',
 			'offline' => 'boolean',
 			'offline_access_parameter' => 'string',
 			'append_state_to_redirect_uri' => 'string',
@@ -575,9 +470,6 @@ class OAuthClientStrategy {
 			'get_token_with_api_key' => 'boolean',
 			'access_token_content_type' => 'string',
 			'access_token_language' => 'string',
-			'oauth_username' => 'string',
-			'oauth_password' => 'string',
-			'realm' => 'string',
 			'scope' => 'string'
 		];
 		foreach ($properties as $property => $value) {

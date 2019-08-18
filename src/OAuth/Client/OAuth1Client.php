@@ -114,12 +114,12 @@ class OAuth1Client extends AbstractOAuthClient implements OAuthClientInterface {
 						$this->trace('The OAuth token is not yet authorized');
 					}
 				}
-				if ($version1a && $this->provider->getRedirectUri() === 'oob' && strlen($this->strategy->getPin())) {
+				if ($version1a && $this->provider->getRedirectUri() === 'oob' && strlen($this->provider->getPin())) {
 					$this->trace('Checking the pin');
 					$this->setAccessTokenSecret($accessToken['secret']);
 					$oauth = [
 						'oauth_token' => $accessToken['value'],
-						'oauth_verifier' => $this->strategy->getPin()
+						'oauth_verifier' => $this->provider->getPin()
 					];
 					if (!$this->requestAnOAuthAccessToken($oauth, $accessToken)) {
 						return false;

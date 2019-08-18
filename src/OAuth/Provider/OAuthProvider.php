@@ -92,6 +92,31 @@ class OAuthProvider {
 	/** @var string */
 	private $end_session_endpoint = '';
 
+	/**
+	 *
+	 * 	@var string $pin_dialog_url
+	 * 	URL of the OAuth server to redirect the browser so the user
+	 * 	can grant access to your application.
+	 *
+	 * 	Set this variable when using the pin based authorization and
+	 * 	the format of the of the authorization dialog page URL is
+	 * 	different than the one set to the authorization_endpoint variable.
+	 *
+	 */
+	private $pin_dialog_url = '';
+
+	/**
+	 *
+	 * 	@var string $pin
+	 * 	Value of the pin code for pin based authorization.
+	 * 	Set this value to the pin informed by the user when
+	 * 	implementing the pin based authorization.
+	 * 	Make sure the  redirect_uri variable
+	 * 	is set to 'oob'.
+	 *
+	 */
+	private $pin = '';
+
 	/** @var string */
 	private $jwks_uri = '';
 
@@ -121,6 +146,40 @@ class OAuthProvider {
 
 	/** @var string */
 	private $api_key = '';
+
+	/**
+	 *
+	 * 	@var string $oauth_username
+	 * 	Define the user name to obtain authorization using a password.
+	 *
+	 * 	Set this variable to the user name of the account to
+	 * 	authorize instead of going through the interactive user
+	 * 	authorization process.
+	 *
+	 */
+	private $oauth_username = '';
+
+	/**
+	 *
+	 * 	@var string $oauth_password
+	 * 	Define the user name to obtain authorization using a password.
+	 *
+	 * 	Set this variable to the user password of the account to
+	 * 	authorize instead of going through the interactive user
+	 * 	authorization process.
+	 *
+	 */
+	private $oauth_password = '';
+
+	/**
+	 *
+	 * 	@var string $realm
+	 * 	Realm of authorization for OpenID Connect
+	 *
+	 * 	Set this variable to the realm value when using OpenID Connect.
+	 *
+	 */
+	private $realm = '';
 
 	/**
 	 * @param string $name
@@ -192,6 +251,14 @@ class OAuthProvider {
 		return $this->end_session_endpoint;
 	}
 
+	public function getPinDialogUrl() {
+		return $this->pin_dialog_url;
+	}
+
+	public function getPin() {
+		return $this->pin;
+	}
+
 	public function getJwksUri() {
 		return $this->jwks_uri;
 	}
@@ -230,6 +297,18 @@ class OAuthProvider {
 
 	public function getApiKey() {
 		return $this->api_key;
+	}
+
+	public function getOauthUsername() {
+		return $this->oauth_username;
+	}
+
+	public function getOauthPassword() {
+		return $this->oauth_password;
+	}
+
+	public function getRealm() {
+		return $this->realm;
 	}
 
 	public function setVersion($version) {
@@ -302,6 +381,16 @@ class OAuthProvider {
 		return $this;
 	}
 
+	public function setPinDialogUrl($pin_dialog_url) {
+		$this->pin_dialog_url = $pin_dialog_url;
+		return $this;
+	}
+
+	public function setPin($pin) {
+		$this->pin = $pin;
+		return $this;
+	}
+
 	public function setJwksUri($jwks_uri) {
 		$this->jwks_uri = $jwks_uri;
 		return $this;
@@ -352,6 +441,21 @@ class OAuthProvider {
 		return $this;
 	}
 
+	public function setOauthUsername($oauth_username) {
+		$this->oauth_username = $oauth_username;
+		return $this;
+	}
+
+	public function setOauthPassword($oauth_password) {
+		$this->oauth_password = $oauth_password;
+		return $this;
+	}
+
+	public function setRealm($realm) {
+		$this->realm = $realm;
+		return $this;
+	}
+
 	public function bind($configuration) {
 		$types = [
 			'protocol' => 'string',
@@ -365,6 +469,7 @@ class OAuthProvider {
 			'request_token_endpoint' => 'string',
 			'userinfo_endpoint' => 'string',
 			'end_session_endpoint' => 'string',
+			'pin_dialog_url' => 'string',
 			'jwks_uri' => 'string',
 			'scopes_supported' => 'array',
 			'response_types_supported' => 'array',
