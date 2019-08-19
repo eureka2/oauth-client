@@ -105,6 +105,32 @@ interface OAuthClientInterface {
 	public function callAPI($url, $method, $parameters, $options);
 
 	/**
+	 * 	Returns the information about the resource owner using a
+	 * 	previously obtained access token via OAuth.
+	 *
+	 * 	This function must be called after having
+	 * 	previously obtained an access token through the OAuth protocol
+	 * 	using the authenticate function, or by directly setting the variables
+	 * 	access_token, as well as access_token_secret in case of using OAuth 1.0 or 1.0a services.
+	 *
+	 * 	@param string $endpoint URL of the user info endpoint.
+	 * 	@return \eureka2\OAuth\Response\ResourceOwner The resource owner
+	 */
+	public function getResourceOwner($endpoint = null);
+
+	/**
+	 * 	Returns the information about the resource owner.
+	 *
+	 *	This function is a high-level function
+	 *	that perform all the necessary actions (initalization, authentication, ...)
+	 * 	before requesting the information about the resource owner.
+	 *
+	 * 	@param array $options array of parameters.
+	 * 	@return \eureka2\OAuth\Response\ResourceOwner The resource owner
+	 */
+	public function fetchResourceOwner($options);
+
+	/**
 	 * 	Cleanup any resources that may have been used during the
 	 * 	OAuth protocol processing or execution of API calls.
 	 *

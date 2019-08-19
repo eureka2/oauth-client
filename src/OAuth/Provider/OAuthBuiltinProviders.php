@@ -19,6 +19,7 @@ class OAuthBuiltinProviders {
 				'user_id_field' => 'id'
 			],
 			'strategy' => [
+				'scope' => 'public_profile,email,user_gender',
 				'reauthentication_parameter' => 'auth_type=reauthenticate'
 			]
 		],
@@ -36,6 +37,7 @@ class OAuthBuiltinProviders {
 				'user_id_field' => 'id'
 			],
 			'strategy' => [
+				'scope' => 'openid read:user',
 				'access_token_content_type' => 'application/json'
 			]
 		],
@@ -47,9 +49,11 @@ class OAuthBuiltinProviders {
 			'endpoints' => [
 				'authorization_endpoint' => 'https://gitlab.com/oauth/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&scope={SCOPE}&state={STATE}',
 				'token_endpoint' => 'https://gitlab.com/oauth/token',
+				'userinfo_endpoint' => 'https://gitlab.com/oauth/userinfo',
 				'jwks_uri' => 'https://gitlab.com/oauth/discovery/keys'
 			],
 			'strategy' => [
+				'scope' => 'openid read_user'
 			]
 		],
 		'Google' => [
@@ -61,9 +65,11 @@ class OAuthBuiltinProviders {
 				'authorization_endpoint' => 'https://accounts.google.com/o/oauth2/auth?response_type=code&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={SCOPE}&state={STATE}',
 				'token_endpoint' => 'https://accounts.google.com/o/oauth2/token',
 				'revocation_endpoint' => 'https://accounts.google.com/o/oauth2/revoke',
+				'userinfo_endpoint' => 'https://www.googleapis.com/oauth2/v1/userinfo',
 				'jwks_uri' => 'https://www.googleapis.com/oauth2/v3/certs'
 			],
 			'strategy' => [
+				'scope' => 'openid profile email',
 				'offline_access_parameter' => 'access_type=offline&approval_prompt=force'
 			]
 		],
@@ -90,7 +96,8 @@ class OAuthBuiltinProviders {
 				'userinfo_endpoint' => 'https://app.franceconnect.gouv.fr/api/v1/userinfo?schema=openid'
 			],
 			'strategy' => [
-				'offline_access_parameter' => 'access_type=offline&approval_prompt=force'
+				'scope' => 'openid identite_pivot address email phone',
+				'offline_access' => true
 			]
 		],
 		'franceconnectSandbox' => [
@@ -105,7 +112,8 @@ class OAuthBuiltinProviders {
 				'userinfo_endpoint' => 'https://fcp.integ01.dev-franceconnect.fr/api/v1/userinfo?schema=openid'
 			],
 			'strategy' => [
-				'offline_access_parameter' => 'access_type=offline&approval_prompt=force'
+				'scope' => 'openid identite_pivot address email phone',
+				'offline_access' => true
 			]
 		],
 		'LinkedIn' => [
@@ -130,9 +138,11 @@ class OAuthBuiltinProviders {
 				'authorization_endpoint' => 'https://login.live.com/oauth20_authorize.srf?client_id={CLIENT_ID}&scope={SCOPE}&response_type=code&redirect_uri={REDIRECT_URI}&state={STATE}',
 				'token_endpoint' => 'https://login.live.com/oauth20_token.srf',
 				'revocation_endpoint' => 'https://login.microsoftonline.com/common/oauth2/logout',
+				'userinfo_endpoint' => 'https://apis.live.net/v5.0/me',
 				'jwks_uri' => 'https://login.microsoftonline.com/consumers/discovery/v2.0/keys'
 			],
 			'strategy' => [
+				'scope' => 'openid wl.basic wl.emails'
 			]
 		],
 		'Orange' => [
@@ -142,7 +152,8 @@ class OAuthBuiltinProviders {
 			],
 			'endpoints' => [
 				'authorization_endpoint' => 'https://api.orange.com/openidconnect/fr/v1/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={SCOPE}&response_type=code&state={STATE}',
-				'token_endpoint' => 'https://api.orange.com/oauth/v2/token'
+				'token_endpoint' => 'https://api.orange.com/oauth/v2/token',
+				'userinfo_endpoint' => 'https://api.orange.com/openidconnect/v1/userinfo'
 			],
 			'strategy' => [
 			]
@@ -157,6 +168,7 @@ class OAuthBuiltinProviders {
 				'token_endpoint' => 'https://api.paypal.com/v1/identity/openidconnect/tokenservice'
 			],
 			'strategy' => [
+				'scope' => 'openid profile email address'
 			]
 		],
 		// 'PaypalSandbox' => [
@@ -169,6 +181,7 @@ class OAuthBuiltinProviders {
 				// 'token_endpoint' => 'https://api.sandbox.paypal.com/v1/identity/openidconnect/tokenservice'
 			// ],
 			// 'strategy' => [
+				// 'scope' => 'openid profile email address'
 			// ]
 		// ],
 		'PaypalSandbox' => [
@@ -178,9 +191,11 @@ class OAuthBuiltinProviders {
 			],
 			'endpoints' => [
 				'authorization_endpoint' => 'https://www.sandbox.paypal.com/signin/authorize?flowEntry=static&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&state={STATE}&scope={SCOPE}',
-				'token_endpoint' => 'https://api.sandbox.paypal.com/v1/oauth2/token'
+				'token_endpoint' => 'https://api.sandbox.paypal.com/v1/oauth2/token',
+				'authorization_endpoint' => 'https://api.sandbox.paypal.com/v1/identity/oauth2/userinfo?schema=paypalv1.1'
 			],
 			'strategy' => [
+				'scope' => 'openid profile email address',
 				'access_token_content_type' => 'application/json',
 				'grant_type' => 'authorization_code',
 				'access_token_authentication' => 'basic',

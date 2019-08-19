@@ -118,7 +118,7 @@ class OAuthClientStrategy {
 
 	/**
 	 *
-	 * 	@var boolean $offline
+	 * 	@var boolean $offline_access
 	 * 	Specify whether it will be necessary to call the API when
 	 * 	the user is not present and the server supports renewing expired
 	 * 	access tokens using refresh tokens.
@@ -128,7 +128,7 @@ class OAuthClientStrategy {
 	 * 	user is not present.
 	 *
 	 */
-	private $offline = false;
+	private $offline_access = false;
 
 	/**
 	 *
@@ -306,8 +306,8 @@ class OAuthClientStrategy {
 		return $this->scope;
 	}
 
-	public function isOffline() {
-		return $this->offline;
+	public function isOfflineAccess() {
+		return $this->offline_access;
 	}
 
 	public function shouldReauthenticate() {
@@ -395,8 +395,8 @@ class OAuthClientStrategy {
 		return $this;
 	}
 
-	public function setOffline($offline) {
-		$this->offline = $offline;
+	public function setOfflineAccess($offline_access) {
+		$this->offline_access = $offline_access;
 		return $this;
 	}
 
@@ -453,7 +453,7 @@ class OAuthClientStrategy {
 	public function bind($properties) {
 		$types = [
 			'reauthentication_parameter' => 'string',
-			'offline' => 'boolean',
+			'offline_access' => 'boolean',
 			'offline_access_parameter' => 'string',
 			'append_state_to_redirect_uri' => 'string',
 			'authorization_header' => 'boolean',

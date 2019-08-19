@@ -4,6 +4,7 @@ namespace eureka2\OAuth\Client;
 
 use Symfony\Component\HttpClient\HttpClient;
 use eureka2\OAuth\Request\OAuthRequest;
+use eureka2\OAuth\Response\ResourceOwner;
 use eureka2\OAuth\Exception\OAuthClientAccessTokenException;
 use eureka2\OAuth\Exception\OAuthClientException;
 use eureka2\OAuth\Provider\OAuthBuiltinProviders;
@@ -493,7 +494,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	}
 
 	protected function getAuthorizationEndpoint($redirectUri = '', $state = '', $nonce = '') {
-		$url = (($this->strategy->isOffline() && !empty($this->strategy->getOfflineAccessParameter()))
+		$url = (($this->strategy->isOfflineAccess() && !empty($this->strategy->getOfflineAccessParameter()))
 			? $this->provider->getAuthorizationEndpoint() . '&' . $this->strategy->getOfflineAccessParameter()
 			: (($redirectUri === 'oob' && !empty($this->provider->getPinDialogUrl()))
 				? $this->provider->getPinDialogUrl()
@@ -504,13 +505,17 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 			throw new OAuthClientException(
 				sprintf(
 					'the authorization endpoint %s is not defined for this provider',
-					($this->strategy->isOffline() ? 'for offline access ' : ($this->strategy->shouldReauthenticate() ? 'for reautentication' : ''))
+					($this->strategy->isOfflineAccess() ? 'for offline access ' : ($this->strategy->shouldReauthenticate() ? 'for reautentication' : ''))
 				)
 			);
 		}
+		$scope = $this->strategy->getScope();
+		if ($this->strategy->isOfflineAccess() && empty($this->strategy->getOfflineAccessParameter())) {
+			$scope .= ' offline_access';
+		}
 		$url = str_replace(
-				['{NONCE}',         '{REDIRECT_URI}',        '{STATE}',         '{CLIENT_ID}',                             '{API_KEY}',                             '{SCOPE}',                              '{REALM}'],
-				[urlencode($nonce), urlencode($redirectUri), urlencode($state), urlencode($this->provider->getClientId()), urlencode($this->provider->getApiKey()), urlencode($this->strategy->getScope()), urlencode($this->provider->getRealm())],
+				['{NONCE}',         '{REDIRECT_URI}',        '{STATE}',         '{CLIENT_ID}',                             '{API_KEY}',                             '{SCOPE}',               '{REALM}'],
+				[urlencode($nonce), urlencode($redirectUri), urlencode($state), urlencode($this->provider->getClientId()), urlencode($this->provider->getApiKey()), urlencode(trim($scope)), urlencode($this->provider->getRealm())],
 				$url);
 		return $url;
 	}
@@ -879,6 +884,49 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	 * @inheritdoc
 	 */
 	abstract public function callAPI($url, $method, $parameters, $options);
+
+	/**
+	 * @inheritdoc
+	 */
+	public function getResourceOwner($endpoint = null) {
+		$endpoint = $endpoint ?? $this->provider->getUserinfoEndpoint();
+		$user = empty($endpoint)
+			? []
+			: $this->callAPI(
+				$endpoint,
+				'GET', [], [
+					'convert_json_to_array' => true,
+					'fail_on_access_error' => true
+				]
+			);
+		$userId = $this->storage->getStoredUser();
+		if (empty($userId) &&!empty($this->provider->getUserIdField())) {
+			$field = $this->provider->getUserIdField();
+			if (isset($user[$field])) {
+				$userId = $user[$field];
+			}
+		}
+		return new ResourceOwner($userId, $user);
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	public function fetchResourceOwner($options) {
+		$user = null;
+		if ($this->initialize($options)) {
+			if ($this->authenticate()) {
+				if (!empty($this->getAccessToken())) {
+					$user = $this->getResourceOwner();
+				}
+			}
+			$this->finalize();
+		}
+		if ($this->shouldExit()) {
+			exit;
+		}
+		return $user;
+	}
 
 	protected function checkTokenBeforeCall($options) {
 		$version = intval($this->provider->getVersion());

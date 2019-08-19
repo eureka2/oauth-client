@@ -42,13 +42,13 @@ $options = [
   ],
   'strategy' => [
     'reauthentication_parameter' => 'string',
-    'offline' => 'boolean',
+    'offline_access' => 'boolean',
     'offline_access_parameter' => 'string',
     'append_state_to_redirect_uri' => 'string',
     'authorization_header' => 'boolean',
     'url_parameters' => 'boolean',
     'token_request_method' => 'string',
-    'signature_method' => 'string',
+    'signature_method' => 'string',              // values : 'PLAINTEXT', 'HMAC-SHA1' and 'RSA-SHA1'
     'signature_certificate_file' => 'string',
     'access_token_authentication' => 'string',
     'access_token_parameter' => 'string',
