@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace eureka2\OAuth\Storage;
 
@@ -14,7 +14,7 @@ interface TokenStorageInterface {
 	 * 	function to make the access token values be stored in other types
 	 * 	of containers, like for instance databases.
 	 *
-	 * 	@param hash $accessToken Associative array with properties of the access token. 
+	 * 	@param array $accessToken Associative array with properties of the access token. 
 	 * 	The array may have set the following properties:
 	 * 	'value': string value of the access token
 	 * 	'authorized': boolean value that determines if the access token was obtained successfully

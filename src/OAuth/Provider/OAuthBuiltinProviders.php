@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace eureka2\OAuth\Provider;
 
@@ -171,37 +171,37 @@ class OAuthBuiltinProviders {
 				'scope' => 'openid profile email address'
 			]
 		],
-		// 'PaypalSandbox' => [
-			// 'protocol' => [
-				// 'name' => 'oauth',
-				// 'version' => '2.0'
-			// ],
-			// 'endpoints' => [
-				// 'authorization_endpoint' => 'https://www.sandbox.paypal.com/webapps/auth/protocol/openidconnect/v1/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&state={STATE}&scope={SCOPE}',
-				// 'token_endpoint' => 'https://api.sandbox.paypal.com/v1/identity/openidconnect/tokenservice'
-			// ],
-			// 'strategy' => [
-				// 'scope' => 'openid profile email address'
-			// ]
-		// ],
 		'PaypalSandbox' => [
 			'protocol' => [
 				'name' => 'oauth',
 				'version' => '2.0'
 			],
 			'endpoints' => [
-				'authorization_endpoint' => 'https://www.sandbox.paypal.com/signin/authorize?flowEntry=static&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&state={STATE}&scope={SCOPE}',
-				'token_endpoint' => 'https://api.sandbox.paypal.com/v1/oauth2/token',
-				'authorization_endpoint' => 'https://api.sandbox.paypal.com/v1/identity/oauth2/userinfo?schema=paypalv1.1'
+				'authorization_endpoint' => 'https://www.sandbox.paypal.com/webapps/auth/protocol/openidconnect/v1/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&state={STATE}&scope={SCOPE}',
+				'token_endpoint' => 'https://api.sandbox.paypal.com/v1/identity/openidconnect/tokenservice'
 			],
 			'strategy' => [
-				'scope' => 'openid profile email address',
-				'access_token_content_type' => 'application/json',
-				'grant_type' => 'authorization_code',
-				'access_token_authentication' => 'basic',
-				'access_token_language' => 'fr-FR'
+				'scope' => 'openid profile email address'
 			]
 		],
+		// 'PaypalSandbox' => [
+			// 'protocol' => [
+				// 'name' => 'oauth',
+				// 'version' => '2.0'
+			// ],
+			// 'endpoints' => [
+				// 'authorization_endpoint' => 'https://www.sandbox.paypal.com/signin/authorize?flowEntry=static&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&state={STATE}&scope={SCOPE}',
+				// 'token_endpoint' => 'https://api.sandbox.paypal.com/v1/oauth2/token',
+				// 'authorization_endpoint' => 'https://api.sandbox.paypal.com/v1/identity/oauth2/userinfo?schema=paypalv1.1'
+			// ],
+			// 'strategy' => [
+				// 'scope' => 'openid profile email address',
+				// 'access_token_content_type' => 'application/json',
+				// 'grant_type' => 'authorization_code',
+				// 'access_token_authentication' => 'basic',
+				// 'access_token_language' => 'fr-FR'
+			// ]
+		// ],
 		'Twitter' => [
 			'protocol' => [
 				'name' => 'oauth',

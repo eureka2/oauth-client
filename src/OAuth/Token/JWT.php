@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace eureka2\OAuth\Token;
 
@@ -6,14 +6,14 @@ use eureka2\OAuth\Exception\OAuthClientSignatureException;
 
 class JWT {
 
-	public static function decode($jwt, $section = 0, $json = true) {
+	public static function decode(string $jwt, int $section = 0, bool $json = true) {
 		$parts = explode('.', $jwt);
 		$part = $parts[$section];
 		$decoded = self::safeBase64Decode($part);
 		return $json ? json_decode($decoded) : $decoded;
 	}
 
-	private static function safeBase64Decode($part) {
+	private static function safeBase64Decode(string $part) {
 		$padding = strlen($part) % 4;
 		if ($padding > 0) {
 			$part .= str_repeat('=', 4 - $padding);
@@ -21,7 +21,7 @@ class JWT {
 		return base64_decode(strtr($part, '-_', '+/'));
 	}
 
-	private static function encodeASNLength($length) {
+	private static function encodeASNLength(int $length) {
 		if ($length <= 0x7F) {
 			return chr($length);
 		}
@@ -73,7 +73,7 @@ class JWT {
 		return $pemPublicKey;
 	}
 
-	public static function verifyRSASignature($header, $keys, $jwt) {
+	public static function verifyRSASignature($header, $keys, string $jwt) {
 		$encoded = explode('.', $jwt);
 		$data = $encoded[0] . '.' .$encoded[1];
 		$signature = self::decode($jwt, 2, false);
@@ -97,7 +97,7 @@ class JWT {
 		return (bool) $result;
 	}
 
-	public static function verifyHMACsignature($header, $jwt, $key) {
+	public static function verifyHMACsignature($header, string $jwt, string $key) {
 		$algo = 'sha' . substr($header->alg, 2); 
 		$encoded = explode('.', $jwt);
 		$data = $encoded[0] . '.' .$encoded[1];

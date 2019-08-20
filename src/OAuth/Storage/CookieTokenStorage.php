@@ -1,9 +1,7 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace eureka2\OAuth\Storage;
 
-use eureka2\OAuth\Client\OAuthClient;
-use eureka2\OAuth\Client\OAuthClientInterface;
 use eureka2\OAuth\Exception\OAuthClientException;
 
 class CookieTokenStorage
@@ -72,7 +70,7 @@ class CookieTokenStorage
 	 * @inheritdoc
 	 */
 	public function resetAccessToken() {
-		$this->client->trace('Resetting the access token status for the OAuth provider ' . $provider);
+		$this->client->trace('Resetting the access token status for the OAuth provider ' . $this->client->getProvider()->getName());
 		$this->deleteCookie();
 		$this->deleteSessionCookie();
 		return true;

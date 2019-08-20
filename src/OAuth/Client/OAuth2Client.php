@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace eureka2\OAuth\Client;
 
@@ -11,6 +11,9 @@ class OAuth2Client extends AbstractOAuthClient implements OAuthClientInterface {
 	protected function verifyClaims($jwt) {
 		$claims = JWT::decode($jwt, 1);
 		if ($claims->aud != $this->provider->getClientId()) {
+			return false;
+		}
+		if (property_exists($claims, 'azp') && $claims->azp != $this->provider->getClientId()) {
 			return false;
 		}
 		if (property_exists($claims, 'nonce') && $claims->nonce != $this->storage->getStoredNonce()) {
@@ -328,7 +331,7 @@ class OAuth2Client extends AbstractOAuthClient implements OAuthClientInterface {
 		} else {
 			$redirectUri = $this->retrieveRedirectURI();
 			if (!empty($this->strategy->getAppendStateToRedirectUri())) {
-				$redirectUri .= (strpos($redirectUri, '?') === false ? '?' : '&') . $this->strategy->getAppendStateToRedirectUri() . '=' . $stored_state;
+				$redirectUri .= (strpos($redirectUri, '?') === false ? '?' : '&') . $this->strategy->getAppendStateToRedirectUri() . '=' . $storedState;
 			}
 			$storedNonce = $this->storage->getStoredNonce();
 			$url = $this->getAuthorizationEndpoint($redirectUri, $storedState, $storedNonce);

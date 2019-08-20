@@ -5,15 +5,13 @@ namespace eureka2\OAuth\Client;
 use Symfony\Component\HttpClient\HttpClient;
 use eureka2\OAuth\Request\OAuthRequest;
 use eureka2\OAuth\Response\ResourceOwner;
-use eureka2\OAuth\Exception\OAuthClientAccessTokenException;
-use eureka2\OAuth\Exception\OAuthClientException;
-use eureka2\OAuth\Provider\OAuthBuiltinProviders;
-use eureka2\OAuth\Provider\OAuthProvider;
+use eureka2\OAuth\Exception\{OAuthClientException, OAuthClientAccessTokenException};
+use eureka2\OAuth\Provider\{OAuthProvider, OAuthBuiltinProviders};
 use eureka2\OAuth\Storage\TokenStorageFactory;
 
 /**
  *
- * This class serves two main purposes:
+ * Base class for all Oauth clients :
  *
  * 	1)	Implement the OAuth protocol to retrieve a token from a server to
  * 		authorize the access to an API on behalf of the current user.
@@ -262,7 +260,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 
 	/**
 	 *
-	 * 	@var array $responseBody
+	 * 	@var string $responseBody
 	 * 	HTTP response body returned by the server when calling an API
 	 *
 	 * 	Check this variable after calling the
@@ -270,7 +268,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	 * 	need to process the error depending the response headers.
 	 *
 	 */
-	protected $responseBody = [];
+	protected $responseBody = '';
 
 	protected $responseTime = 0;
 
@@ -511,7 +509,8 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 		}
 		$scope = $this->strategy->getScope();
 		if ($this->strategy->isOfflineAccess() && empty($this->strategy->getOfflineAccessParameter())) {
-			$scope .= ' offline_access';
+			$sep = strpos($scope, ',') === false ? ' ' : ',';
+			$scope .= $sep . 'offline_access';
 		}
 		$url = str_replace(
 				['{NONCE}',         '{REDIRECT_URI}',        '{STATE}',         '{CLIENT_ID}',                             '{API_KEY}',                             '{SCOPE}',               '{REALM}'],
@@ -761,7 +760,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 				);
 			}
 		}
-		$this->setResponseTime((isset($this->response_headers['date']) ? strtotime(is_array($this->responseHeaders['date']) ? $this->responseHeaders['date'][0] : $this->responseHeaders['date']) : time()));
+		$this->setResponseTime((isset($this->responseHeaders['date']) ? strtotime(is_array($this->responseHeaders['date']) ? $this->responseHeaders['date'][0] : $this->responseHeaders['date']) : time()));
 		return $this->convertResponseBody($options);
 	}
 
@@ -802,7 +801,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 							$this->trace('Decoding XML response with simplexml');
 							try {
 								$data = new \SimpleXMLElement($data);
-							} catch (Exception $exception) {
+							} catch (\Exception $exception) {
 								throw new OAuthClientException('Could not parse XML response: ' . $exception->getMessage());
 							}
 							break;
@@ -1156,11 +1155,11 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 		}
 		if (isset($server['HTTP_X_FORWARDED_PORT']) && !empty($server['HTTP_X_FORWARDED_PORT'])) {
 			$port = (int)$server['HTTP_X_FORWARDED_PORT'];
-		} elseif (isset($server['HTTP_X_FORWARDED_HOST']) && !empty($server['HTTP_X_FORWARDED_HOST']) && strpos(':', $server['HTTP_X_FORWARDED_HOST']) !== false) {
+		} elseif (isset($server['HTTP_X_FORWARDED_HOST']) && !empty($server['HTTP_X_FORWARDED_HOST']) && strpos($server['HTTP_X_FORWARDED_HOST'], ':') !== false) {
 			$port = (int)explode(':', $server['HTTP_X_FORWARDED_HOST'])[1];
 		} elseif (isset($server['SERVER_PORT']) && !empty($server['SERVER_PORT'])) {
 			$port = (int)$server['SERVER_PORT'];
-		} elseif (isset($server['HTTP_HOST']) && !empty($server['HTTP_HOST']) && strpos(':', $server['HTTP_HOST']) !== false) {
+		} elseif (isset($server['HTTP_HOST']) && !empty($server['HTTP_HOST']) && strpos($server['HTTP_HOST'], ':') !== false) {
 			$port = (int)explode(':', $server['HTTP_HOST'])[1];
 		} else {
 			$port = $scheme === 'https' ? 443 : 80;

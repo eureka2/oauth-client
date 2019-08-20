@@ -1,6 +1,35 @@
 # oauth-client
 OAuth client
 
+# Usage
+
+## High-level request to a builtin OAuth provider
+ ```php
+use eureka2\OAuth\Client\OAuthClientFactory;
+
+try {
+    $client = OAuthClientFactory::create('Google');
+    $user = $client->fetchResourceOwner([
+        'provider' => [
+            'registration' => [
+                'keys' => [
+                    'client_id' => '<YOUR CLIENT ID>',
+                    'client_secret' => '<YOUR CLIENT SECRET>',
+                    'redirect_uri' => 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME']
+                ]
+            ]
+        ],
+        'strategy' => [
+            'offline_access' => true
+        ]
+    ]);
+    ....
+    // Do something with $user
+} catch (Exception $e) {
+    // Do something with $e
+}
+```
+
 ## Options
 ```php
 $options = [

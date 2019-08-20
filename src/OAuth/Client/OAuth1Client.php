@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace eureka2\OAuth\Client;
 
@@ -192,7 +192,7 @@ class OAuth1Client extends AbstractOAuthClient implements OAuthClientInterface {
 				default:
 					throw new OAuthClientException($method . ' is not a supported method to request tokens');
 			}
-			if (($response = $this->sendOAuthRequest($url, $method, [], $options, $response, $oauth)) === false) {
+			if (($response = $this->sendOAuthRequest($url, $method, [], $options, $oauth)) === false) {
 				return false;
 			}
 			if (!isset($response['oauth_token']) || !isset($response['oauth_token_secret'])) {
@@ -259,7 +259,7 @@ class OAuth1Client extends AbstractOAuthClient implements OAuthClientInterface {
 	protected function sign(&$url, $method, $parameters, $oauth, $requestContentType, $hasFiles, $postValuesInUri, &$authorization, &$postValues) {
 		$values = [
 			'oauth_consumer_key' => $this->provider->getClientId(),
-			'oauth_nonce' => md5(uniqid(rand(), true)),
+			'oauth_nonce' => md5(uniqid(''.rand(), true)),
 			'oauth_signature_method' => $this->strategy->getSignatureMethod(),
 			'oauth_timestamp' => time(),
 			'oauth_version' => '1.0',

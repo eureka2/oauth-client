@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace eureka2\OAuth\Client;
  
@@ -21,7 +21,7 @@ interface OpenIDClientInterface extends OAuthClientInterface{
 	 *
 	 * @throws \eureka2\OAuth\Exception\OAuthClientException
 	 */
-	public function introspectToken($token, $tokenTypeHint = '');
+	public function introspectToken(string $token, string $tokenTypeHint = '');
 
 
 }

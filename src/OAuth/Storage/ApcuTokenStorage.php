@@ -1,8 +1,6 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace eureka2\OAuth\Storage;
-
-use eureka2\OAuth\Exception\OAuthClientPHPException;
 
 class ApcuTokenStorage
 	extends AbstractTokenStorage

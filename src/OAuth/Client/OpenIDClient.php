@@ -2,6 +2,8 @@
 
 namespace eureka2\OAuth\Client;
 
+use eureka2\OAuth\Exception\OAuthClientException;
+
 class OpenIDClient extends OAuth2Client
 	implements OAuthClientInterface, OpenIDClientInterface {
 
@@ -52,7 +54,7 @@ class OpenIDClient extends OAuth2Client
 	/**
 	 * @inheritdoc
 	 */
-	public function introspectToken($token, $tokenTypeHint = '') {
+	public function introspectToken(string $token, ?string $tokenTypeHint = '') {
 		$endpoint = $this->provider->getIntrospectionEndpoint();
 		if (empty($endpoint)) {
 			return false;
