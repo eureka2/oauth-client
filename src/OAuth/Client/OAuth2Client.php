@@ -10,7 +10,11 @@ class OAuth2Client extends AbstractOAuthClient implements OAuthClientInterface {
 
 	protected function verifyClaims($jwt) {
 		$claims = JWT::decode($jwt, 1);
-		if ($claims->aud != $this->provider->getClientId()) {
+		if (is_array($claims->aud)) {
+			if (!in_array($this->provider->getClientId(), $claims->aud)) {
+				return false;
+			}
+		} else if ($claims->aud != $this->provider->getClientId()) {
 			return false;
 		}
 		if (property_exists($claims, 'azp') && $claims->azp != $this->provider->getClientId()) {
@@ -24,6 +28,15 @@ class OAuth2Client extends AbstractOAuthClient implements OAuthClientInterface {
 		}
 		if (property_exists($claims, 'nbf') && $claims->nbf > time() + 300) {
 			return false;
+		}
+		if (property_exists($claims, 'at_hash') && !empty($this->accessToken)) {
+			$header = JWT::decode($this->accessToken);
+			$bit = isset($header->alg) && $header->alg != 'none' ? substr($header->alg, 2, 3) : '256';
+			$atHash = substr(hash('sha'.$bit, $this->accessToken, true), 0, ((int)$bit)/16);
+			$atHash = strtr(rtrim(base64_encode($atHash), '='), '+/', '-_');
+			if ($claims->at_hash != $atHash) {
+				return false;
+			}
 		}
 		return $claims;
 	}

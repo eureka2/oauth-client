@@ -1,6 +1,8 @@
 # oauth-client
 OAuth client
 
+**ATTENTION**: the developments are not finished, do not use
+
 # Usage
 
 ## High-level request to a builtin OAuth provider
@@ -25,7 +27,7 @@ try {
     ]);
     ....
     // Do something with $user
-} catch (Exception $e) {
+} catch (\Exception $e) {
     // Do something with $e
 }
 ```

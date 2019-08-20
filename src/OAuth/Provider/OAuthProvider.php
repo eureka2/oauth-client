@@ -310,11 +310,13 @@ class OAuthProvider {
 	private $realm = '';
 
 	/**
+	 * Constructs a OAuthProvider instance with the registered data of the client
+	 * with the OAuth provider.
 	 *
-	 * @param string $name
-	 * @param string $client_id
-	 * @param string $client_secret
-	 * @param string $redirect_uri
+	 * @param string $name The name of the OAuth provider
+	 * @param string $client_id The identifier of your application registered with the OAuth provider
+	 * @param string $client_secret The secret value assigned to your application
+	 * @param string $redirect_uri The URL of the current script page that is calling this class
 	 *
 	 */
 	public function __construct(string $name, string $client_id = '', string $client_secret = '', string $redirect_uri = '') {

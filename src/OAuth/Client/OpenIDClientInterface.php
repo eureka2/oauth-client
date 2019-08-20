@@ -1,7 +1,12 @@
 <?php declare(strict_types = 1);
 
 namespace eureka2\OAuth\Client;
- 
+
+/**
+ *
+ * This interface completes the OAuthClient interface for the OpenID protocol.
+ *
+ */
 interface OpenIDClientInterface extends OAuthClientInterface{
 
 	/**

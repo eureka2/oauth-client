@@ -4,6 +4,11 @@ namespace eureka2\OAuth\Client;
 
 use eureka2\OAuth\Exception\OAuthClientException;
 
+/**
+ *
+ * This class completes the OAuth2Client class for the OpenID protocol.
+ *
+ */
 class OpenIDClient extends OAuth2Client
 	implements OAuthClientInterface, OpenIDClientInterface {
 

@@ -4,13 +4,34 @@ namespace eureka2\OAuth\Token;
 
 use eureka2\OAuth\Exception\OAuthClientSignatureException;
 
+/**
+ *
+ * This class provides a set of functions related to Json Web Token
+ *
+ * A JSON Web Token (JWT) includes three sections:
+ * 0 - Header
+ * 1 - Payload
+ * 2 - Signature
+ *
+ * They are encoded as Base64url strings, and are separated by dot "." characters.
+ *
+ */
 class JWT {
 
-	public static function decode(string $jwt, int $section = 0, bool $json = true) {
+	/**
+	 * Decodes a section of the JSON Web Token and returns it.
+	 *
+	 * @param string $jwt The string value of the JSON Web Token
+	 * @param int $section the section number to decode (0 to 2)
+	 * @param bool $object true if the decoded section must be returned as an object, false otherwise
+	 *
+	 * @ return object|string
+	 */
+	public static function decode(string $jwt, int $section = 0, bool $object = true) {
 		$parts = explode('.', $jwt);
 		$part = $parts[$section];
 		$decoded = self::safeBase64Decode($part);
-		return $json ? json_decode($decoded) : $decoded;
+		return $object ? json_decode($decoded) : $decoded;
 	}
 
 	private static function safeBase64Decode(string $part) {
