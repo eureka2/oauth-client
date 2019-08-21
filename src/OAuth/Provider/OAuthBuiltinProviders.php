@@ -178,7 +178,8 @@ class OAuthBuiltinProviders {
 			],
 			'endpoints' => [
 				'authorization_endpoint' => 'https://www.sandbox.paypal.com/webapps/auth/protocol/openidconnect/v1/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&state={STATE}&scope={SCOPE}',
-				'token_endpoint' => 'https://api.sandbox.paypal.com/v1/identity/openidconnect/tokenservice'
+				'token_endpoint' => 'https://api.sandbox.paypal.com/v1/identity/openidconnect/tokenservice',
+				'userinfo_endpoint' => 'https://api.sandbox.paypal.com/v1/identity/openidconnect/userinfo?schema=openid'
 			],
 			'strategy' => [
 				'scope' => 'openid profile email address'
@@ -190,7 +191,7 @@ class OAuthBuiltinProviders {
 				// 'version' => '2.0'
 			// ],
 			// 'endpoints' => [
-				// 'authorization_endpoint' => 'https://www.sandbox.paypal.com/signin/authorize?flowEntry=static&client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&state={STATE}&scope={SCOPE}',
+				// 'authorization_endpoint' => 'https://www.sandbox.paypal.com/connect?flowEntry=static&response_type=code&client_id={CLIENT_ID}&scope={SCOPE}&redirect_uri={REDIRECT_URI}&state={STATE}',
 				// 'token_endpoint' => 'https://api.sandbox.paypal.com/v1/oauth2/token',
 				// 'authorization_endpoint' => 'https://api.sandbox.paypal.com/v1/identity/oauth2/userinfo?schema=paypalv1.1'
 			// ],

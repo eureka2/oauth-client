@@ -1,9 +1,45 @@
 # oauth-client
 OAuth client
 
-**ATTENTION**: the developments are not finished, do not use
+**CAUTION**: the developments are not finished, DO NOT USE
+
+# Requirements
+- PHP >=7.1.3
+- symfony/http-client >= 4.3
 
 # Usage
+
+## Low-level requests to a builtin OAuth provider
+ ```php
+use eureka2\OAuth\Client\OAuthClientFactory;
+
+try {
+    $client = OAuthClientFactory::create('Google');
+    $client->setClientId('<YOUR CLIENT ID>');
+    $client->setClientSecret('<YOUR CLIENT SECRET>');
+    $client->setRedirectUri('http://' . $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME']);
+    $user = (object) [];
+    if ($client->initialize([
+        'strategy' => [
+            'offline_access' => true
+        ]
+    ])) {
+        if ($client->authenticate()) {
+            if (!empty($client->getAccessToken())) {
+                $user = $client->getResourceOwner();
+            }
+        }
+        $client->finalize();
+    }
+    if ($client->shouldExit()) {
+        exit;
+    }
+    ....
+    // Do something with $user
+} catch (\Exception $e) {
+    // Do something with $e
+}
+```
 
 ## High-level request to a builtin OAuth provider
  ```php
@@ -37,8 +73,8 @@ try {
 $options = [
   'provider' => [
     'protocol' => [
-      'name' => 'string',     // 'oauth' or 'openid'
-      'version' => 'string'   // '1.0', '1.0a', '2.0' for 'oauth' or '1.0' for 'openid'
+      'name' => 'string',     // 'oauth' or 'openid' (default: 'oauth')
+      'version' => 'string'   // '1.0', '1.0a', '2.0' for 'oauth' or '1.0' for 'openid' (default: '2.0')
     ],
     'endpoints' => [
       'discovery_endpoint' => 'string',
@@ -54,7 +90,19 @@ $options = [
       'jwks_uri' => 'string'
     ],
     'mapping' => [
-      'user_id_field' => 'string'
+      'user_id_field' => 'string', // default: 'sub'
+      'address_field' => 'string',
+      'birthdate_field' => 'string',
+      'email_field' => 'string',
+      'family_name_field' => 'string',
+      'gender_field' => 'string',
+      'given_name_field' => 'string',
+      'locale_field' => 'string',
+      'middle_name_field' => 'string',
+      'name_field' => 'string',
+      'nickname_field' => 'string',
+      'phone_number_field' => 'string',
+      'picture_field' => 'string'
     ],
     'registration' => [
       'keys' => [

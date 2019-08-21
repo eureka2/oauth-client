@@ -4,6 +4,11 @@ namespace eureka2\OAuth\Provider;
 
 use eureka2\OAuth\Exception\OAuthClientException;
 
+/**
+ * This class, which represents an OAuth provider,
+ * stores the configuration parameters related to this provider.
+ *
+ */
 class OAuthProvider {
 
 	/**
@@ -14,15 +19,17 @@ class OAuthProvider {
 
 	/**
 	 * @var string $protocol
+	 * The OAuth-based protocol, either 'oauth' or 'openid'
+	 * supported by this provider.
 	 *
 	 */
 	private $protocol = 'oauth';
 
 	/**
 	 * @var string $version
-	 * Version of the protocol version supported by the OAuth provider.
+	 * Version of the protocol supported by the OAuth provider.
 	 * Supported versions are '1.0', '1.0a', '2.0' for the 'oauth' protocol
-	 * and '1.0' for the openid protocol.
+	 * and '1.0' for the 'openid' protocol.
 	 *
 	 */
 	private $version = '2.0';
@@ -30,6 +37,7 @@ class OAuthProvider {
 	/**
 	 * @var string $client_id
 	 * Identifier of your application registered with the OAuth provider.
+	 *
 	 * Set this variable to the application identifier that is
 	 * provided by the OAuth provider when you register the application.
 	 *
@@ -39,6 +47,7 @@ class OAuthProvider {
 	/**
 	 * @var string $client_secret
 	 * Secret value assigned to your application when it is registered with the OAuth provider.
+	 *
 	 * Set this variable to the application secret that is provided
 	 * by the OAuth server when you register the application.
 	 *
@@ -48,30 +57,38 @@ class OAuthProvider {
 	/**
 	 * @var string $redirect_uri
 	 * URL of the current script page that is calling this class.
+	 *
 	 * Set this variable to the current script page URL
 	 * before proceeding the the OAuth authorization process.
 	 * This url must be registered with the identity provider.
 	 * For pin based authorization, set this variable to 'oob'.
+	 *
 	 */
 	private $redirect_uri = '';
 
 	/**
 	 * @var string $discovery_endpoint
+	 * The discovery endpoint is the URL that returns a JSON list of
+	 * the OpenID/OAuth endpoints, supported scopes and claims, 
+	 * public keys used to sign the tokens, and other details. 
 	 *
 	 */
 	private $discovery_endpoint = '';
 
 	/**
-	 *
 	 * 	@var string $authorization_endpoint
-	 * 	URL of the OAuth server to redirect the browser so the user
+	 * 	URL of the OAuth provider to redirect the browser so the user
 	 * 	can grant access to your application.
+	 *
 	 * 	Set this variable to the OAuth request token URL when you are
 	 * 	not accessing one of the built-in supported OAuth servers.
+	 *
 	 * 	For OAuth 1.0a servers that return the login dialog URL
 	 * 	automatically, set this variable to 'automatic'
+	 *
 	 * 	For OAuth 1.0a servers that support 2 legged authentication set
 	 * 	this variable to '2legged'
+	 *
 	 * 	For certain servers, the dialog URL can have certain marks that
 	 * 	will act as template placeholders which will be replaced with
 	 * 	values defined before redirecting the users browser. Currently it
@@ -129,7 +146,6 @@ class OAuthProvider {
 	private $revocation_endpoint = '';
 
 	/**
-	 *
 	 * 	@var string $request_token_endpoint
 	 * 	URL of the OAuth server to request the initial token for OAuth 1.0 and 1.0a servers.
 	 *
@@ -174,9 +190,9 @@ class OAuthProvider {
 	private $pin_dialog_url = '';
 
 	/**
-	 *
 	 * 	@var string $pin
 	 * 	Value of the pin code for pin based authorization.
+	 *
 	 * 	Set this value to the pin informed by the user when
 	 * 	implementing the pin based authorization.
 	 * 	Make sure the  redirect_uri variable
@@ -207,7 +223,7 @@ class OAuthProvider {
 	/**
 	 * @var array $response_types_supported
 	 * Array containing a list of the OAuth 2.0 response_type values that this provider supports.
-	 * Dynamic OpenID Providers MUST support the code, id_token, and the token id_token Response Type values.
+	 * Dynamic OpenID Providers must support the code, id_token, and the token id_token Response Type values.
 	 *
 	 */
 	private $response_types_supported = [];
@@ -254,7 +270,7 @@ class OAuthProvider {
 
 	/**
 	 * @var array $claims_supported
-	 * Array containing a list of the Claim Names of the Claims that the OpenID Provider
+	 * Array containing a list of the Claim names of the Claims that the OpenID Provider
 	 * may be able to supply values for.
 	 * Note that for privacy or other reasons, this might not be an exhaustive list.
 	 *
@@ -262,18 +278,20 @@ class OAuthProvider {
 	private $claims_supported = [];
 
 	/**
-	 * @var string $user_id_field
-	 * The name of the field in the ID token returned by the provider 
-	 * that represents the user's invariant identifier.
-	 * This field can be used for the account linking.
+	 * @var string $mapping
+	 * Match between OAuth client fields and
+	 * fields returned by the provider's UserInfo endpoint.
+	 * By default, contains the mapping of user_id_field
+	 * which can be used for the account linking.
 	 *
 	 */
-	private $user_id_field = 'sub';
+	private $mapping = [ 'user_id_field' => 'sub' ];
 
 	/**
 	 * @var string $api_key
-	 * Identifier of your API key provided by the OAuth server.
-	 * Set this variable to the API key if the OAuth server requires one.
+	 * Identifier of your API key provided by the OAuth provider.
+	 *
+	 * Set this variable to the API key if the OAuth provider requires one.
 	 *
 	 */
 	private $api_key = '';
@@ -326,122 +344,281 @@ class OAuthProvider {
 		$this->redirect_uri = $redirect_uri;
 	}
 
+	/**
+	 * Returns the name of the provider
+	 *
+	 * @return string
+	 */
 	public function getName() : string {
 		return $this->name;
 	}
 
+	/**
+	 * Returns the OAuth-based protocol, either 'oauth' or 'openid'
+	 *
+	 * @return string
+	 */
 	public function getProtocol() : string {
 		return $this->protocol;
 	}
 
+	/**
+	 * Returns the version of the protocol supported by the OAuth provider
+	 *
+	 * @return string
+	 */
 	public function getVersion() : string {
 		return $this->version;
 	}
 
+	/**
+	 * Returns the identifier of your application registered with the OAuth provider.
+	 *
+	 * @return string
+	 */
 	public function getClientId() : string {
 		return $this->client_id;
 	}
 
+	/**
+	 * Returns the secret value assigned to your application.
+	 *
+	 * @return string
+	 */
 	public function getClientSecret() : string {
 		return $this->client_secret;
 	}
 
+	/**
+	 * Returns the URL of the current script page that is calling this class
+	 *
+	 * @return string
+	 */
 	public function getRedirectUri() : string {
 		return $this->redirect_uri;
 	}
 
+	/**
+	 * Returns the discovery endpoint.
+	 *
+	 * @return string
+	 */
 	public function getDiscoveryEndpoint() : string {
 		return $this->discovery_endpoint;
 	}
 
+	/**
+	 * Returns the authorization endpoint.
+	 *
+	 * @return string
+	 */
 	public function getAuthorizationEndpoint() : string {
 		return $this->authorization_endpoint;
 	}
 
+	/**
+	 * Returns the token endpoint
+	 *
+	 * @return string
+	 */
 	public function getTokenEndpoint() : string {
 		return $this->token_endpoint;
 	}
 
+	/**
+	 * Returns the client dynamic registration endpoint
+	 *
+	 * @return string
+	 */
 	public function getRegistrationEndpoint() : string {
 		return $this->registration_endpoint;
 	}
 
+	/**
+	 * Returns the introspection endpoint
+	 *
+	 * @return string
+	 */
 	public function getIntrospectionEndpoint() : string {
 		return $this->introspection_endpoint;
 	}
 
+	/**
+	 * Returns the revocation endpoint
+	 *
+	 * @return string
+	 */
 	public function getRevocationEndpoint() : string {
 		return $this->revocation_endpoint;
 	}
 
+	/**
+	 * Returns the request token endpoint
+	 *
+	 * @return string
+	 */
 	public function getRequestTokenEndpoint() : string {
 		return $this->request_token_endpoint;
 	}
 
+	/**
+	 * Returns the UserInfo endpoint
+	 *
+	 * @return string
+	 */
 	public function getUserinfoEndpoint() : string {
 		return $this->userinfo_endpoint;
 	}
 
+	/**
+	 * Returns the end session endpoint
+	 *
+	 * @return string
+	 */
 	public function getEndSessionEndpoint() : string {
 		return $this->end_session_endpoint;
 	}
 
+	/**
+	 * Returns the pin dialog url
+	 *
+	 * @return string
+	 */
 	public function getPinDialogUrl() : string {
 		return $this->pin_dialog_url;
 	}
 
+	/**
+	 * Returns the value of the pin code
+	 *
+	 * @return string
+	 */
 	public function getPin() : string {
 		return $this->pin;
 	}
 
+	/**
+	 * Returns the Jwks URI
+	 *
+	 * @return string
+	 */
 	public function getJwksUri() : string {
 		return $this->jwks_uri;
 	}
 
+	/**
+	 * Returns the scope values supported by the OAuth provider.
+	 *
+	 * @return array
+	 */
 	public function getScopesSupported() : array {
 		return $this->scopes_supported;
 	}
 
+	/**
+	 * Returns the response_type values supported by the OAuth provider.
+	 *
+	 * @return array
+	 */
 	public function getResponseTypesSupported() : array {
 		return $this->response_types_supported;
 	}
 
+	/**
+	 * Returns the response_mode values supported by the OAuth provider.
+	 *
+	 * @return array
+	 */
 	public function getResponseModesSupported() : array {
 		return $this->response_modes_supported;
 	}
 
+	/**
+	 * Returns the authentication methods supported by the OAuth provider.
+	 *
+	 * @return array
+	 */
 	public function getTokenEndpointAuthMethodsSupported() : array {
 		return $this->token_endpoint_auth_methods_supported;
 	}
 
+	/**
+	 * Returns the subject identifier types supported by the OAuth provider.
+	 *
+	 * @return array
+	 */
 	public function getSubjectTypesSupported() : array {
 		return $this->subject_types_supported;
 	}
 
+	/**
+	 * Returns the list of JWS signing algorithms supported by the OAuth provider.
+	 *
+	 * @return array
+	 */
 	public function getIdTokenSigningAlgValuesSupported() : array {
 		return $this->id_token_signing_alg_values_supported;
 	}
 
+	/**
+	 * Returns the claims supported by the OAuth provider.
+	 *
+	 * @return array
+	 */
 	public function getClaimsSupported() : array {
 		return $this->claims_supported;
 	}
 
+	/**
+	 * Returns the field of the user info corresponding to the user identifier.
+	 *
+	 * @return array
+	 */
 	public function getUserIdField() : string {
-		return $this->user_id_field;
+		return $this->mapping['user_id_field'] ?? '';
 	}
 
+	/**
+	 * Returns the fields mapping between the OAuth client and the OAuth provider.
+	 *
+	 * @return array
+	 */
+	public function getMapping() : array {
+		return $this->mapping;
+	}
+
+	/**
+	 * Returns the identifier of the API key provided by the OAuth provider.
+	 *
+	 * @return array
+	 */
 	public function getApiKey() : string {
 		return $this->api_key;
 	}
 
+	/**
+	 * Returns the OAuth user name to use with password authorization
+	 *
+	 * @return array
+	 */
 	public function getOauthUsername() : string {
 		return $this->oauth_username;
 	}
 
+	/**
+	 * Returns the OAuth password to use with password authorization
+	 *
+	 * @return array
+	 */
 	public function getOauthPassword() : string {
 		return $this->oauth_password;
 	}
 
+	/**
+	 * Returns the realm of authorization for OpenID Connect
+	 *
+	 * @return array
+	 */
 	public function getRealm() : string {
 		return $this->realm;
 	}
@@ -567,7 +744,12 @@ class OAuthProvider {
 	}
 
 	public function setUserIdField(string $user_id_field) {
-		$this->user_id_field = $user_id_field;
+		$this->mapping['user_id_field'] = $user_id_field;
+		return $this;
+	}
+
+	public function setMapping(array $mapping) {
+		$this->mapping = $mapping;
 		return $this;
 	}
 
@@ -613,7 +795,7 @@ class OAuthProvider {
 			'subject_types_supported' => 'array',
 			'id_token_signing_alg_values_supported' => 'array',
 			'claims_supported' => 'array',
-			'user_id_field' => 'string'
+			'mapping' => 'array'
 		];
 		$required = [
 			'protocol' => '',

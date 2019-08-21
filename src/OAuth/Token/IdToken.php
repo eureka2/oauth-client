@@ -177,7 +177,7 @@ class IdToken {
 	/**
 	 * Returns the value of specified claim
 	 *
-	 * @param string the name of the claim
+	 * @param string $claim the name of the claim
 	 * @return string|array the value of the claim
 	 */
 	public function getClaim(string $claim) {

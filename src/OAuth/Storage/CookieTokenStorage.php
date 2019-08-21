@@ -4,6 +4,18 @@ namespace eureka2\OAuth\Storage;
 
 use eureka2\OAuth\Exception\OAuthClientException;
 
+/**
+ *
+ * This class uses encrypted cookies
+ * to store the OAuth session variables. 
+ *
+ * This class is instantiated if the 'storage' option is set as follows:
+ * 'storage' => [
+ *    'type' => 'cookie',
+ *    'key' => '< A KEY STRING FOR ENCRYPTION >'
+ * ]
+ *
+ */
 class CookieTokenStorage
 	extends AbstractTokenStorage
 	implements TokenStorageInterface, TokenStorageManagementInterface {

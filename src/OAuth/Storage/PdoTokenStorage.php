@@ -5,6 +5,18 @@ namespace eureka2\OAuth\Storage;
 use eureka2\OAuth\Token\AccessToken;
 use eureka2\OAuth\Exception\OAuthClientException;
 
+/**
+ *
+ * This class uses a PDO database (MySQL, PostGreSQL or SQLite)
+ * to store the OAuth session variables. 
+ *
+ * This class is instantiated if the 'storage' option is set as follows:
+ * 'storage' => [
+ *    'type' => 'pdo',
+ *    'dsn' => '< THE DATABASE DSN>'
+ * ]
+ *
+ */
 class PdoTokenStorage
 	extends AbstractTokenStorage 
 	implements TokenStorageInterface, TokenStorageManagementInterface {
@@ -71,6 +83,9 @@ class PdoTokenStorage
 
 	private $pdo = null;
 
+	/**
+	 * @inheritdoc
+	 */
 	public function createOAuthSession(&$session) {
 		$session = null;
 		$this->initializeOAuthSession($session);
@@ -88,6 +103,9 @@ class PdoTokenStorage
 		return true;
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function getOAuthSession($sessionId, $provider, &$oauthSession) {
 		$parameters = [
 			$sessionId, \PDO::PARAM_STR,
@@ -104,6 +122,9 @@ class PdoTokenStorage
 		return true;
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function saveOAuthSession($session) {
 		$token = $session->getAccessToken();
 		$parameters = [
@@ -127,6 +148,9 @@ class PdoTokenStorage
 		return $this->query('UPDATE oauth_session SET session=?, state=?, nonce=?, access_token=?, access_token_secret=?, expiry=?, authorized=?, type=?, provider=?, creation=?, refresh_token=?, scope=?, id_token=?, access_token_response=?, user=? WHERE id=?', $parameters, $results);
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function resetAccessToken() {
 		$provider = $this->client->getProvider()->getName();
 		$this->client->trace('Resetting the access token status for OAuth provider ' . $provider);

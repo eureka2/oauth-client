@@ -4,10 +4,24 @@ namespace eureka2\OAuth\Storage;
 
 use eureka2\OAuth\Exception\OAuthClientPHPException;
 
+/**
+ *
+ * This class uses the superglobal $_SESSION
+ * to store the OAuth session variables. 
+ *
+ * This class is instantiated if the 'storage' option is set as follows:
+ * 'storage' => [
+ *    'type' => 'session'
+ * ]
+ *
+ */
 class SessionTokenStorage
 	extends AbstractTokenStorage
 	implements TokenStorageInterface, TokenStorageManagementInterface {
 
+	/**
+	 * @inheritdoc
+	 */
 	public function createOAuthSession(&$session) {
 		$session = null;
 		$this->initializeOAuthSession($session);
@@ -15,6 +29,9 @@ class SessionTokenStorage
 		return $this->saveOAuthSession($session);
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function getOAuthSession($sessionId, $provider, &$oauthSession) {
 		$this->startSession();
 		if (!isset($_SESSION[$provider]) || !isset($_SESSION[$provider]['OAUTH_SESSION'])) {
@@ -28,11 +45,17 @@ class SessionTokenStorage
 		return true;
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function saveOAuthSession($session) {
 		$_SESSION[$session->getProvider()]['OAUTH_SESSION'] = $session;
 		return true;
 	}
 
+	/**
+	 * @inheritdoc
+	 */
 	public function resetAccessToken() {
 		$provider = $this->client->getProvider()->getName();
 		$this->client->trace('Resetting the access token status for OAuth provider ' . $provider);

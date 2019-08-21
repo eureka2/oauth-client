@@ -2,6 +2,17 @@
 
 namespace eureka2\OAuth\Storage;
 
+/**
+ *
+ * This class uses the PHP APC User Cache (APCu) 
+ * to store the OAuth session variables. 
+ *
+ * This class is instantiated if the 'storage' option is set as follows:
+ * 'storage' => [
+ *    'type' => 'apcu'
+ * ]
+ *
+ */
 class ApcuTokenStorage
 	extends AbstractTokenStorage
 	implements TokenStorageInterface, TokenStorageManagementInterface {

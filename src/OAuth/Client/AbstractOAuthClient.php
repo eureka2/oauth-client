@@ -952,7 +952,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 		$configuration = [];
 		$builtin = OAuthBuiltinProviders::PROVIDERS[$this->provider->getName()] ?? [];
 		if (isset($builtin['endpoints']) && isset($builtin['endpoints']['discovery_endpoint'])) {
-			$configuration = array_merge($configuration, $this->discover($builtin['endpoints']['discovery_endpoint']));
+			$configuration = $this->deepMerge($configuration, $this->discover($builtin['endpoints']['discovery_endpoint']));
 		}
 		if (isset($builtin['protocol'])) {
 			$configuration = array_merge($configuration, [
@@ -964,10 +964,10 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 			$configuration = array_merge($configuration, $builtin['endpoints']);
 		}
 		if (isset($builtin['mapping'])) {
-			$configuration = array_merge($configuration, $builtin['mapping']);
+			$configuration['mapping'] = $this->deepMerge($configuration['mapping'] ?? [], $builtin['mapping']);
 		}
 		if (isset($options['provider']) && isset($options['provider']['endpoints']) && isset($options['provider']['endpoints']['discovery_endpoint'])) {
-			$configuration = array_merge($configuration, $this->discover($options['provider']['endpoints']['discovery_endpoint']));
+			$configuration = $this->deepMerge($configuration, $this->discover($options['provider']['endpoints']['discovery_endpoint']));
 		}
 		if (isset($options['provider']) && isset($options['provider']['protocol'])) {
 			$configuration = array_merge($configuration, [
@@ -979,7 +979,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 			$configuration = array_merge($configuration, $options['provider']['endpoints']);
 		}
 		if (isset($options['provider']) && isset($options['provider']['mapping'])) {
-			$configuration = array_merge($configuration, $options['provider']['mapping']);
+			$configuration['mapping'] = $this->deepMerge($configuration['mapping'] ?? [], $options['provider']['mapping']);
 		}
 		$this->provider->bind($configuration);
 		$this->initializeRegitrationOptions($options);
@@ -990,6 +990,28 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 		$this->strategy->bind($strategy);
 		$this->storage->initialize();
 		return true;
+	}
+
+	/**
+	* array_merge_recursive does indeed merge arrays, but it converts values with duplicate
+	* keys to arrays rather than overwriting the value in the first array with the duplicate
+	* value in the second array, as array_merge does. I.e., with array_merge_recursive,
+	* this happens
+	*
+	* @param array $arr1
+	* @param array $arr2
+	* @return array
+	*/
+	private function deepMerge (array $arr1, array $arr2) {
+		$merged = $arr1;
+		foreach ( $arr2 as $key => &$value ) {
+			if ( is_array ( $value ) && isset ( $merged [$key] ) && is_array ( $merged [$key] ) ) {
+				$merged [$key] = $this->deepMerge ( $merged [$key], $value );
+			} else {
+				$merged [$key] = $value;
+			}
+		}
+		return $merged;
 	}
 
 	protected function initializeRegitrationOptions($options) {
