@@ -7,52 +7,52 @@ use eureka2\OAuth\Exception\OAuthClientException;
 interface OAuthClientInterface {
 
 	/**
-	 * 	Initialize the class variables and internal state. It must
-	 * 	be called before calling other class functions.
+	 * Initialize the class variables and internal state. It must
+	 * be called before calling other class functions.
 	 *
-	 * 	Set the provider variable before
-	 * 	calling this function to let it initialize the class variables to
-	 * 	work with the specified provider. Alternatively, you can set
-	 * 	other class variables manually to make it work with providers that
-	 * 	are not yet built-in supported.
+	 * Set the provider variable before
+	 * calling this function to let it initialize the class variables to
+	 * work with the specified provider. Alternatively, you can set
+	 * other class variables manually to make it work with providers that
+	 * are not yet built-in supported.
 	 *
-	 * 	@options array $options class variables to work with the specified provider.
+	 * @param array $options class variables to work with the specified provider.
 	 *
-	 * 	@return bool This function returns true if it was able to successfully initialize the class for the specified server type.
+	 * @return bool This function returns true if it was able to successfully initialize the class for the specified server type.
 	 *
 	 */
 	public function initialize($options = []);
 
 	/**
-	 * 	Process the OAuth protocol interaction with the OAuth provider.
+	 * Process the OAuth protocol interaction with the OAuth provider.
 	 *
-	 * 	Call this function when you need to retrieve the OAuth access token.
-	 * 	Check the access_token to determine if the access token was obtained successfully.
+	 * Call this function when you need to retrieve the OAuth access token.
+	 * Check the access_token to determine if the access token was obtained successfully.
 	 *
-	 * 	@return bool This function returns true if the OAuth protocol was processed without errors.
+	 * @return bool This function returns true if the OAuth protocol was processed without errors.
 	 *
 	 */
 	public function authenticate();
 
 	/**
-	 * 	Send a HTTP request to the Web services API using a
-	 * 	previously obtained access token via OAuth.
+	 * Send a HTTP request to the Web services API using a
+	 * previously obtained access token via OAuth.
 	 *
-	 * 	This function can be used to call an API after having
-	 * 	previously obtained an access token through the OAuth protocol
-	 * 	using the authenticate function, or by directly setting the variables
-	 * 	access_token, as well as access_token_secret in case of using OAuth 1.0 or 1.0a services.
-	 * 	The response_status variable returns the HTTP response status of the request.
-	 * 	The responseHeaders variable returns the HTTP response headers.
-	* 	The responseBody variable returns the HTTP response body.
+	 * This function can be used to call an API after having
+	 * previously obtained an access token through the OAuth protocol
+	 * using the authenticate function, or by directly setting the variables
+	 * access_token, as well as access_token_secret in case of using OAuth 1.0 or 1.0a services.
+	 * The response_status variable returns the HTTP response status of the request.
+	 * The responseHeaders variable returns the HTTP response headers.
+	 * The responseBody variable returns the HTTP response body.
 	 *
-	 * 	@param string $url URL of the API where the HTTP request will be sent.
+	 * @param string $url URL of the API where the HTTP request will be sent.
 	 *
-	 * 	@param string $method HTTP method that will be used to send the request. It can be 'GET', 'POST', 'DELETE', 'PUT', etc..
+	 * @param string $method HTTP method that will be used to send the request. It can be 'GET', 'POST', 'DELETE', 'PUT', etc..
 	 *
-	 * 	@param array $parameters Associative array with the names and values of the API call request parameters.
+	 * @param array $parameters Associative array with the names and values of the API call request parameters.
 	 *
-	 * 	@param array $options Associative array with additional options to configure the request.
+	 * @param array $options Associative array with additional options to configure the request.
 	 * 	    Currently it supports the following options:
 	 * 	        '2legged'                : boolean option that determines if the API request should be 2 legged. The default value is false.
 	 * 	        'accept'                 : content type value of the Accept HTTP header to be sent in the API call HTTP request.
@@ -94,112 +94,115 @@ interface OAuthClientInterface {
 	 * 	                                   The default value for this option is to use what the server returned in the Content-Type header.
 	 *
 	 *
-	 * 	@return mixed Return the value of the API response. If the value is
-	 * 	JSON encoded, this function will decode it and return the value
-	 * 	converted to respective types. If the value is form encoded,
-	 * 	this function will decode the response and return it as an
-	 * 	array. Otherwise, the class will return the value as a string.
-	 * 	This function returns false if the call was not done successfully.
+	 * @return mixed Return the value of the API response. If the value is
+	 * JSON encoded, this function will decode it and return the value
+	 * converted to respective types. If the value is form encoded,
+	 * this function will decode the response and return it as an
+	 * array. Otherwise, the class will return the value as a string.
+	 * This function returns false if the call was not done successfully.
 	 *
 	 */
 	public function callAPI($url, $method, $parameters, $options);
 
 	/**
-	 * 	Returns the information about the resource owner using a
-	 * 	previously obtained access token via OAuth.
+	 * Returns the information about the resource owner using a
+	 * previously obtained access token via OAuth.
 	 *
-	 * 	This function must be called after having
-	 * 	previously obtained an access token through the OAuth protocol
-	 * 	using the authenticate function, or by directly setting the variables
-	 * 	access_token, as well as access_token_secret in case of using OAuth 1.0 or 1.0a services.
+	 * This function must be called after having
+	 * previously obtained an access token through the OAuth protocol
+	 * using the authenticate function, or by directly setting the variables
+	 * access_token, as well as access_token_secret in case of using OAuth 1.0 or 1.0a services.
 	 *
-	 * 	@param string $endpoint URL of the user info endpoint.
-	 * 	@return \eureka2\OAuth\Response\ResourceOwner The resource owner
+	 * @param string $endpoint URL of the user info endpoint.
+	 *
+	 * @return \eureka2\OAuth\Response\ResourceOwner The resource owner
 	 */
 	public function getResourceOwner($endpoint = null);
 
 	/**
-	 * 	Returns the information about the resource owner.
+	 * Returns the information about the resource owner.
 	 *
-	 *	This function is a high-level function
-	 *	that perform all the necessary actions (initalization, authentication, ...)
-	 * 	before requesting the information about the resource owner.
+	 * This function is a high-level function
+	 * that perform all the necessary actions (initalization, authentication, ...)
+	 * before requesting the information about the resource owner.
 	 *
-	 * 	@param array $options array of parameters.
-	 * 	@return \eureka2\OAuth\Response\ResourceOwner The resource owner
+	 * @param array $options array of parameters.
+	 *
+	 * @return \eureka2\OAuth\Response\ResourceOwner The resource owner
 	 */
 	public function fetchResourceOwner($options);
 
 	/**
-	 * 	Cleanup any resources that may have been used during the
-	 * 	OAuth protocol processing or execution of API calls.
+	 * Cleanup any resources that may have been used during the
+	 * OAuth protocol processing or execution of API calls.
 	 *
-	 * 	Always call this function as the last step after calling the
-	 * 	functions process or callAPI.
+	 * Always call this function as the last step after calling the
+	 * functions process or callAPI.
 	 */
 	public function finalize();
 
 	/**
-	 * 	Check if the access token was retrieved and if it is valid.
+	 * Check if the access token was retrieved and if it is valid.
 	 *
-	 * 	Call this function when you need to check of an access token
-	 * 	is valid without forcing to redirect the user to the OAuth provider
-	 * 	authorization page.
+	 * Call this function when you need to check of an access token
+	 * is valid without forcing to redirect the user to the OAuth provider
+	 * authorization page.
 	 *
-	 * 	If a previously retrieved access token has expired, this function
-	 * 	may renew it automatically.
+	 * If a previously retrieved access token has expired, this function
+	 * may renew it automatically.
 	 *
-	 * 	@param string $redirectUrl
+	 * @param string $redirectUrl
 	 *
-	 * 	@return string|bool  the URL of the OAuth provider authorization to
-	 * 	redirect the user if the access token was not yet retrieved or is not valid.
-	 * 	This function returns true if the OAuth protocol was checked without errors.
+	 * @return string|bool  the URL of the OAuth provider authorization to
+	 * redirect the user if the access token was not yet retrieved or is not valid.
+	 * This function returns true if the OAuth protocol was checked without errors.
 	 *
 	 */
 	public function checkAccessToken(&$redirectUrl);
 
 	/**
-	 * 	Reset the access token to a state back when the user has
-	 * 	not yet authorized the access to the OAuth server API.
+	 * Reset the access token to a state back when the user has
+	 * not yet authorized the access to the OAuth server API.
 	 *
-	 * 	Call this function if for some reason the token to access
-	 * 	the API was revoked and you need to ask the user to authorize
-	 * 	the access again.
+	 * Call this function if for some reason the token to access
+	 * the API was revoked and you need to ask the user to authorize
+	 * the access again.
 	 *
-	 * 	By default the class stores and retrieves access tokens in a
-	 * 	session variable named 'OAUTH_ACCESS_TOKEN'.
+	 * By default the class stores and retrieves access tokens in a
+	 * session variable named 'OAUTH_ACCESS_TOKEN'.
 	 *
-	 * 	This function must be called when the user is accessing your site
-	 * 	pages, so it can reset the information stored in session variables
-	 * 	that cache the state of a previously retrieved access token.
+	 * This function must be called when the user is accessing your site
+	 * pages, so it can reset the information stored in session variables
+	 * that cache the state of a previously retrieved access token.
 	 *
-	 * 	Actual implementations should create a sub-class and override this
-	 * 	function to reset the access token state when it is stored in
-	 * 	other types of containers, like for instance databases.
+	 * Actual implementations should create a sub-class and override this
+	 * function to reset the access token state when it is stored in
+	 * other types of containers, like for instance databases.
 	 *
-	 * 	@return bool This function should return true if the access token was resetted successfully.
+	 * @return bool This function should return true if the access token was resetted successfully.
 	 *
 	 */
 	public function resetAccessToken();
 
 	/**
-	 * 	Revoke a previously obtained token so it becomes invalid.
+	 * Revoke a previously obtained token so it becomes invalid.
 	 *
-	 * 	Call this function when you need to invalidate a token that
-	 * 	you no longer need to use, so it is not used by any other
-	 * 	application.
+	 * Call this function when you need to invalidate a token that
+	 * you no longer need to use, so it is not used by any other
+	 * application.
 	 *
-	 * 	@param string $tokenTypeHint the type of token to be revoked if it is not an access token.
-	 * 	@return bool This function returns true if the OAuth protocol was revoked without errors.
+	 * @param string $tokenTypeHint the type of token to be revoked if it is not an access token.
+	 *
+	 * @return bool This function returns true if the OAuth protocol was revoked without errors.
 	 */
 	public function revokeToken($tokenTypeHint = 'access_token');
 
 
 	/**
-	 * 	Determines whether the logOut function can be called.
+	 * Determines whether the logOut function can be called.
 	 *
-	 * 	@return bool returns true if OAuth provider has a end-session endpoint
-	 * 	and there is a valid access token.
+	 * @return bool returns true if OAuth provider has a end-session endpoint
+	 * and there is a valid access token.
 	 */
 	public function canLogOut();
 
@@ -217,43 +220,49 @@ interface OAuthClientInterface {
 
 	/**
 	 *
-	 * 	Determine if the current script should be exited.
-	 * 	Call this function after calling the
-	 * 	authenticate function and exit your script
-	 * 	immediately if this function returns true.
+	 * Determine if the current script should be exited.
 	 *
+	 * Call this function after calling the
+	 * authenticate function and exit your script
+	 * immediately if this function returns true.
+	 *
+	 * @return bool
 	 */
 	public function shouldExit();
 
 	/**
 	 *
-	 * 	Returns the obtained access token upon
-	 * 	successful OAuth authentication.
+	 * Returns the obtained access token upon
+	 * successful OAuth authentication.
 	 *
+	 * @return string
 	 */
 	public function getAccessToken();
 
 	/**
 	 *
-	 * 	Returns the obtained refresh token upon
-	 * 	successful OAuth authentication.
+	 * Returns the obtained refresh token upon
+	 * successful OAuth authentication.
 	 *
+	 * @return string
 	 */
 	public function getRefreshToken();
 
 	/**
 	 *
-	 * 	Returns the obtained ID token upon
-	 * 	successful OpenID authentication.
+	 * Returns the obtained ID token upon
+	 * successful OpenID authentication.
 	 *
+	 * @return string
 	 */
 	public function getIdToken();
 
 	/**
 	 *
-	 * 	Returns the current instance
-	 * 	of the OAuthProvider class.
+	 * Returns the current instance
+	 * of the OAuthProvider class.
 	 *
+	 * @return \eureka2\OAuth\Provider\OAuthProvider
 	 */
 	public function getProvider();
 

@@ -2,6 +2,13 @@
 
 namespace eureka2\OAuth\Token;
 
+/**
+ * This class represents an ID Token.
+ * The ID Token, a JSON Web Token (JWT), contains user profile information 
+ * (including items such as the user's ID, user's name and email) which is represented
+ * in the form of claims. These claims are statements about the user.
+ *
+ */
 class IdToken {
 
 	const CLAIMS = [

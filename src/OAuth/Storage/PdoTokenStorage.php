@@ -84,7 +84,7 @@ class PdoTokenStorage
 	private $pdo = null;
 
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function createOAuthSession(&$session) {
 		$session = null;
@@ -104,7 +104,7 @@ class PdoTokenStorage
 	}
 
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function getOAuthSession($sessionId, $provider, &$oauthSession) {
 		$parameters = [
@@ -123,7 +123,7 @@ class PdoTokenStorage
 	}
 
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function saveOAuthSession($session) {
 		$token = $session->getAccessToken();
@@ -149,7 +149,7 @@ class PdoTokenStorage
 	}
 
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function resetAccessToken() {
 		$provider = $this->client->getProvider()->getName();

@@ -9,9 +9,10 @@ use eureka2\OAuth\Exception\OAuthClientSignatureException;
  * This class provides a set of functions related to Json Web Token
  *
  * A JSON Web Token (JWT) includes three sections:
- * 0 - Header
- * 1 - Payload
- * 2 - Signature
+ *
+ * - 0: Header
+ * - 1: Payload
+ * - 2: Signature
  *
  * They are encoded as Base64url strings, and are separated by dot "." characters.
  *
@@ -25,7 +26,7 @@ class JWT {
 	 * @param int $section the section number to decode (0 to 2)
 	 * @param bool $object true if the decoded section must be returned as an object, false otherwise
 	 *
-	 * @ return object|string
+	 * @return object|string
 	 */
 	public static function decode(string $jwt, int $section = 0, bool $object = true) {
 		$parts = explode('.', $jwt);
@@ -34,6 +35,13 @@ class JWT {
 		return $object ? json_decode($decoded) : $decoded;
 	}
 
+	/**
+	 * Decodes a string encoded in url-safe base64 and returns it.
+	 *
+	 * @param string $part The encoded string
+	 *
+	 * @return string the decoded string
+	 */
 	private static function safeBase64Decode(string $part) {
 		$padding = strlen($part) % 4;
 		if ($padding > 0) {
@@ -42,6 +50,14 @@ class JWT {
 		return base64_decode(strtr($part, '-_', '+/'));
 	}
 
+
+	/**
+	 * Encodes a length according to ASN.1 encoding rules
+	 *
+	 * @param int $length The length to encode
+	 *
+	 * @return string the encoded length
+	 */
 	private static function encodeASNLength(int $length) {
 		if ($length <= 0x7F) {
 			return chr($length);
@@ -50,7 +66,17 @@ class JWT {
 		return pack('Ca*', 0x80 | strlen($temp), $temp);
 	}
 
-	private static function getKeyForHeader($keys, $header) {
+
+	/**
+	 * Extracts the JSON Web Key (JWK) for RSA signature from a JSON Web Key Set (JWKS) and
+	 * the header of a JSON Web Token
+	 *
+	 * @param object $keys The JSON Web Key Set (JWKS)
+	 * @param object $header The header of a JSON Web Token
+	 *
+	 * @return object The JSON Web Key (JWK) for the RSA algorithm
+	 */
+	private static function extractRSAKey($keys, $header) {
 		foreach ($keys as $key) {
 			if ($key->kty == 'RSA') {
 				if (!isset($header->kid) || $key->kid == $header->kid) {
@@ -67,6 +93,13 @@ class JWT {
 		);
 	}
 
+	/**
+	 * Creates a public key in PEM format from the given key which is extracted from a JSON Web Key Set (JWKS)
+	 *
+	 * @param object $key JSON Web Key (JWK)
+	 *
+	 * @return string The public key
+	 */
 	private static function createPemPublicKey($key) {
 		$modulus = self::safeBase64Decode($key->n);
 		$modulus = pack('Ca*a*', 2, self::encodeASNLength(strlen($modulus)), $modulus);
@@ -94,11 +127,22 @@ class JWT {
 		return $pemPublicKey;
 	}
 
+	/**
+	 * Verifies the signature of a JSON Web Token using an RSA algorithm.
+	 *
+	 * @param object $header The header of the JSON Web Token
+	 * @param object $keys The JSON Web Key Set (JWKS)
+	 * @param string $jwt The JSON Web Token
+	 *
+	 * @return bool true if the signature is valid, false otherwise
+	 *
+	 * @throws OAuthClientSignatureException if an error occurs
+	 */
 	public static function verifyRSASignature($header, $keys, string $jwt) {
 		$encoded = explode('.', $jwt);
 		$data = $encoded[0] . '.' .$encoded[1];
 		$signature = self::decode($jwt, 2, false);
-		$key = self::getKeyForHeader($keys, $header);
+		$key = self::extractRSAKey($keys, $header);
 		$publicKey = self::createPemPublicKey($key);
 		$publicKeyResource = openssl_pkey_get_public($publicKey);
 		$algo = 'sha' . substr($header->alg, 2); 
@@ -118,6 +162,17 @@ class JWT {
 		return (bool) $result;
 	}
 
+	/**
+	 * Verifies the signature of a JSON Web Token using an HMAC algorithm.
+	 *
+	 * @param object $header The header of the JSON Web Token
+	 * @param string $jwt The JSON Web Token
+	 * @param string $key The shared secret key used for generating the HMAC variant
+	 *
+	 * @return bool true if the signature is valid, false otherwise
+	 *
+	 * @throws OAuthClientSignatureException if an error occurs
+	 */
 	public static function verifyHMACsignature($header, string $jwt, string $key) {
 		$algo = 'sha' . substr($header->alg, 2); 
 		$encoded = explode('.', $jwt);

@@ -20,7 +20,7 @@ class SessionTokenStorage
 	implements TokenStorageInterface, TokenStorageManagementInterface {
 
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function createOAuthSession(&$session) {
 		$session = null;
@@ -30,7 +30,7 @@ class SessionTokenStorage
 	}
 
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function getOAuthSession($sessionId, $provider, &$oauthSession) {
 		$this->startSession();
@@ -46,7 +46,7 @@ class SessionTokenStorage
 	}
 
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function saveOAuthSession($session) {
 		$_SESSION[$session->getProvider()]['OAUTH_SESSION'] = $session;
@@ -54,7 +54,7 @@ class SessionTokenStorage
 	}
 
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function resetAccessToken() {
 		$provider = $this->client->getProvider()->getName();

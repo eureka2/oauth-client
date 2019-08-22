@@ -81,22 +81,22 @@ abstract class AbstractTokenStorage
 	}
 
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	abstract public function createOAuthSession(&$session);
 
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	abstract public function getOAuthSession($session, $provider, &$oauthSession);
 
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	abstract public function saveOAuthSession($session);
 
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function storeAccessToken($accessToken) {
 		$session = null;
@@ -108,7 +108,7 @@ abstract class AbstractTokenStorage
 	}
 
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function storeUser($user) {
 		$session = null;
@@ -120,7 +120,7 @@ abstract class AbstractTokenStorage
 	}
 
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function getStoredAccessToken() {
 		$session = null;
@@ -133,7 +133,7 @@ abstract class AbstractTokenStorage
 	}
 
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function getStoredState() {
 		$session = null;
@@ -144,7 +144,7 @@ abstract class AbstractTokenStorage
 	}
 
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function getStoredNonce() {
 		$session = null;
@@ -155,7 +155,7 @@ abstract class AbstractTokenStorage
 	}
 
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function getStoredUser() {
 		$session = null;
@@ -166,13 +166,13 @@ abstract class AbstractTokenStorage
 	}
 
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function initialize() {
 	}
 
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function finalize() {
 	}

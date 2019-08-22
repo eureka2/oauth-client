@@ -10,176 +10,187 @@ use eureka2\OAuth\Provider\{OAuthProvider, OAuthBuiltinProviders};
 use eureka2\OAuth\Storage\TokenStorageFactory;
 
 /**
- *
  * Base class for all Oauth clients :
+ * ----------------------------------
  *
- * 	1)	Implement the OAuth protocol to retrieve a token from a server to
- * 		authorize the access to an API on behalf of the current user.
+ * 1. Implement the OAuth protocol to retrieve a token from a server to
+ *    authorize the access to an API on behalf of the current user.
  *
- * 	2)	Perform calls to a Web services API using a token previously
- * 		obtained using this class or a token provided some other way by the
- * 	 	Web services provider.
+ * 2. Perform calls to a Web services API using a token previously
+ *    obtained using this class or a token provided some other way by the
+ *    Web services provider.
  *
- * 	 	Regardless of your purposes, you always need to start calling
- * 	 	the class initialize function after initializing setup variables.
- * 		After you are done with the class,
- * 	 	always call the finalize function at the end.
+ * Regardless of your purposes, you always need to start calling
+ * the class initialize function after initializing setup variables.
+ * After you are done with the class, always call the finalize function at the end.
  *
- * 	 	This class supports either OAuth protocol versions 1.0, 1.0a, 2.0 and OpenID.
- * 		It abstracts the differences between these protocol versions,
- * 		so the class usage is the same independently of the OAuth version of the server.
+ * This class supports either OAuth protocol versions 1.0, 1.0a, 2.0 and OpenID.
+ * It abstracts the differences between these protocol versions,
+ * so the class usage is the same independently of the OAuth version of the server.
  *
- * 		The OAuthBuiltinProviders class provides built-in support to several popular OAuth providers,
- * 		so you do not have to manually configure all the details to access those providers.
+ * The OAuthBuiltinProviders class provides built-in support to several popular OAuth providers,
+ * so you do not have to manually configure all the details to access those providers.
  *
- * 		If you need to access one provider that is not yet directly
- * 		supported by the OAuthBuiltinProviders class,
- * 		you need to configure it explicitly setting the variables: 
- * 			protocol,
- * 			version,
- * 			url_parameters,
- * 			authorization_header,
- * 			request_token_endpoint,
- * 			authorization_endpoint,
- * 			reauthentication_parameter,
- * 			pin_dialog_url,
- * 			offline_access_parameter,
- * 			append_state_to_redirect_uri,
- * 			token_endpoint.
- * 			scope,
- * 			oauth_username,
- * 			oauth_password,
- * 			grant_type and
- * 			token_endpoint.
+ * If you need to access one provider that is not yet directly
+ * supported by the OAuthBuiltinProviders class,
+ * you need to configure it explicitly setting the variables:
  *
- * 		Before proceeding to the actual OAuth authorization process, you
- * 		need to have registered your application with the OAuth provider.
- * 		The registration provides you values to set the variables
- * 		client_id and client_secret.
- * 		Some servers also provide an additional value to set the api_key variable.
- * 		You also need to set the variable redirect_uri before calling the authenticate function
- * 		to make the class perform the necessary interactions with the OAuth server.
+ * - protocol
+ * - version
+ * - url_parameters
+ * - authorization_header
+ * - request_token_endpoint
+ * - authorization_endpoint
+ * - reauthentication_parameter
+ * - pin_dialog_url
+ * - offline_access_parameter
+ * - append_state_to_redirect_uri
+ * - token_endpoint
+ * - scope
+ * - oauth_username
+ * - oauth_password
+ * - grant_type and
+ * - token_endpoint
  *
- * 		The OAuth protocol involves multiple steps that include redirection
- * 		to the OAuth server. There it asks permission to the current user to
- * 		grant your application access to APIs on his/her behalf.
+ * Before proceeding to the actual OAuth authorization process, you
+ * need to have registered your application with the OAuth provider.
+ * The registration provides you values to set the variables
+ * *client_id* and *client_secret*.
+ * Some servers also provide an additional value to set the *api_key* variable.
+ * You also need to set the variable *redirect_uri* before calling the authenticate function
+ * to make the class perform the necessary interactions with the OAuth server.
  *
- * 		When there is a redirection, the class will set the exit variable,
- * 		then your script should exit immediately without outputting anything.
+ * The OAuth protocol involves multiple steps that include redirection
+ * to the OAuth server. There it asks permission to the current user to
+ * grant your application access to APIs on his/her behalf.
  *
- * 		When the OAuth access token is successfully obtained, the following
- * 		variables are set by the class with the obtained values:
- * 			accessToken,
- * 			accessTokenSecret,
- * 			accessTokenExpiry,
- * 			accessTokenType.
+ * When there is a redirection, the class will set the *exit* variable,
+ * then your script should exit immediately without outputting anything.
  *
- * 		You may want to store these values to use them later when calling the server APIs.
- * 		Once you get the access token, you can call the server APIs using the callAPI function.
- * 		Check the access_token_error variable to determine if there was an error when trying to to call the API.
+ * When the OAuth access token is successfully obtained, the following
+ * variables are set by the class with the obtained values:
  *
- * 		If for some reason the user has revoked the access to your
- * 		application, you need to ask the user to authorize your application again.
- * 		First you may need to call the function resetAccessToken to reset the value of
- * 		the access token that may be cached in session variables.
+ * - accessToken,
+ * - accessTokenSecret,
+ * - accessTokenExpiry,
+ * - accessTokenType.
+ *
+ * You may want to store these values to use them later when calling the server APIs.
+ * Once you get the access token, you can call the server APIs using the *callAPI(...)* function.
+ * Check the *access_token_error* variable to determine if there was an error when trying to to call the API.
+ *
+ * If for some reason the user has revoked the access to your
+ * application, you need to ask the user to authorize your application again.
+ * First you may need to call the function *resetAccessToken()* to reset the value of
+ * the access token that may be cached in session variables.
  *
  */
 abstract class AbstractOAuthClient implements OAuthClientInterface {
-	
+
+	/**
+	 * 	The User-Agent used in HTTP requests
+	 *
+	 * 	@var string $oauthUserAgent
+	 *
+	 */
 	protected $oauthUserAgent = 'OAuth Client (https://www.eureka-soft.fr)';
 
 	/**
-	 *
-	 * 	@var bool $debug
 	 * 	Control whether debug output is enabled
+	 *
 	 * 	Set this variable to true if you
 	 * 	need to check what is going on during calls to the class. When
 	 * 	enabled, the debug output goes either to the variable
-	 * 	@link debug_output and the PHP error log.
+	 * 	debugOutput and the PHP error log.
+	 *
+	 * 	@var bool $debug
 	 *
 	 */
 	protected $debug = false;
 
 	/**
-	 *
-	 * 	@var bool $debugHttp
 	 * 	Control whether the dialog with the remote Web server
 	 * 	should also be logged.
+	 *
 	 * 	Set this variable to true if you
 	 * 	want to inspect the data exchange with the OAuth server.
+	 *
+	 * 	@var bool $debugHttp
 	 *
 	 */
 	protected $debugHttp = false;
 
 	/**
-	 *
-	 * 	@var string $logFileName
 	 * 	Name of the file to store log messages
+	 *
 	 * 	Set this variable to the path of a file to which log messages
 	 * 	will be appended instead of sending to PHP error log when the
-	 * 	@link debug variable is set to true.
+	 * 	debug variable is set to true.
+	 *
+	 * 	@var string $logFileName
 	 *
 	 */
 	protected $logFileName = '';
 
 	/**
-	 *
-	 * 	@var bool $exit
 	 * 	Determine if the current script should be exited.
+	 *
 	 * 	Check this variable after calling the
 	 * 	authenticate function and exit your script
 	 * 	immediately if the variable is set to true.
+	 *
+	 * 	@var bool $exit
 	 *
 	 */
 	protected $exit = false;
 
 	/**
-	 *
-	 * 	@var string $debugOutput
 	 * 	Capture the debug output generated by the class
+	 *
 	 * 	Inspect this variable if you need to see what happened during
 	 * 	the class function calls.
+	 *
+	 * 	@var string $debugOutput
 	 *
 	 */
 	protected $debugOutput = '';
 
 	/**
-	 *
-	 * 	@var string $debugPrefix
 	 * 	Mark the lines of the debug output to identify actions
 	 * 	performed by this class.
+	 *
 	 * 	Change this variable if you prefer the debug output lines to
 	 * 	be prefixed with a different text.
+	 *
+	 * 	@var string $debugPrefix
 	 *
 	 */
 	protected $debugPrefix = 'OAuth client: ';
 
 	/**
-	 *
-	 * 	@var string $accessToken
 	 * 	Access token obtained from the OAuth server
 	 *
 	 * 	Check this variable to get the obtained access token upon
 	 * 	successful OAuth authorization.
 	 *
+	 * 	@var string $accessToken
+	 *
 	 */
 	protected $accessToken = '';
 
 	/**
-	 *
-	 * 	@var string $accessTokenSecret
 	 * 	Access token secret obtained from the OAuth server
 	 *
 	 * 	If the OAuth protocol version is 1.0 or 1.0a, check this
 	 * 	variable to get the obtained access token secret upon successful
 	 * 	OAuth authorization.
 	 *
+	 * 	@var string $accessTokenSecret
+	 *
 	 */
 	protected $accessTokenSecret = '';
 
 	/**
-	 *
-	 * 	@var string $accessTokenExpiry
 	 * 	Timestamp of the expiry of the access token obtained from
 	 * 	the OAuth server.
 	 *
@@ -187,55 +198,55 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	 * 	time upon successful OAuth authorization. If this variable is
 	 * 	empty, that means no expiry time was set.
 	 *
+	 * 	@var string $accessTokenExpiry
+	 *
 	 */
 	protected $accessTokenExpiry = '';
 
 	/**
-	 *
-	 * 	@var string $accessTokenType
 	 * 	Type of access token obtained from the OAuth server.
 	 *
 	 * 	Check this variable to get the obtained access token type
 	 * 	upon successful OAuth authorization.
 	 *
+	 * 	@var string $accessTokenType
+	 *
 	 */
 	protected $accessTokenType = '';
 
 	/**
-	 *
-	 * 	@var array $accessTokenResponse
 	 * 	The original response for the access token request
 	 *
 	 * 	Check this variable if the OAuth server returns custom
 	 * 	parameters in the request to obtain the access token.
 	 *
+	 * 	@var array $accessTokenResponse
+	 *
 	 */
 	protected $accessTokenResponse;
 
 	/**
-	 *
-	 * 	@var string $refreshToken
 	 * 	Refresh token obtained from the OAuth server
 	 *
 	 * 	Check this variable to get the obtained refresh token upon
 	 * 	successful OAuth authorization.
 	 *
+	 * 	@var string $refreshToken
+	 *
 	 */
 	protected $refreshToken = '';
 
 	/**
-	 *
-	 * 	@var object $idToken
 	 * 	The id_token value from OAuth servers compatible with OpenID Connect.
 	 *
 	 * 	Check this variable if the OAuth server returns id_token values.
+	 *
+	 * 	@var object $idToken
 	 *
 	 */
 	protected $idToken = null;
 
 	/**
-	 *
-	 * 	@var integer $responseStatus
 	 * 	HTTP response status returned by the server when calling an  API
 	 *
 	 * 	Check this variable after calling the callAPI function if the API calls and you
@@ -243,33 +254,41 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	 * 	200 means no error. 
 	 * 	0 means the server response was not retrieved.
 	 *
+	 * 	@var integer $responseStatus
+	 *
 	 */
 	protected $responseStatus = 0;
 
 	/**
-	 *
-	 * 	@var array $responseHeaders
 	 * 	HTTP response headers returned by the server when calling an API
 	 *
 	 * 	Check this variable after calling the
 	 * 	callAPI function if the API calls and you
 	 * 	need to process the error depending the response headers.
 	 *
+	 * 	@var array $responseHeaders
+	 *
 	 */
 	protected $responseHeaders = [];
 
 	/**
-	 *
-	 * 	@var string $responseBody
 	 * 	HTTP response body returned by the server when calling an API
 	 *
 	 * 	Check this variable after calling the
 	 * 	callAPI function if the API calls and you
 	 * 	need to process the error depending the response headers.
 	 *
+	 * 	@var string $responseBody
+	 *
 	 */
 	protected $responseBody = '';
 
+	/**
+	 * 	Time of response of the HTTP request
+	 *
+	 * 	@var integer $responseTime
+	 *
+	 */
 	protected $responseTime = 0;
 
 	/**
@@ -293,6 +312,11 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	 */
 	protected $storage = null;
 
+	/**
+	 * Constructs an OAuth client object for the given provider name
+	 *
+	 * @param string $provider The provider name
+	 */
 	public function __construct($provider = "") {
 		$this->strategy = new OAuthClientStrategy();
 		$this->provider = new OAuthProvider($provider);
@@ -307,14 +331,14 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	}
 
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function shouldExit() {
 		return $this->exit;
 	}
 
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function getAccessToken() {
 		return $this->accessToken;
@@ -337,14 +361,14 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	}
 
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function getRefreshToken() {
 		return $this->refreshToken;
 	}
 
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function getIdToken() {
 		return $this->idToken;
@@ -382,97 +406,169 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	}
 
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function getProvider() {
 		return $this->provider;
 	}
 
+	/**
+	 *
+	 * @return self
+	 */
 	public function setDebug($debug) {
 		$this->debug = $debug;
 		return $this;
 	}
 
+	/**
+	 *
+	 * @return self
+	 */
 	public function setDebugHttp($debugHttp) {
 		$this->debugHttp = $debugHttp;
 		return $this;
 	}
 
+	/**
+	 *
+	 * @return self
+	 */
 	protected function setExit($exit) {
 		$this->exit = $exit;
 		return $this;
 	}
 
+	/**
+	 *
+	 * @return self
+	 */
 	public function setRedirectUri($redirect_uri) {
 		$this->provider->setRedirectUri($redirect_uri);
 		return $this;
 	}
 
+	/**
+	 *
+	 * @return self
+	 */
 	public function setClientId($client_id) {
 		$this->provider->setClientId($client_id);
 		return $this;
 	}
 
+	/**
+	 *
+	 * @return self
+	 */
 	public function setClientSecret($client_secret) {
 		$this->provider->setClientSecret($client_secret);
 		return $this;
 	}
 
+	/**
+	 *
+	 * @return self
+	 */
 	public function setAccessToken($accessToken) {
 		$this->accessToken = $accessToken;
 		return $this;
 	}
 
+	/**
+	 *
+	 * @return self
+	 */
 	public function setAccessTokenSecret($accessTokenSecret) {
 		$this->accessTokenSecret = $accessTokenSecret;
 		return $this;
 	}
 
+	/**
+	 *
+	 * @return self
+	 */
 	protected function setAccessTokenExpiry($accessTokenExpiry) {
 		$this->accessTokenExpiry = $accessTokenExpiry;
 		return $this;
 	}
 
+	/**
+	 *
+	 * @return self
+	 */
 	protected function setAccessTokenType($accessTokenType) {
 		$this->accessTokenType = $accessTokenType;
 		return $this;
 	}
 
+	/**
+	 *
+	 * @return self
+	 */
 	protected function setAccessTokenResponse($accessTokenResponse) {
 		$this->accessTokenResponse = $accessTokenResponse;
 		return $this;
 	}
 
+	/**
+	 *
+	 * @return self
+	 */
 	protected function setRefreshToken($refreshToken) {
 		$this->refreshToken = $refreshToken;
 		return $this;
 	}
 
+	/**
+	 *
+	 * @return self
+	 */
 	protected function setIdToken($idToken) {
 		$this->idToken = $idToken;
 		return $this;
 	}
 
+	/**
+	 *
+	 * @return self
+	 */
 	protected function setResponseStatus($responseStatus) {
 		$this->responseStatus = $responseStatus;
 		return $this;
 	}
 
+	/**
+	 *
+	 * @return self
+	 */
 	protected function setResponseHeaders($responseHeaders) {
 		$this->responseHeaders = $responseHeaders;
 		return $this;
 	}
 
+	/**
+	 *
+	 * @return self
+	 */
 	protected function setResponseBody($responseBody) {
 		$this->responseBody = $responseBody;
 		return $this;
 	}
 
+	/**
+	 *
+	 * @return self
+	 */
 	protected function setOauthUserAgent($oauthUserAgent) {
 		$this->oauthUserAgent = $oauthUserAgent;
 		return $this;
 	}
 
+	/**
+	 *
+	 * @return self
+	 */
 	protected function setResponseTime($responseTime) {
 		$this->responseTime = $responseTime;
 		return $this;
@@ -880,12 +976,12 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	}
 
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	abstract public function callAPI($url, $method, $parameters, $options);
 
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function getResourceOwner($endpoint = null) {
 		$endpoint = $endpoint ?? $this->provider->getUserinfoEndpoint();
@@ -909,7 +1005,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	}
 
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function fetchResourceOwner($options) {
 		$user = null;
@@ -942,7 +1038,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	}
 
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function initialize($options = []) {
 		$this->storage = TokenStorageFactory::create($this, $options['storage'] ?? [ 'type' => 'session' ]);
@@ -1065,7 +1161,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	}
 
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function authenticate() {
 		if (!$this->checkAccessToken($redirectUrl)) {
@@ -1079,15 +1175,21 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 		return true;
 	}
 
+	/**
+	 * {@inheritdoc}
+	 */
 	abstract public function checkAccessToken(&$redirectUrl);
 
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function resetAccessToken() {
 		return $this->storage->resetAccessToken();
 	}
 
+	/**
+	 * {@inheritdoc}
+	 */
 	public function canRevokeToken() {
 		$token = $this->getAccessToken();
 		if (($revocationEndpoint = $this->getRevocationEndpoint($token)) === null) {
@@ -1104,7 +1206,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	}
 
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function revokeToken($tokenTypeHint = 'access_token') {
 		if (!in_array($tokenTypeHint, ['access_token', 'refresh_token'])) {
@@ -1147,7 +1249,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	}
 
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function finalize() {
 		$this->storage->finalize();
@@ -1192,7 +1294,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	}
 
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function canLogOut() {
 		$endPoint = $this->provider->getEndSessionEndpoint();
@@ -1206,7 +1308,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	}
 
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function logOut($redirect = null) {
 		if (!$this->canLogOut()) {

@@ -572,7 +572,7 @@ class OAuthProvider {
 	/**
 	 * Returns the field of the user info corresponding to the user identifier.
 	 *
-	 * @return array
+	 * @return string
 	 */
 	public function getUserIdField() : string {
 		return $this->mapping['user_id_field'] ?? '';
@@ -590,7 +590,7 @@ class OAuthProvider {
 	/**
 	 * Returns the identifier of the API key provided by the OAuth provider.
 	 *
-	 * @return array
+	 * @return string
 	 */
 	public function getApiKey() : string {
 		return $this->api_key;
@@ -599,7 +599,7 @@ class OAuthProvider {
 	/**
 	 * Returns the OAuth user name to use with password authorization
 	 *
-	 * @return array
+	 * @return string
 	 */
 	public function getOauthUsername() : string {
 		return $this->oauth_username;
@@ -608,7 +608,7 @@ class OAuthProvider {
 	/**
 	 * Returns the OAuth password to use with password authorization
 	 *
-	 * @return array
+	 * @return string
 	 */
 	public function getOauthPassword() : string {
 		return $this->oauth_password;
@@ -617,157 +617,307 @@ class OAuthProvider {
 	/**
 	 * Returns the realm of authorization for OpenID Connect
 	 *
-	 * @return array
+	 * @return string
 	 */
 	public function getRealm() : string {
 		return $this->realm;
 	}
 
-	public function setVersion(string $version) {
-		$this->version = $version;
-		return $this;
-	}
-
+	/**
+	 * Sets the OAuth-based protocol, either 'oauth' or 'openid'
+	 *
+	 * @return self
+	 */
 	public function setProtocol(string $protocol) {
 		$this->protocol = $protocol;
 		return $this;
 	}
 
+	/**
+	 * Sets the version of the protocol supported by the OAuth provider
+	 *
+	 * @return self
+	 */
+	public function setVersion(string $version) {
+		$this->version = $version;
+		return $this;
+	}
+
+	/**
+	 * Sets the identifier of your application registered with the OAuth provider.
+	 *
+	 * @return self
+	 */
 	public function setClientId(string $client_id) {
 		$this->client_id = $client_id;
 		return $this;
 	}
 
+	/**
+	 * Sets the secret value assigned to your application.
+	 *
+	 * @return self
+	 */
 	public function setClientSecret(string $client_secret) {
 		$this->client_secret = $client_secret;
 		return $this;
 	}
 
+	/**
+	 * Sets the URL of the current script page that is calling this class
+	 *
+	 * @return self
+	 */
 	public function setRedirectUri(string $redirect_uri) {
 		$this->redirect_uri = $redirect_uri;
 		return $this;
 	}
 
+	/**
+	 * Sets the discovery endpoint.
+	 *
+	 * @return self
+	 */
 	public function setDiscoveryEndpoint(string $discovery_endpoint) {
 		$this->discovery_endpoint = $discovery_endpoint;
 		return $this;
 	}
 
+	/**
+	 * Sets the authorization endpoint.
+	 *
+	 * @return self
+	 */
 	public function setAuthorizationEndpoint(string $authorization_endpoint) {
 		$this->authorization_endpoint = $authorization_endpoint;
 		return $this;
 	}
 
+	/**
+	 * Sets the token endpoint
+	 *
+	 * @return self
+	 */
 	public function setTokenEndpoint(string $token_endpoint) {
 		$this->token_endpoint = $token_endpoint;
 		return $this;
 	}
 
+	/**
+	 * Sets the client dynamic registration endpoint
+	 *
+	 * @return self
+	 */
 	public function setRegistrationEndpoint(string $registration_endpoint) {
 		$this->registration_endpoint = $registration_endpoint;
 		return $this;
 	}
 
+	/**
+	 * Sets the introspection endpoint
+	 *
+	 * @return self
+	 */
 	public function setIntrospectionEndpoint(string $introspection_endpoint) {
 		$this->introspection_endpoint = $introspection_endpoint;
 		return $this;
 	}
 
+	/**
+	 * Sets the revocation endpoint
+	 *
+	 * @return self
+	 */
 	public function setRevocationEndpoint(string $revocation_endpoint) {
 		$this->revocation_endpoint = $revocation_endpoint;
 		return $this;
 	}
 
+	/**
+	 * Sets the request token endpoint
+	 *
+	 * @return self
+	 */
 	public function setRequestTokenEndpoint(string $request_token_endpoint) {
 		$this->request_token_endpoint = $request_token_endpoint;
 		return $this;
 	}
 
+	/**
+	 * Sets the UserInfo endpoint
+	 *
+	 * @return self
+	 */
 	public function setUserinfoEndpoint(string $userinfo_endpoint) {
 		$this->userinfo_endpoint = $userinfo_endpoint;
 		return $this;
 	}
 
+	/**
+	 * Sets the end session endpoint
+	 *
+	 * @return self
+	 */
 	public function setEndSessionEndpoint(string $end_session_endpoint) {
 		$this->end_session_endpoint = $end_session_endpoint;
 		return $this;
 	}
 
+	/**
+	 * Sets the pin dialog url
+	 *
+	 * @return self
+	 */
 	public function setPinDialogUrl(string $pin_dialog_url) {
 		$this->pin_dialog_url = $pin_dialog_url;
 		return $this;
 	}
 
+	/**
+	 * Sets the value of the pin code
+	 *
+	 * @return self
+	 */
 	public function setPin(string $pin) {
 		$this->pin = $pin;
 		return $this;
 	}
 
+	/**
+	 * Sets the Jwks URI
+	 *
+	 * @return self
+	 */
 	public function setJwksUri(string $jwks_uri) {
 		$this->jwks_uri = $jwks_uri;
 		return $this;
 	}
 
+	/**
+	 * Sets the scope values supported by the OAuth provider.
+	 *
+	 * @return self
+	 */
 	public function setScopesSupported(array $scopes_supported) {
 		$this->scopes_supported = $scopes_supported;
 		return $this;
 	}
 
+	/**
+	 * Sets the response_type values supported by the OAuth provider.
+	 *
+	 * @return self
+	 */
 	public function setResponseTypesSupported(array $response_types_supported) {
 		$this->response_types_supported = $response_types_supported;
 		return $this;
 	}
 
+	/**
+	 * Sets the response_mode values supported by the OAuth provider.
+	 *
+	 * @return self
+	 */
 	public function setResponseModesSupported(array $response_modes_supported) {
 		$this->response_modes_supported = $response_modes_supported;
 		return $this;
 	}
 
+	/**
+	 * Sets the authentication methods supported by the OAuth provider.
+	 *
+	 * @return self
+	 */
 	public function setTokenEndpointAuthMethodsSupported(array $token_endpoint_auth_methods_supported) {
 		$this->token_endpoint_auth_methods_supported = $token_endpoint_auth_methods_supported;
 		return $this;
 	}
 
+	/**
+	 * Sets the subject identifier types supported by the OAuth provider.
+	 *
+	 * @return self
+	 */
 	public function setSubjectTypesSupported(array $subject_types_supported) {
 		$this->subject_types_supported = $subject_types_supported;
 		return $this;
 	}
 
+	/**
+	 * Sets the list of JWS signing algorithms supported by the OAuth provider.
+	 *
+	 * @return self
+	 */
 	public function setIdTokenSigningAlgValuesSupported(array $id_token_signing_alg_values_supported) {
 		$this->id_token_signing_alg_values_supported = $id_token_signing_alg_values_supported;
 		return $this;
 	}
 
+	/**
+	 * Sets the claims supported by the OAuth provider.
+	 *
+	 * @return self
+	 */
 	public function setClaimsSupported(array $claims_supported) {
 		$this->claims_supported = $claims_supported;
 		return $this;
 	}
 
+	/**
+	 * Sets the field of the user info corresponding to the user identifier.
+	 *
+	 * @return self
+	 */
 	public function setUserIdField(string $user_id_field) {
 		$this->mapping['user_id_field'] = $user_id_field;
 		return $this;
 	}
 
+	/**
+	 * Sets the fields mapping between the OAuth client and the OAuth provider.
+	 *
+	 * @return self
+	 */
 	public function setMapping(array $mapping) {
 		$this->mapping = $mapping;
 		return $this;
 	}
 
+	/**
+	 * Sets the identifier of the API key provided by the OAuth provider.
+	 *
+	 * @return self
+	 */
 	public function setApiKey(string $api_key) {
 		$this->api_key = $api_key;
 		return $this;
 	}
 
+	/**
+	 * Sets the OAuth user name to use with password authorization
+	 *
+	 * @return self
+	 */
 	public function setOauthUsername(string $oauth_username) {
 		$this->oauth_username = $oauth_username;
 		return $this;
 	}
 
+	/**
+	 * Sets the OAuth password to use with password authorization
+	 *
+	 * @return self
+	 */
 	public function setOauthPassword(string $oauth_password) {
 		$this->oauth_password = $oauth_password;
 		return $this;
 	}
 
+	/**
+	 * Sets the realm of authorization for OpenID Connect
+	 *
+	 * @return self
+	 */
 	public function setRealm(string $realm) {
 		$this->realm = $realm;
 		return $this;

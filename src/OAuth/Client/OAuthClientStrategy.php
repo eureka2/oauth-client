@@ -7,105 +7,108 @@ use eureka2\OAuth\Exception\OAuthClientException;
 class OAuthClientStrategy {
 
 	/**
-	 *
-	 * 	@var string $reauthentication_parameter
 	 * 	URL of the OAuth server to redirect the browser so the user
 	 * 	can grant access to your application.
+	 *
 	 * 	Set this variable when forcing the user to authenticate again
 	 * 	and the format of the of the authorization dialog page URL is
-	 * 	different than the one set to the
-	 * 	@link authorization_endpoint variable.
+	 * 	different than the one set to the authorization_endpoint variable.
+	 *
+	 * 	@var string $reauthentication_parameter
 	 *
 	 */
 	private $reauthentication_parameter = '';
 
 	/**
-	 *
-	 * 	@var string $offline_access_parameter
 	 * 	URL of the OAuth server to redirect the browser so the user
 	 * 	can grant access to your application when offline access is
 	 * 	requested.
+	 *
 	 * 	Set this variable to the OAuth request token URL when you are
 	 * 	not accessing one of the built-in supported OAuth servers and the
 	 * 	OAuth server supports offline access.
-	 * 	It should have the same format as the
-	 * 	@link authorization_endpoint variable.
+	 * 	It should have the same format as the authorization_endpoint variable.
+	 *
+	 * 	@var string $offline_access_parameter
 	 *
 	 */
 	private $offline_access_parameter = '';
 
 	/**
-	 *
-	 * 	@var string $append_state_to_redirect_uri
 	 * 	Pass the OAuth session state in a variable with a different
 	 * 	name to work around implementation bugs of certain OAuth
-	 * 	servers
+	 * 	servers.
+	 *
 	 * 	Set this variable  when you are not accessing one of the
 	 * 	built-in supported OAuth servers if the OAuth server has a bug
 	 * 	that makes it not pass back the OAuth state identifier in a
 	 * 	request variable named state.
 	 *
+	 * 	@var string $append_state_to_redirect_uri
+	 *
 	 */
 	private $append_state_to_redirect_uri = '';
 
 	/**
-	 *
-	 * 	@var boolean $url_parameters
 	 * 	Determine if the API call parameters should be moved to the
 	 * 	call URL.
+	 *
 	 * 	Set this variable to true if the
 	 * 	API you need to call requires that the call parameters always be
 	 * 	passed via the API URL.
+	 *
+	 * 	@var boolean $url_parameters
 	 *
 	 */
 	private $url_parameters = false;
 
 	/**
-	 *
-	 * 	@var boolean $authorization_header
 	 * 	Determine if the OAuth parameters should be passed via HTTP
 	 * 	Authorization request header.
+	 *
 	 * 	Set this variable to true if the
 	 * 	OAuth server requires that the OAuth parameters be passed using
 	 * 	the HTTP Authorization instead of the request URI parameters.
+	 *
+	 * 	@var boolean $authorization_header
 	 *
 	 */
 	private $authorization_header = true;
 
 	/**
-	 *
-	 * 	@var string $token_request_method
 	 * 	Define the HTTP method that should be used to request
 	 * 	tokens from the server.
+	 *
 	 * 	Set this variable to 'POST' if the
 	 * 	OAuth server does not support requesting tokens using the HTTP GET
 	 * 	method.
+	 *
+	 * 	@var string $token_request_method
 	 *
 	 */
 	private $token_request_method = 'GET';
 
 	/**
-	 *
-	 * 	@var string $signature_method
 	 * 	If Oauth 1.0 or 1.0a, define the method to generate the signature for API request
 	 * 	parameters values.
+	 *
 	 * 	Supports 'PLAINTEXT', 'HMAC-SHA1' and 'RSA-SHA1'.
+	 *
+	 * 	@var string $signature_method
 	 *
 	 */
 	private $signature_method = 'HMAC-SHA1';
 
 	/**
-	 *
-	 * 	@var string $signature_certificate_file
 	 *	If signature_method is 'RSA-SHA1', this variable must contains
 	 * 	the full path of the file containing a PEM encoded certificate/private key
+	 *
+	 * 	@var string $signature_certificate_file
 	 *
 	 */
 	private $signature_certificate_file = '';
 
 	/**
-	 *
-	 * 	@var string $scope
 	 * 	Permissions that your application needs to call the OAuth
 	 * 	server APIs
 	 *
@@ -113,12 +116,12 @@ class OAuthClientStrategy {
 	 * 	needs to call to set this variable with the identifiers of the
 	 * 	permissions that the user needs to grant to your application.
 	 *
+	 * 	@var string $scope
+	 *
 	 */
 	private $scope = '';
 
 	/**
-	 *
-	 * 	@var boolean $offline_access
 	 * 	Specify whether it will be necessary to call the API when
 	 * 	the user is not present and the server supports renewing expired
 	 * 	access tokens using refresh tokens.
@@ -127,12 +130,12 @@ class OAuthClientStrategy {
 	 * 	server supports renewing expired tokens automatically when the
 	 * 	user is not present.
 	 *
+	 * 	@var boolean $offline_access
+	 *
 	 */
 	private $offline_access = false;
 
 	/**
-	 *
-	 * 	@var boolean $reauthenticate
 	 * 	Specify whether it will be necessary to force the user to
 	 * 	authenticate again even after the user has already authorized the
 	 * 	application before.
@@ -140,12 +143,12 @@ class OAuthClientStrategy {
 	 * 	Set this variable to true if you
 	 * 	want to force the user to authenticate again.
 	 *
+	 * 	@var boolean $reauthenticate
+	 *
 	 */
 	private $reauthenticate = false;
 
 	/**
-	 *
-	 * 	@var string $default_access_token_type
 	 * 	Type of access token to be assumed when the OAuth server
 	 * 	does not specify an access token type.
 	 *
@@ -153,36 +156,36 @@ class OAuthClientStrategy {
 	 * 	access token to be used but it does not specify a token type
 	 * 	when the access token is returned.
 	 *
+	 * 	@var string $default_access_token_type
+	 *
 	 */
 	private $default_access_token_type = '';
 
 	/**
-	 *
-	 * 	@var string $access_token_content_type
 	 * 	Content type to be assumed when retrieving the response to
 	 * 	a request to retrieve the access token.
 	 *
 	 * 	Set this variable only if the server does not return the
 	 * 	correct content type for the access token request response.
 	 *
+	 * 	@var string $access_token_content_type
+	 *
 	 */
 	private $access_token_content_type = '';
 
 	/**
-	 *
-	 * 	@var string $access_token_language
-	 * 	language to be assumed when retrieving the response to
+	 * 	Language to be assumed when retrieving the response to
 	 * 	a request to retrieve the access token.
 	 *
 	 * 	Set this variable only if the server requires an 'Accept-Language' header
 	 *  for the access token request response.
 	 *
+	 * 	@var string $access_token_language
+	 *
 	 */
 	private $access_token_language = '';
 
 	/**
-	 *
-	 * 	@var string $access_token_parameter
 	 * 	Name of the access token parameter to be passed in API call
 	 * 	requests.
 	 *
@@ -191,12 +194,12 @@ class OAuthClientStrategy {
 	 * 	'oauth_token' of OAuth 1 and
 	 * 	'access_token' for OAuth 2.
 	 *
+	 * 	@var string $access_token_parameter
+	 *
 	 */
 	private $access_token_parameter = '';
 
 	/**
-	 *
-	 * 	@var boolean $store_access_token_response
 	 * 	Option to determine if the original response for the access
 	 * 	token request should be stored in the
 	 * 	accessTokenResponse variable.
@@ -205,12 +208,12 @@ class OAuthClientStrategy {
 	 * 	OAuth server returns custom parameters in the request to obtain
 	 * 	the access token that may be needed in subsequent API calls.
 	 *
+	 * 	@var boolean $store_access_token_response
+	 *
 	 */
 	private $store_access_token_response = false;
 
 	/**
-	 *
-	 * 	@var string $access_token_authentication
 	 * 	Option to determine if the requests to obtain a new access
 	 * 	token should use authentication to pass the application client ID
 	 * 	and secret.
@@ -222,12 +225,12 @@ class OAuthClientStrategy {
 	 * 	avoid that the Authorization header be set in the request to get
 	 * 	the access token.
 	 *
+	 * 	@var string $access_token_authentication
+	 *
 	 */
 	private $access_token_authentication = '';
 
 	/**
-	 *
-	 * 	@var string $refresh_token_authentication
 	 * 	Option to determine if the requests to refresh an expired
 	 * 	access token should use authentication to pass the application
 	 * 	client ID and secret.
@@ -239,12 +242,12 @@ class OAuthClientStrategy {
 	 * 	avoid that the Authorization header be set in the request to get
 	 * 	the refresh token.
 	 *
+	 * 	@var string $refresh_token_authentication
+	 *
 	 */
 	private $refresh_token_authentication = '';
 
 	/**
-	 *
-	 * 	@var string $grant_type
 	 * 	Define the type of grant to obtain the OAuth 2 access token.
 	 * 	Change this variable to :
 	 * 		'client_credentials' to obtain application only access token.
@@ -252,20 +255,21 @@ class OAuthClientStrategy {
 	 * 			In this case the user does not need to be present,
 	 * 			so the class will not redirect the user to the
 	 * 			authorization dialog page.
-	 * 	
+	 *
+	 * 	@var string $grant_type
 	 *
 	 */
 	private $grant_type = "authorization_code";
 
 	/**
-	 *
-	 * 	@var boolean $get_token_with_api_key
 	 * 	Option to determine if the access token should be retrieved
 	 * 	using the API key value instead of the client secret.
 	 *
 	 * 	Set this variable to true if the
 	 * 	OAuth server requires that the client secret be set to the API key
 	 * 	when retrieving the OAuth token.
+	 *
+	 * 	@var boolean $get_token_with_api_key
 	 *
 	 */
 	private $get_token_with_api_key = false;

@@ -57,7 +57,7 @@ class OpenIDClient extends OAuth2Client
 	}
 
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function introspectToken(string $token, ?string $tokenTypeHint = '') {
 		$endpoint = $this->provider->getIntrospectionEndpoint();

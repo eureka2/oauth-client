@@ -18,7 +18,7 @@ class ApcuTokenStorage
 	implements TokenStorageInterface, TokenStorageManagementInterface {
 
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function createOAuthSession(&$session) {
 		$session = null;
@@ -28,7 +28,7 @@ class ApcuTokenStorage
 	}
 
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function getOAuthSession($sessionId, $provider, &$oauthSession) {
 		if (empty($this->getSessionCookie()) || !apcu_exists($this->getSessionCookie())) {
@@ -43,7 +43,7 @@ class ApcuTokenStorage
 	}
 
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function saveOAuthSession($session) {
 		apcu_store($this->getSessionCookie(), $session);
@@ -51,7 +51,7 @@ class ApcuTokenStorage
 	}
 
 	/**
-	 * @inheritdoc
+	 * {@inheritdoc}
 	 */
 	public function resetAccessToken() {
 		$provider = $this->client->getProvider()->getName();

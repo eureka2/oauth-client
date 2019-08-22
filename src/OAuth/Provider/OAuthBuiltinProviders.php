@@ -2,6 +2,25 @@
 
 namespace eureka2\OAuth\Provider;
 
+/**
+ * This class contains the configuration for the following OAuth providers:
+ * 
+ * - Facebook (Oauth 2.0)
+ * - Github (Oauth 2.0)
+ * - Gitlab (OpenID 1.0)
+ * - Google (Oauth 2.0)
+ * - Google1 ( OAuth 1.0a)
+ * - Franceconnect (Oauth 2.0)
+ * - FranceconnectSandbox (Oauth 2.0)
+ * - LinkedIn (Oauth 2.0)
+ * - Microsoft (OpenID 1.0)
+ * - Orange  (Oauth 2.0)
+ * - Paypal (Oauth 2.0)
+ * - PaypalSandbox (Oauth 2.0)
+ * - Twitter (Oauth 1.0a)
+ * - Yahoo (Oauth 1.0a)
+ *
+ */
 class OAuthBuiltinProviders {
 
 	const PROVIDERS = [
@@ -23,7 +42,7 @@ class OAuthBuiltinProviders {
 				'reauthentication_parameter' => 'auth_type=reauthenticate'
 			]
 		],
-		'github' => [
+		'Github' => [
 			'protocol' => [
 				'name' => 'oauth',
 				'version' => '2.0'
@@ -84,7 +103,7 @@ class OAuthBuiltinProviders {
 				"request_token_endpoint" => "https://www.google.com/accounts/OAuthGetRequestToken?scope={SCOPE}"
 			]
 		],
-		'franceconnect' => [
+		'Franceconnect' => [
 			'protocol' => [
 				'name' => 'oauth',
 				'version' => '2.0'
@@ -100,7 +119,7 @@ class OAuthBuiltinProviders {
 				'offline_access' => true
 			]
 		],
-		'franceconnectSandbox' => [
+		'FranceconnectSandbox' => [
 			'protocol' => [
 				'name' => 'oauth',
 				'version' => '2.0'
