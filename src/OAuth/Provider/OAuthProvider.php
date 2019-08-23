@@ -331,6 +331,10 @@ class OAuthProvider {
 	 * Constructs a OAuthProvider instance with the registered data of the client
 	 * with the OAuth provider.
 	 *
+	 * The name of the provider given in parameter can be that of a built-in provider or not.
+	 * If it is not a built-in provider, you must provide the configuration parameters in
+	 * the options argument of the *initialize(...)* function.
+	 *
 	 * @param string $name The name of the OAuth provider
 	 * @param string $client_id The identifier of your application registered with the OAuth provider
 	 * @param string $client_secret The secret value assigned to your application
@@ -341,7 +345,7 @@ class OAuthProvider {
 		$this->name = $name;
 		$this->client_id = $client_id;
 		$this->client_secret = $client_secret;
-		$this->redirect_uri = $redirect_uri;
+		$this->redirect_uri = !empty($redirect_uri) ? $redirect_uri : $this->makeDefaultRedirectUri() ;
 	}
 
 	/**
@@ -923,6 +927,14 @@ class OAuthProvider {
 		return $this;
 	}
 
+	/**
+	 * Binds the configuration parameters to the properties 
+	 * of this instance of the OAuth provider.
+	 *
+	 * @return void
+	 *
+	 * throws \eureka2\OAuth\Exception\OAuthClientException
+	 */
 	public function bind(array $configuration) {
 		$types = [
 			'protocol' => 'string',
@@ -970,6 +982,49 @@ class OAuthProvider {
 				throw new OAuthClientException('OAuthProvider: the property "' . $property . '" must be defined');
 			}
 		}
+	}
+
+	/**
+	 * Constructs a default redirect URI from the superglobals.
+	 *
+	 * @return string the default redirect URI
+	 */
+	protected function makeDefaultRedirectUri() {
+		$server = filter_input_array(INPUT_SERVER);
+		if (isset($server['HTTP_UPGRADE_INSECURE_REQUESTS']) && ($server['HTTP_UPGRADE_INSECURE_REQUESTS'] == 1)) {
+			$scheme = 'https';
+		} elseif (isset($server['HTTP_X_FORWARDED_PROTO'])) {
+			$scheme = $server['HTTP_X_FORWARDED_PROTO'];
+		} elseif (isset($server['REQUEST_SCHEME'])) {
+			$scheme = $server['REQUEST_SCHEME'];
+		} elseif (isset($server['HTTPS']) && $server['HTTPS'] !== 'off') {
+			$scheme = 'https';
+		} else {
+			$scheme = 'http';
+		}
+		if (isset($server['HTTP_X_FORWARDED_HOST']) && !empty($server['HTTP_X_FORWARDED_HOST'])) {
+			$host = explode(':', $server['HTTP_X_FORWARDED_HOST'])[0];
+		} elseif (isset($server['HTTP_HOST']) && !empty($server['HTTP_HOST'])) {
+			$host = explode(':', $server['HTTP_HOST'])[0];
+		} elseif (isset($server['SERVER_NAME']) && !empty($server['SERVER_NAME'])) {
+			$host = $server['SERVER_NAME'];
+		} else {
+			$host = $server['SERVER_ADDR'];
+		}
+		if (isset($server['HTTP_X_FORWARDED_PORT']) && !empty($server['HTTP_X_FORWARDED_PORT'])) {
+			$port = (int)$server['HTTP_X_FORWARDED_PORT'];
+		} elseif (isset($server['HTTP_X_FORWARDED_HOST']) && !empty($server['HTTP_X_FORWARDED_HOST']) && strpos($server['HTTP_X_FORWARDED_HOST'], ':') !== false) {
+			$port = (int)explode(':', $server['HTTP_X_FORWARDED_HOST'])[1];
+		} elseif (isset($server['SERVER_PORT']) && !empty($server['SERVER_PORT'])) {
+			$port = (int)$server['SERVER_PORT'];
+		} elseif (isset($server['HTTP_HOST']) && !empty($server['HTTP_HOST']) && strpos($server['HTTP_HOST'], ':') !== false) {
+			$port = (int)explode(':', $server['HTTP_HOST'])[1];
+		} else {
+			$port = $scheme === 'https' ? 443 : 80;
+		}
+		$port = (443 == $port) || (80 == $port) ? '' : ':' . $port;
+		$requestUri = trim(strtok($server['REQUEST_URI'], '?'), '/');
+		return sprintf('%s://%s%s/%s', $scheme, $host, $port, $requestUri);
 	}
 
 }

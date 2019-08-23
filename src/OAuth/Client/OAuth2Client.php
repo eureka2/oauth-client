@@ -83,14 +83,13 @@ class OAuth2Client extends AbstractOAuthClient implements OAuthClientInterface {
 	}
 
 	protected function requestAnOAuthAccessToken($code, $refresh) {
-		$redirectUri = $this->retrieveRedirectURI();
 		$authentication = $this->strategy->getAccessTokenAuthentication();
 		if (!empty($this->provider->getOauthUsername())) {
 			$values = [
 				'grant_type' => 'password',
 				'username' => $this->provider->getOauthUsername(),
 				'password' => $this->provider->getOauthPassword(),
-				'redirect_uri' => $redirectUri
+				'redirect_uri' => $this->provider->getRedirectUri()
 			];
 			$authentication = 'Basic';
 		} elseif ($this->provider->getRedirectUri() === 'oob' && !empty($this->provider->getPin())) {
@@ -115,7 +114,7 @@ class OAuth2Client extends AbstractOAuthClient implements OAuthClientInterface {
 				case 'authorization_code':
 					$values = [
 						'code' => $code,
-						'redirect_uri' => $redirectUri,
+						'redirect_uri' => $this->provider->getRedirectUri(),
 						'grant_type' => 'authorization_code'
 					];
 					break;
@@ -342,7 +341,7 @@ class OAuth2Client extends AbstractOAuthClient implements OAuthClientInterface {
 				return false;
 			}
 		} else {
-			$redirectUri = $this->retrieveRedirectURI();
+			$redirectUri = $this->provider->getRedirectUri();
 			if (!empty($this->strategy->getAppendStateToRedirectUri())) {
 				$redirectUri .= (strpos($redirectUri, '?') === false ? '?' : '&') . $this->strategy->getAppendStateToRedirectUri() . '=' . $storedState;
 			}

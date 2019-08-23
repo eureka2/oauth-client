@@ -13,9 +13,13 @@ class OpenIDClient extends OAuth2Client
 	implements OAuthClientInterface, OpenIDClientInterface {
 
 	/**
-	 * Obtaining OpenID provider configuration information
+	 * Sends a OAuth request to the discovery endpoint of the OpenID provider
+	 * in order to obtain the configuration information, which is the list of
+	 * all endpoints and the list of supported OAuth elements.
 	 *
 	 * @param string $discoveryEndpoint The discovery endpoint
+	 *
+	 * @throws \eureka2\OAuth\Exception\OAuthClientException if an error occurs.
 	 */
 	protected function discover($discoveryEndpoint) {
 		$url = $discoveryEndpoint . '/.well-known/openid-configuration';

@@ -174,9 +174,8 @@ class OAuth1Client extends AbstractOAuthClient implements OAuthClientInterface {
 			$this->trace('Requesting the unauthorized OAuth token');
 			$url = $this->provider->getRequestTokenEndpoint();
 			$url = str_replace('{SCOPE}', urlencode($this->strategy->getScope()), $url);
-			$redirect_uri = $this->retrieveRedirectURI();
 			$oauth = [
-				'oauth_callback' => $redirect_uri,
+				'oauth_callback' => $this->provider->getRedirectUri(),
 			];
 			$options = [
 				'resource' => 'OAuth request token',
@@ -234,7 +233,7 @@ class OAuth1Client extends AbstractOAuthClient implements OAuthClientInterface {
 				$url .= (strpos($url, '?') === false ? '?' : '&') . 'oauth_token=' . $accessToken['value'];
 		}
 		if (!$version1a) {
-			$url .= '&oauth_callback=' . urlencode($this->retrieveRedirectURI());
+			$url .= '&oauth_callback=' . urlencode($this->provider->getRedirectUri());
 		}
 		$redirectUrl = $url;
 		return true;

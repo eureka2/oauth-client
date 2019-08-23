@@ -134,7 +134,7 @@ class PdoTokenStorage
 			$token->getValue(), \PDO::PARAM_STR,
 			$token->getSecret(), \PDO::PARAM_STR,
 			$token->getExpiry(), \PDO::PARAM_STR,
-			$token->getAuthorized(), \PDO::PARAM_BOOL,
+			$token->isAuthorized(), \PDO::PARAM_BOOL,
 			$token->getType(), \PDO::PARAM_STR,
 			$session->getProvider(), \PDO::PARAM_STR,
 			$session->getCreation(), \PDO::PARAM_STR,

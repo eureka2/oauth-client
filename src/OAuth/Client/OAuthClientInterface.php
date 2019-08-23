@@ -53,45 +53,49 @@ interface OAuthClientInterface {
 	 * @param array $parameters Associative array with the names and values of the API call request parameters.
 	 *
 	 * @param array $options Associative array with additional options to configure the request.
-	 * 	    Currently it supports the following options:
-	 * 	        '2legged'                : boolean option that determines if the API request should be 2 legged. The default value is false.
-	 * 	        'accept'                 : content type value of the Accept HTTP header to be sent in the API call HTTP request.
-	 * 	                                   Some APIs require that a certain value be sent to specify
-	 * 	                                   which version of the API is being called. The default value is '*&#47;*'.
-	 * 	        'accept_language'        : value of the Accept-Language HTTP header to be sent in the API call HTTP request.
-	 * 	                                   Some APIs require that a certain value be sent to specify
-	 * 	                                   which version of the API is being called.
-	 * 	        'convert_json_to_array'  : boolean option that determines if objects should be converted into arrays when the
-	 * 	                                   response is returned in JSON format. The default value is false.
-	 * 	        'decode_xml_response'    : name of the method to decode XML responses. Currently only 'simplexml' is supported. It makes a
-	 * 	                                   XML response be parsed and returned as a SimpleXMLElement object.
-	 * 	        'fail_on_access_error'   : boolean option that determines if this functions should fail when the provider
-	 * 	                                   response status is not between 200 and 299. The default value is false.
-	 * 	        'files'                  : associative array with details of the parameters that must be passed as file uploads.
-	 * 	                                   The array indexes must have the same name of the parameters
-	 * 	                                   to be sent as files. The respective array entry values must
-	 * 	                                   also be associative arrays with the parameters for each file.
-	 * 	                                   Currently it supports the following parameters:
-	 * 	                                   - 'type' MIME value of the content type of the file.
-	 * 	                                   - 'filename' defines a custom file name for the file to be uploaded. Default: none
-	 * 	                                   - 'contents' optional, the contents of the file 
-	 * 	          'post_values_in_uri'   : boolean option to determine that a POST request should pass the request values in the URI. The default value is false.
-	 * 	          'max_redirects'        : limit number of times that HTTP response redirects will be followed. If it is set to 0, redirection responses fail in error. The default value is 0.
-	 * 	          'body'                 : request body data of a custom type. The 'request_content_type' option must be specified, so the 'body' option is considered.
-	 * 	          'request_content_type' : content type that should be used to send the request values. It can be either
-	 * 	                                   'application/x-www-form-urlencoded' for sending values like from Web forms, or
-	 * 	                                   'application/json' for sending the values encoded in JSON format.
-	 * 	                                    The default value is 'application/x-www-form-urlencoded'.
-	 * 	          'headers'              : associative array of custom headers to be sent with the API call.
-	 * 	                                   These headers override any values set by the class when sending the API call HTTP request.
-	 * 	          'resource'             : string with a label that will be used in the error messages and debug log entries to identify what operation the request is performing.
-	 * 	                                   The default value is 'API call'.
-	 * 	          'response_content_type': content type that should be considered when decoding the API request response.
-	 * 	                                   This overrides the Content-Type header returned by the server.
-	 * 	                                   If the content type is 'application/x-www-form-urlencoded' the function will parse the data returning an array of key-value pairs.
-	 * 	                                   If the content type is 'application/json' the response will be decode as a JSON-encoded data type.
-	 * 	                                   Other content type values will make the function return the original response value as it was returned from the server.
-	 * 	                                   The default value for this option is to use what the server returned in the Content-Type header.
+	 *
+	 * Currently it supports the following options:
+	 *
+	 * - '2legged'                : boolean option that determines if the API request should be 2 legged. The default value is false.
+	 * - 'accept'                 : content type value of the Accept HTTP header to be sent in the API call HTTP request.
+	 *                              Some APIs require that a certain value be sent to specify
+	 *                              which version of the API is being called. The default value is '*&#47;*'.
+	 * - 'accept_language'        : value of the Accept-Language HTTP header to be sent in the API call HTTP request.
+	 *                              Some APIs require that a certain value be sent to specify
+	 *                              which version of the API is being called.
+	 * - 'convert_json_to_array'  : boolean option that determines if objects should be converted into arrays when the
+	 *                              response is returned in JSON format. The default value is false.
+	 * - 'convert_xml_to_object'  : name of the method to convert XML responses. Currently only 'simplexml' is supported. It makes a
+	 *                              XML response be parsed and returned as a SimpleXMLElement object.
+	 * - 'fail_on_access_error'   : boolean option that determines if this functions should fail when the provider
+	 *                              response status is not between 200 and 299. The default value is false.
+	 * - 'files'                  : associative array with details of the parameters that must be passed as file uploads.
+	 *                              The array indexes must have the same name of the parameters
+	 *                              to be sent as files. The respective array entry values must
+	 *                              also be associative arrays with the parameters for each file.
+	 *                              Currently it supports the following parameters:
+	 *
+	 *                              - 'type' MIME value of the content type of the file.
+	 *                              - 'filename' defines a custom file name for the file to be uploaded. Default: none
+	 *                              - 'contents' optional, the contents of the file
+	 *
+	 * - 'post_values_in_uri'   : boolean option to determine that a POST request should pass the request values in the URI. The default value is false.
+	 * - 'max_redirects'        : limit number of times that HTTP response redirects will be followed. If it is set to 0, redirection responses fail in error. The default value is 0.
+	 * - 'body'                 : request body data of a custom type. The 'request_content_type' option must be specified, so the 'body' option is considered.
+	 * - 'request_content_type' : content type that should be used to send the request values. It can be either
+	 *                            'application/x-www-form-urlencoded' for sending values like from Web forms, or
+	 *                            'application/json' for sending the values encoded in JSON format.
+	 *                            The default value is 'application/x-www-form-urlencoded'.
+	 * - 'headers'              : associative array of custom headers to be sent with the API call.
+	 *                            These headers override any values set by the class when sending the API call HTTP request.
+	 * - 'resource'             : string with a label that will be used in the error messages and debug log entries to identify what operation the request is performing.
+	 *                            The default value is 'API call'.
+	 * - 'response_content_type': content type that should be considered when decoding the API request response.
+	 *                            This overrides the Content-Type header returned by the server.
+	 *                            If the content type is 'application/x-www-form-urlencoded' the function will parse the data returning an array of key-value pairs.
+	 *                            If the content type is 'application/json' the response will be decode as a JSON-encoded data type.
+	 *                            Other content type values will make the function return the original response value as it was returned from the server.
+	 *                            The default value for this option is to use what the server returned in the Content-Type header.
 	 *
 	 *
 	 * @return mixed Return the value of the API response. If the value is
@@ -111,7 +115,7 @@ interface OAuthClientInterface {
 	 * This function must be called after having
 	 * previously obtained an access token through the OAuth protocol
 	 * using the authenticate function, or by directly setting the variables
-	 * access_token, as well as access_token_secret in case of using OAuth 1.0 or 1.0a services.
+	 * *access_token*, as well as *access_token_secret* in case of using OAuth 1.0 or 1.0a services.
 	 *
 	 * @param string $endpoint URL of the user info endpoint.
 	 *
@@ -185,6 +189,14 @@ interface OAuthClientInterface {
 	public function resetAccessToken();
 
 	/**
+	 * Determines whether the revokeToken function can be called.
+	 *
+	 * @return bool returns true if OAuth provider has a revocation endpoint
+	 * and there is a valid access token.
+	 */
+	public function canRevokeToken();
+
+	/**
 	 * Revoke a previously obtained token so it becomes invalid.
 	 *
 	 * Call this function when you need to invalidate a token that
@@ -231,27 +243,32 @@ interface OAuthClientInterface {
 	public function shouldExit();
 
 	/**
-	 *
 	 * Returns the obtained access token upon
 	 * successful OAuth authentication.
+	 *
+	 * Call this function to get the obtained access token upon
+	 * successful OAuth authorization.
 	 *
 	 * @return string
 	 */
 	public function getAccessToken();
 
 	/**
-	 *
 	 * Returns the obtained refresh token upon
 	 * successful OAuth authentication.
+	 *
+	 * Call this function to get the obtained refresh token upon
+	 * successful OAuth authorization.
 	 *
 	 * @return string
 	 */
 	public function getRefreshToken();
 
 	/**
-	 *
 	 * Returns the obtained ID token upon
 	 * successful OpenID authentication.
+	 *
+	 * Call this function if the OAuth server returns id_token values.
 	 *
 	 * @return string
 	 */
