@@ -79,7 +79,7 @@ interface OAuthClientInterface {
 	 *                              - 'filename' defines a custom file name for the file to be uploaded. Default: none
 	 *                              - 'contents' optional, the contents of the file
 	 *
-	 * - 'post_values_in_uri'   : boolean option to determine that a POST request should pass the request values in the URI. The default value is false.
+	 * - 'post_data_in_uri'     : boolean option to determine that a POST request should pass the request data in the URI. The default value is false.
 	 * - 'max_redirects'        : limit number of times that HTTP response redirects will be followed. If it is set to 0, redirection responses fail in error. The default value is 0.
 	 * - 'body'                 : request body data of a custom type. The 'request_content_type' option must be specified, so the 'body' option is considered.
 	 * - 'request_content_type' : content type that should be used to send the request values. It can be either
@@ -141,7 +141,7 @@ interface OAuthClientInterface {
 	 * OAuth protocol processing or execution of API calls.
 	 *
 	 * Always call this function as the last step after calling the
-	 * functions process or callAPI.
+	 * functions *authenticate()* or *callAPI(...)*.
 	 */
 	public function finalize();
 

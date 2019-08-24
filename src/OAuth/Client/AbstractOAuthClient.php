@@ -859,10 +859,28 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 		header('Location: ' . $url);
 	}
 
-	protected function sign(&$url, $method, $parameters, $oauth, $requestContentType, $hasFiles, $postValuesInUri, &$authorization, &$postValues) {
+	/**
+	 * Sign the request data in PLAINTEXT, HMAC_SHA1 or RSA_SHA1
+	 * using a key composed from the secret client registered with the provider
+	 * and the oauth token secret returned by the token request endpoint.
+	 * For OAuth 1.0 an Oauth 1.0a only.
+	 *
+	 * @param string $url
+	 * @param string $method
+	 * @param array $parameters
+	 * @param array $oauth
+	 * @param string $requestContentType
+	 * @param bool $hasFiles
+	 * @param bool $postDataInUri
+	 *
+	 * @return array ($url, $authorization, $postData)
+	 *
+	 * @throws \eureka2\OAuth\Exception\OAuthClientException if an error occurs.
+	 */
+	protected function signRequestData(&$url, $method, $parameters, $oauth, $requestContentType, $hasFiles, $postDataInUri, &$authorization, &$postData) {
 		throw new OAuthClientException(
 			sprintf(
-				'the sign method is not available for the protocol %s %s',
+				'the signRequestData method is not available for the protocol %s %s',
 				$this->provider->getProtocol(),
 				$this->provider->getVersion()
 			)
@@ -922,6 +940,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	 * - body : the body of the request
 	 * - accept : the Accept header of the request
 	 * - accept_language the Accept-Language header of the reques t(default: '*')
+	 * - post_data_in_uri : the request data must be passed in the URI even if the method is POST (OAuth 1.0 or 1.0a only).
 	 *
 	 * @param array $oauth Additional options if OAuth 1.0 or 1.0a
 	 *
@@ -932,7 +951,6 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	protected function prepareOAuthRequest($url, $method, $parameters, $options, $oauth = null) {
 		$postFiles = [];
 		$method = strtoupper($method);
-		$authorization = '';
 		$requestContentType = (isset($options['request_content_type']) ? strtolower(trim(strtok($options['request_content_type'], ';'))) : (($method === 'POST' || isset($oauth)) ? 'application/x-www-form-urlencoded' : ''));
 		$files = $options['files'] ?? [];
 		if (count($files) > 0) {
@@ -960,11 +978,10 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 			$postFiles = $files;
 		}
 		if (isset($oauth)) {
-			if (!$this->sign($url, $method, $parameters, $oauth, $requestContentType, count($files) !== 0, isset($options['post_values_in_uri']) && $options['post_values_in_uri'], $authorization, $post_values)) {
-				return false;
-			}
+			list($url, $authorization, $postData) = $this->signRequestData($url, $method, $parameters, $oauth, $requestContentType, count($files) !== 0, isset($options['post_data_in_uri']) && $options['post_data_in_uri']);
 		} else {
-			$postValues = $parameters;
+			$authorization = '';
+			$postData = $parameters;
 			if (count($parameters)) {
 				switch ($requestContentType) {
 					case 'application/x-www-form-urlencoded':
@@ -988,14 +1005,14 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 					throw new OAuthClientException('the request body is defined automatically from the parameters');
 				}
 				$requestHeaders['Content-Type'] = $requestContentType;
-				$requestBody = $postValues;
+				$requestBody = $postData;
 				break;
 			case 'multipart/form-data':
 				if (isset($options['body'])) {
 					throw new OAuthClientException('the request body is defined automatically from the parameters');
 				}
 				$requestHeaders['Content-Type'] = $requestContentType;
-				$requestBody = array_merge($postFiles, $postValues);
+				$requestBody = array_merge($postFiles, $postData);
 				break;
 			case 'application/json':
 			case 'application/javascript':
@@ -1150,10 +1167,20 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 		return $response ?? false;
 	}
 
+	/**
+	 * Checks if there is a stored access token
+	 *
+	 * @return bool true if there is a stored access token, false otherwise
+	 */
 	protected function isThereAStoredAccessToken() {
 		return $this->storage->getStoredAccessToken() !== null;
 	}
 
+	/**
+	 * Checks if the stored access token is valid
+	 *
+	 * @return bool true if the stored access token is valid, false otherwise
+	 */
 	protected function isStoredAccessTokenValid() {
 		if (!$this->isThereAStoredAccessToken()) {
 			return false;
@@ -1229,6 +1256,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 				$endpoint,
 				'GET', [], [
 					'convert_json_to_array' => true,
+					'accept' => 'application/json',
 					'fail_on_access_error' => true
 				]
 			);
@@ -1261,6 +1289,11 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 		return $user;
 	}
 
+	/**
+	 * Checks the access token state before calling an API.
+	 *
+	 * @return bool true if access token is valid, false otherwise
+	 */
 	protected function checkTokenBeforeCall($options) {
 		$version = intval($this->provider->getVersion());
 		$twoLegged = ($this->provider->getProtocol() == 'oauth' && $version === 1 && isset($options['2legged']) && $options['2legged']);
@@ -1351,6 +1384,11 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 		return $merged;
 	}
 
+	/**
+	 * Initializes the options registered with the OAuth provider.
+	 *
+	 * @return void
+	 */
 	protected function initializeRegitrationOptions($options) {
 		if (isset($options['provider']) && isset($options['provider']['registration'])) {
 			if (isset($options['provider']['registration']['keys'])) {
@@ -1403,6 +1441,11 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 		);
 	}
 
+	/**
+	 * Checks that the authenticate method has not already been called
+	 *
+	 * @throws \eureka2\OAuth\Exception\OAuthClientException if the authenticate method has already been called.
+	 */
 	protected function checkNoToken() {
 		if (!empty($this->getAccessToken()) || !empty($this->getAccessTokenSecret())) {
 			$this->trace('The authenticate function should not be called again if the OAuth token was already set manually');

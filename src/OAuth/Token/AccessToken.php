@@ -109,7 +109,7 @@ class AccessToken {
 	}
 
 	/**
-	 * Determines if the OAuth token is authorized or not.
+	 * Is the OAuth token is authorized?
 	 * For OAuth 2.0, this value is always true.
 	 * 
 	 * @return bool true if the OAuth token is authorized, false otherwise.
@@ -129,7 +129,7 @@ class AccessToken {
 	}
 
 	/**
-	 * Returns the type of token this is, typically just the string “bearer”.
+	 * Returns the type of token which is, typically just the string “bearer”.
 	 * 
 	 * @return string the type of token
 	 */
@@ -176,41 +176,104 @@ class AccessToken {
 		return $this->response;
 	}
 
+	/**
+	 * Sets the access token string as issued by the authorization server.
+	 *
+	 * @param string $value the access token string
+	 *
+	 * @return self
+	 */
 	public function setValue($value) {
 		$this->value = $value;
 		return $this;
 	}
 
+	/**
+	 * Sets the access token secret.
+	 * For OAuth 1.0, used for exchange, signature generation, or refreshing the access_token.
+	 * Unused for other versions.
+	 *
+	 * @param string $secret the access token secret
+	 * 
+	 * @return self
+	 */
 	public function setSecret($secret) {
 		$this->secret = $secret;
 		return $this;
 	}
 
+	/**
+	 * Determines if the OAuth token is authorized or not.
+	 * For OAuth 2.0, this value is always true.
+	 *
+	 * @param bool $authorized true if authorized, false otherwise
+	 * 
+	 * @return self
+	 */
 	public function setAuthorized($authorized) {
 		$this->authorized = $authorized;
 		return $this;
 	}
 
+	/**
+	 * Sets the expiration date time of the access token (format: %Y-%m-%d %H:%M:%S)
+	 * calculated from the lifetime in seconds of the token.
+	 *
+	 * @param string $expiry the expiration date time of the access token
+	 * 
+	 * @return self
+	 */
 	public function setExpiry($expiry) {
 		$this->expiry = $expiry;
 		return $this;
 	}
 
+	/**
+	 * Sets the type of token which is, typically just the string “bearer”.
+	 *
+	 * @param string $type the type of token
+	 * 
+	 * @return self
+	 */
 	public function setType($type) {
 		$this->type = $type;
 		return $this;
 	}
 
+	/**
+	 * Sets the refresh token which applications can use to obtain another access token
+	 * when the access token will expire.
+	 *
+	 * @param string $refresh the refresh token
+	 * 
+	 * @return self
+	 */
 	public function setRefresh($refresh) {
 		$this->refresh = $refresh;
 		return $this;
 	}
 
+	/**
+	 * Sets the granted scope when it is different from the requested scope,
+	 * such as if the user modified the scope.
+	 *
+	 * @param string $scope the granted scope
+	 * 
+	 * @return self
+	 */
 	public function setScope($scope) {
 		$this->scope = $scope;
 		return $this;
 	}
 
+	/**
+	 * Sets the OpenID token that the authorization server will return
+	 * which encodes the user’s authentication information.
+	 *
+	 * @param \eureka2\OAuth\Token\IdToken|string|null $id_token the OpenID token
+	 * 
+	 * @return self
+	 */
 	public function setIdToken($id_token) {
 		if ($id_token === null || empty($id_token)) {
 			$this->id_token = null;
@@ -222,15 +285,33 @@ class AccessToken {
 		return $this;
 	}
 
+	/**
+	 * Sets the access token response as returned by the authorization server
+	 *
+	 * @param string $response the access token response
+	 * 
+	 * @return self
+	 */
 	public function setResponse($response) {
 		$this->response = $response;
 		return $this;
 	}
 
+	/**
+	 * Returns the access token string as issued by the authorization server.
+	 * Alias of getValue
+	 * 
+	 * @return string the access token string
+	 */
 	public function __toString() {
 		return $this->getValue();
 	}
 
+	/**
+	 * Converts the access token to array
+	 * 
+	 * @return array
+	 */
 	public function toArray() {
 		$accessToken = [
 			'value' => $this->getValue(),

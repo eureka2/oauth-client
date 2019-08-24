@@ -6,8 +6,18 @@ use eureka2\OAuth\Exception\OAuthClientAuthorizationException;
 use eureka2\OAuth\Exception\OAuthClientException;
 use eureka2\OAuth\Token\JWT;
 
+/**
+ * This class represents the OAuth client dealing with providers supporting OAuth 2.0.
+ */
 class OAuth2Client extends AbstractOAuthClient implements OAuthClientInterface {
 
+	/**
+	 * Verifies the claims of an ID token and return them if they are valid
+	 *
+	 * @param string $jwt the JSON Web Token containing the ID Token 
+	 *
+	 * @return object|false the claims if they are valid, false otherwise.
+	 */
 	protected function verifyClaims($jwt) {
 		$claims = JWT::decode($jwt, 1);
 		if (is_array($claims->aud)) {
@@ -41,6 +51,15 @@ class OAuth2Client extends AbstractOAuthClient implements OAuthClientInterface {
 		return $claims;
 	}
 
+	/**
+	 * Verifies the signature of an ID token
+	 *
+	 * @param string $jwt the JSON Web Token containing the ID Token 
+	 *
+	 * @return bool true if the signature is valid, false otherwise
+	 *
+	 * @throws \eureka2\OAuth\Exception\OAuthClientException if an error occurs.
+	 */
 	protected function verifySignature($jwt) {
 		$header = JWT::decode($jwt);
 		if (preg_match("/^RS(\d+)$/", $header->alg, $m)) {
@@ -82,7 +101,18 @@ class OAuth2Client extends AbstractOAuthClient implements OAuthClientInterface {
 		);
 	}
 
-	protected function requestAnOAuthAccessToken($code, $refresh) {
+	/**
+	 * Prepares and initiates the request for an access or refresh token
+	 *
+	 * @param string|null $code eventually, the code received from the authorization endpoint.
+	 * @param bool $refresh true if the request is for a refresh token
+	 *
+	 * @return bool true if the token has been successfully obtained, false otherwise
+	 *
+	 * @throws \eureka2\OAuth\Exception\OAuthClientException if an error occurs.
+	 * @throws \eureka2\OAuth\Exception\OAuthClientAuthorizationException if the provider has sent an error message.
+	 */
+	protected function requestAnOAuthToken($code = null, $refresh = false) {
 		$authentication = $this->strategy->getAccessTokenAuthentication();
 		if (!empty($this->provider->getOauthUsername())) {
 			$values = [
@@ -245,6 +275,9 @@ class OAuth2Client extends AbstractOAuthClient implements OAuthClientInterface {
 		return $this->storage->storeAccessToken($accessToken);
 	}
 
+	/**
+	 * {@inheritdoc}
+	 */
 	public function callAPI($url, $method, $parameters, $options) {
 		if (! $this->checkTokenBeforeCall($options)) {
 			return false;
@@ -260,7 +293,7 @@ class OAuth2Client extends AbstractOAuthClient implements OAuthClientInterface {
 				throw new OAuthClientException('the access token expired and no refresh token is available');
 			}
 			$this->trace('Refreshing the OAuth access token expired on ' . $this->getAccessTokenExpiry());
-			if (!$this->requestAnOAuthAccessToken(null, true)) {
+			if (!$this->requestAnOAuthToken(null, true)) {
 				return false;
 			}
 		}
@@ -270,12 +303,20 @@ class OAuth2Client extends AbstractOAuthClient implements OAuthClientInterface {
 		return $this->sendOAuthRequest($url, $method, $parameters, $options);
 	}
 
+	/**
+	 * Checks if an access token has expired
+	 *
+	 * @return bool true if the access token has expired and there is no refresh token
+	 */
 	protected function isAccessTokenExpired() {
 		return !empty($this->getAccessTokenExpiry())
 			&& strcmp($this->getAccessTokenExpiry(), gmstrftime('%Y-%m-%d %H:%M:%S')) <= 0
 			&& empty($this->getRefreshToken());
 	}
 
+	/**
+	 * {@inheritdoc}
+	 */
 	public function checkAccessToken(&$redirectUrl) {
 		$this->checkNoToken();
 		$this->trace('Checking if OAuth access token was already retrieved from ' . $this->getTokenEndpoint());
@@ -295,7 +336,7 @@ class OAuth2Client extends AbstractOAuthClient implements OAuthClientInterface {
 			case 'authorization_code':
 				if ($this->provider->getRedirectUri() === 'oob' && !empty($this->provider->getPin())) {
 					$this->trace('Getting the access token using the pin');
-					if (!$this->requestAnOAuthAccessToken(null, false)) {
+					if (!$this->requestAnOAuthToken(null, false)) {
 						return false;
 					}
 					return true;
@@ -304,13 +345,13 @@ class OAuth2Client extends AbstractOAuthClient implements OAuthClientInterface {
 				}
 			case 'password':
 				$this->trace('Getting the access token using the username and password');
-				if (!$this->requestAnOAuthAccessToken(null, false)) {
+				if (!$this->requestAnOAuthToken(null, false)) {
 					return false;
 				}
 				return true;
 			case 'client_credentials':
 				$this->trace('Getting the access token using the client credentials');
-				if (!$this->requestAnOAuthAccessToken(null, false)) {
+				if (!$this->requestAnOAuthToken(null, false)) {
 					return false;
 				}
 				return true;
@@ -337,7 +378,7 @@ class OAuth2Client extends AbstractOAuthClient implements OAuthClientInterface {
 				}
 				throw new OAuthClientException('it was not returned the OAuth dialog code');
 			}
-			if (!$this->requestAnOAuthAccessToken($code, false)) {
+			if (!$this->requestAnOAuthToken($code, false)) {
 				return false;
 			}
 		} else {

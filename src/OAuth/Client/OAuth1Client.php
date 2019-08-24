@@ -5,8 +5,21 @@ namespace eureka2\OAuth\Client;
 use eureka2\OAuth\Exception\OAuthClientAuthorizationException;
 use eureka2\OAuth\Exception\OAuthClientException;
 
+/**
+ * This class represents the OAuth client dealing with providers supporting OAuth 1.0 or OAuth 1.0a.
+ */
 class OAuth1Client extends AbstractOAuthClient implements OAuthClientInterface {
 
+	/**
+	 * Prepares and initiates the request for an access token
+	 *
+	 * @param array $oauth options specific to OAuth 1.0 or 1.0a
+	 * @param array $accessToken the variable to receive the access token
+	 *
+	 * @return bool true if the access token has been successfully obtained, false otherwise
+	 *
+	 * @throws \eureka2\OAuth\Exception\OAuthClientException if an error occurs.
+	 */
 	protected function requestAnOAuthAccessToken($oauth, &$accessToken) {
 		$url = $this->getTokenEndpoint();
 		$options = [
@@ -17,7 +30,7 @@ class OAuth1Client extends AbstractOAuthClient implements OAuthClientInterface {
 			case 'GET':
 				break;
 			case 'POST':
-				$options['post_values_in_uri'] = true;
+				$options['post_data_in_uri'] = true;
 				break;
 			default:
 				throw new OAuthClientException($method . ' is not a supported method to request tokens');
@@ -54,6 +67,9 @@ class OAuth1Client extends AbstractOAuthClient implements OAuthClientInterface {
 		return $this->storage->storeAccessToken($accessToken);
 	}
 
+	/**
+	 * {@inheritdoc}
+	 */
 	public function callAPI($url, $method, $parameters, $options) {
 		if (! $this->checkTokenBeforeCall($options)) {
 			return false;
@@ -93,6 +109,9 @@ class OAuth1Client extends AbstractOAuthClient implements OAuthClientInterface {
 		return $this->sendOAuthRequest($url, $method, $parameters, $options, $oauth);
 	}
 
+	/**
+	 * {@inheritdoc}
+	 */
 	public function checkAccessToken(&$redirectUrl) {
 		$this->checkNoToken();
 		$version1a = ($this->provider->getProtocol() == 'oauth' && $this->provider->getVersion() === '1.0a');
@@ -186,7 +205,7 @@ class OAuth1Client extends AbstractOAuthClient implements OAuthClientInterface {
 				case 'GET':
 					break;
 				case 'POST':
-					$options['post_values_in_uri'] = true;
+					$options['post_data_in_uri'] = true;
 					break;
 				default:
 					throw new OAuthClientException($method . ' is not a supported method to request tokens');
@@ -239,6 +258,11 @@ class OAuth1Client extends AbstractOAuthClient implements OAuthClientInterface {
 		return true;
 	}
 
+	/**
+	 * Builds the base string for the signature of request data.
+	 *
+	 * @return string the base string
+	 */
 	protected function buildBaseString($url, $method, $values) {
 		$uri = strtok($url, '?');
 		$baseString = $method . '&' . str_replace(['%7E', '+'], ['~', ' '], rawurlencode($uri)) . '&';
@@ -255,7 +279,10 @@ class OAuth1Client extends AbstractOAuthClient implements OAuthClientInterface {
 		return $baseString;
 	}
 
-	protected function sign(&$url, $method, $parameters, $oauth, $requestContentType, $hasFiles, $postValuesInUri, &$authorization, &$postValues) {
+	/**
+	 * {@inheritdoc}
+	 */
+	protected function signRequestData($url, $method, $parameters, $oauth, $requestContentType, $hasFiles, $postDataInUri) {
 		$values = [
 			'oauth_consumer_key' => $this->provider->getClientId(),
 			'oauth_nonce' => md5(uniqid(''.rand(), true)),
@@ -266,7 +293,7 @@ class OAuth1Client extends AbstractOAuthClient implements OAuthClientInterface {
 		if ($hasFiles) {
 			$valueParameters = [];
 		} else {
-			if (($this->strategy->isUrlParameters() || $method !== 'POST') && $requestContentType === 'application/x-www-form-urlencoded' && count($parameters)) {
+			if (($this->strategy->isUrlParameters() || $method !== 'POST') && $requestContentType === 'application/x-www-form-urlencoded' && count($parameters) > 0) {
 				$url .= (strpos($url, '?') === false ? '?' : '&') . http_build_query($parameters);
 				$parameters = [];
 			}
@@ -313,16 +340,17 @@ class OAuth1Client extends AbstractOAuthClient implements OAuthClientInterface {
 			if (!empty($headerValues)) {
 				$authorization .= ' ' . str_replace(['%7E', '+'], ['~', ' '], http_build_query($headerValues, null, ','));
 			}
-			$postValues = $parameters;
+			$postData = $parameters;
 		} else {
-			if ($method !== 'POST' || $postValuesInUri) {
-				$url .= (strpos($url, '?') === false ? '?' : '&') . http_build_query($postValues);
-				$postValues = [];
+			$authorization = '';
+			if ($method !== 'POST' || $postDataInUri) {
+				$url .= (strpos($url, '?') === false ? '?' : '&') . http_build_query($values);
+				$postData = [];
 			} else {
-				$postValues = $values;
+				$postData = $values;
 			}
 		}
-		return true;
+		return [$url, $authorization, $postData];
 	}
 
 }
