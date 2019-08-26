@@ -76,7 +76,7 @@ class OpenIDClient extends OAuth2Client
 		}
 		$clientId = $this->provider->getClientId();
 		$clientSecret = $this->provider->getClientSecret();
-		$parameters = http_build_query($parameters, null, '&');
+		$parameters = http_build_query($parameters, '', '&');
 		$options = [
 			'resource' => 'OAuth introspect Token',
 			'accept' => 'application/json',

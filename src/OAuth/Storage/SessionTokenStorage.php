@@ -65,6 +65,9 @@ class SessionTokenStorage
 		return true;
 	}
 
+	/**
+	 * Starts a PHP session, if not already started
+	 */
 	private function startSession() {
 		if (session_id() === '' && !session_start()) {
 			throw new OAuthClientPHPException('it was not possible to start the PHP session');

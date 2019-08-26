@@ -1257,6 +1257,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 				'GET', [], [
 					'convert_json_to_array' => true,
 					'accept' => 'application/json',
+					'accept_language' => 'fr',
 					'fail_on_access_error' => true
 				]
 			);
@@ -1583,7 +1584,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 		if($redirect !== null){
 			$params['post_logout_redirect_uri'] = $redirect;
 		}
-		$endPoint .= (strpos($endPoint, '?') === false ? '?' : '&') . http_build_query($params, null, '&');
+		$endPoint .= (strpos($endPoint, '?') === false ? '?' : '&') . http_build_query($params, '', '&');
 		$this->redirect($endPoint);
 		$this->setExit(true);
 	}

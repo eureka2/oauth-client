@@ -338,7 +338,7 @@ class OAuth1Client extends AbstractOAuthClient implements OAuthClientInterface {
 		if ($this->strategy->isAuthorizationInHeader()) {
 			$authorization = 'OAuth';
 			if (!empty($headerValues)) {
-				$authorization .= ' ' . str_replace(['%7E', '+'], ['~', ' '], http_build_query($headerValues, null, ','));
+				$authorization .= ' ' . str_replace(['%7E', '+'], ['~', ' '], http_build_query($headerValues, '', ','));
 			}
 			$postData = $parameters;
 		} else {

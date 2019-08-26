@@ -118,7 +118,7 @@ class PdoTokenStorage
 			$oauthSession = null;
 			return true;
 		}
-		$this->setOAuthSession($oauthSession, $results[0]);
+		$oauthSession = $this->setOAuthSession($results[0]);
 		return true;
 	}
 
@@ -169,7 +169,14 @@ class PdoTokenStorage
 		return true;
 	}
 
-	private function setOAuthSession(&$oauthSession, $session) {
+	/**
+	 * Creates an OAuthSessionValue object from an array of session variables.
+	 *
+	 * @param array $session the array of session variables
+	 *
+	 * @return \eureka2\OAuth\Storage\OAuthSessionValue the OAuthSessionValue object to create
+	 */
+	private function setOAuthSession($session) {
 		$accessToken = new AccessToken([
 			'value' => $session[4],
 			'secret' => $session[5],
@@ -190,8 +197,14 @@ class PdoTokenStorage
 		$oauthSession->setProvider($session[9]);
 		$oauthSession->setCreation($session[10]);
 		$oauthSession->setUser($session[15]);
+		return $oauthSession;
 	}
 
+	/**
+	 * Checks if the OAuth session table exists
+	 *
+	 * @return bool true if the OAuth session table exists, false otherwise
+	 */
 	private function tableExists() {
 		try {
 			$result = $this->pdo->query("SELECT 1 FROM oauth_session LIMIT 1");
@@ -201,6 +214,11 @@ class PdoTokenStorage
 		return $result !== false;
 	}
 
+	/**
+	 * Creates the OAuth session table
+	 *
+	 * @throws OAuthClientException if an error occurs.
+	 */
 	private function createTable() {
 		try {
 			$driver = $this->pdo->getAttribute(\PDO::ATTR_DRIVER_NAME);
@@ -236,6 +254,11 @@ class PdoTokenStorage
 		}
 	}
 
+	/**
+	 * Connects to the database
+	 *
+	 * @throws OAuthClientException if an error occurs.
+	 */
 	private function connect() {
 		if (!isset($this->parameters['dsn'])) {
 			throw new OAuthClientException('The database dsn is not provided');
@@ -268,6 +291,11 @@ class PdoTokenStorage
 		}
 	}
 
+	/**
+	 * Executes a query on the session table
+	 *
+	 * @return bool true if the query succeeds, false otherwise
+	 */
 	private function query($sql, $parameters, &$results) {
 		if (!isset($this->pdo)) {
 			$this->connect();
