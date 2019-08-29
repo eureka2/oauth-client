@@ -1572,7 +1572,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 		$accessToken = $this->storage->getStoredAccessToken();
 		$idToken = $accessToken['id_token'] ?? '';
 		if (!empty($idToken)) {
-			$params['id_token_hint'] = $idToken;
+			$params['id_token_hint'] = $idToken['token'];
 		}
 		$state = $this->storage->getStoredState();
 		if (!is_null($state)) {
@@ -1582,6 +1582,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 			$params['post_logout_redirect_uri'] = $redirect;
 		}
 		$endPoint .= (strpos($endPoint, '?') === false ? '?' : '&') . http_build_query($params, '', '&');
+		$this->storage->resetAccessToken();
 		$this->redirect($endPoint);
 		$this->setExit(true);
 	}

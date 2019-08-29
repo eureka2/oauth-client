@@ -27,10 +27,10 @@ class OAuth2Client extends AbstractOAuthClient implements OAuthClientInterface {
 		} else if ($claims->aud != $this->provider->getClientId()) {
 			return false;
 		}
-		if (property_exists($claims, 'azp') && $claims->azp != $this->provider->getClientId()) {
+		if (property_exists($claims, 'azp') && !empty($claims->azp) && $claims->azp != $this->provider->getClientId()) {
 			return false;
 		}
-		if (property_exists($claims, 'nonce') && $claims->nonce != $this->storage->getStoredNonce()) {
+		if (property_exists($claims, 'nonce') && !empty($claims->nonce) && $claims->nonce != $this->storage->getStoredNonce()) {
 			return false;
 		}
 		if (!property_exists($claims, 'exp') || $claims->exp < time() - 300) {

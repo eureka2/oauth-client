@@ -212,14 +212,14 @@ class IdToken {
 	}
 
 	/**
-	 * Returns the array of claims
+	 * Returns an array containing the claims and the undecoded ID Token
 	 *
 	 * Alias of the getClaims method
 	 *
 	 * @return array
 	 */
 	public function toArray() : array {
-		return $this->getClaims();
+		return array_merge([ 'token' => $this->get() ], $this->getClaims());
 	}
 
 

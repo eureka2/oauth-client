@@ -66,10 +66,9 @@ class OAuthBuiltinProviders {
 				'version' => '1.0'
 			],
 			'endpoints' => [
-				'authorization_endpoint' => 'https://gitlab.com/oauth/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&scope={SCOPE}&state={STATE}',
-				'token_endpoint' => 'https://gitlab.com/oauth/token',
-				'userinfo_endpoint' => 'https://gitlab.com/oauth/userinfo',
-				'jwks_uri' => 'https://gitlab.com/oauth/discovery/keys'
+				'discovery_endpoint' => 'https://gitlab.com',
+				'userinfo_endpoint' => 'https://gitlab.com/api/v4/user'
+
 			],
 			'strategy' => [
 				'scope' => 'openid read_user'
@@ -154,13 +153,11 @@ class OAuthBuiltinProviders {
 				'version' => '1.0'
 			],
 			'endpoints' => [
-				'authorization_endpoint' => 'https://login.live.com/oauth20_authorize.srf?client_id={CLIENT_ID}&scope={SCOPE}&response_type=code&redirect_uri={REDIRECT_URI}&state={STATE}',
-				'token_endpoint' => 'https://login.live.com/oauth20_token.srf',
-				'revocation_endpoint' => 'https://login.microsoftonline.com/common/oauth2/logout',
-				'userinfo_endpoint' => 'https://apis.live.net/v5.0/me',
-				'jwks_uri' => 'https://login.microsoftonline.com/consumers/discovery/v2.0/keys'
+				'discovery_endpoint' => 'https://login.microsoftonline.com/common/v2.0',
+				'userinfo_endpoint' => 'https://apis.live.net/v5.0/me'
 			],
 			'strategy' => [
+				'offline_access' => true,
 				'scope' => 'openid wl.basic wl.emails'
 			]
 		],
@@ -171,7 +168,8 @@ class OAuthBuiltinProviders {
 			],
 			'endpoints' => [
 				'authorization_endpoint' => 'https://api.orange.com/openidconnect/fr/v1/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={SCOPE}&response_type=code&state={STATE}',
-				'token_endpoint' => 'https://api.orange.com/oauth/v2/token',
+				// 'token_endpoint' => 'https://api.orange.com/oauth/v2/token',
+				'token_endpoint' => 'https://api.orange.com/openidconnect/fr/v1/token',
 				'userinfo_endpoint' => 'https://api.orange.com/openidconnect/v1/userinfo'
 			],
 			'strategy' => [
