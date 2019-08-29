@@ -91,7 +91,7 @@ class OAuthRequest {
 	/**
 	 * Sets the url of the endpoint of the OAuth provider
 	 *
-	 * @param string url of the endpoint
+	 * @param string $url the url of the endpoint
 	 *
 	 * @return self
 	 */
@@ -103,7 +103,7 @@ class OAuthRequest {
 	/**
 	 * Sets the HTTP method for the request
 	 *
-	 * @param string the HTTP method
+	 * @param string $method the HTTP method
 	 *
 	 * @return self
 	 */
@@ -115,7 +115,7 @@ class OAuthRequest {
 	/**
 	 * Sets the request-header fields
 	 *
-	 * @param string the request-header fields
+	 * @param array $headers the request-header fields
 	 *
 	 * @return self
 	 */
@@ -127,7 +127,7 @@ class OAuthRequest {
 	/**
 	 * Sets the body content of the request
 	 *
-	 * @param string the body content
+	 * @param string $body the body content
 	 *
 	 * @return self
 	 */

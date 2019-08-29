@@ -353,10 +353,10 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	/**
 	 * Returns the original response for the access token request
 	 *
-	 * 	Check this variable if the OAuth server returns custom
-	 * 	parameters in the request to obtain the access token.
+	 * Check this variable if the OAuth server returns custom
+	 * parameters in the request to obtain the access token.
 	 *
-	 * @return string
+	 * @return array
 	 */
 	protected function getAccessTokenResponse() {
 		return $this->accessTokenResponse;
@@ -483,7 +483,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	 * Set this variable to true if you
 	 * want to inspect the data exchange with the OAuth server.
 	 *
-	 * @param bool $debug
+	 * @param bool $debugHttp
 	 *
 	 * @return self
 	 */
@@ -499,7 +499,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	 * will be appended instead of sending to PHP error log when the
 	 * debug variable is set to true.
 	 *
-	 * @param bool $debug
+	 * @param string $logFileName
 	 *
 	 * @return self
 	 */
@@ -511,7 +511,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	/**
 	 * Determines if the current script should be exited.
 	 *
-	 * @param bool $debug
+	 * @param bool $exit
 	 *
 	 * @return self
 	 */
@@ -608,7 +608,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	/**
 	 * Sets the original response for the access token request.
 	 *
-	 * @param string $accessTokenResponse
+	 * @param array $accessTokenResponse
 	 *
 	 * @return self
 	 */
@@ -630,9 +630,9 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	}
 
 	/**
-	 * Sets the id_token value from OAuth servers compatible with OpenID Connect.
+	 * Sets the id_token object from OAuth servers compatible with OpenID Connect.
 	 *
-	 * @param string $idToken
+	 * @param \eureka2\OAuth\Token\IdToken|null $idToken
 	 *
 	 * @return self
 	 */
@@ -877,7 +877,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	 *
 	 * @throws \eureka2\OAuth\Exception\OAuthClientException if an error occurs.
 	 */
-	protected function signRequestData(&$url, $method, $parameters, $oauth, $requestContentType, $hasFiles, $postDataInUri, &$authorization, &$postData) {
+	protected function signRequestData($url, $method, $parameters, $oauth, $requestContentType, $hasFiles, $postDataInUri) {
 		throw new OAuthClientException(
 			sprintf(
 				'the signRequestData method is not available for the protocol %s %s',
@@ -1257,11 +1257,10 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 				'GET', [], [
 					'convert_json_to_array' => true,
 					'accept' => 'application/json',
-					'accept_language' => 'fr',
 					'fail_on_access_error' => true
 				]
 			);
-		$userId = $this->storage->getStoredUser();
+		$userId = $this->storage->getStoredUserId();
 		if (empty($userId) &&!empty($this->provider->getUserIdField())) {
 			$field = $this->provider->getUserIdField();
 			if (isset($user[$field])) {
@@ -1356,7 +1355,6 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 			$strategy = array_merge($strategy, $options['strategy']);
 		}
 		$this->strategy->bind($strategy);
-		$this->storage->initialize();
 		return true;
 	}
 
@@ -1492,7 +1490,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 		if (empty($revocationEndpoint)) {
 			return false;
 		}
-		$redirectUrl = null;
+		$redirectUrl = '';
 		if (!$this->checkAccessToken($redirectUrl) || !isset($redirectUrl)) {
 			return false;
 		}
@@ -1546,7 +1544,6 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	 * {@inheritdoc}
 	 */
 	public function finalize() {
-		$this->storage->finalize();
 	}
 
 	/**

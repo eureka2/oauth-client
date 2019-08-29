@@ -8,7 +8,7 @@ use eureka2\OAuth\Token\AccessToken;
  * This class holds all the variables stored during a session
  *
  */
-class OAuthSessionValue {
+class OAuthSession {
 
 	/**
 	 * The serial number of the session used especially for database storage
@@ -20,7 +20,7 @@ class OAuthSessionValue {
 	/**
 	 * The id of the session
 	 *
-	 * @var string $id
+	 * @var string $sessionId
 	 */
 	private $sessionId = null;
 
@@ -62,39 +62,39 @@ class OAuthSessionValue {
 	/**
 	 * The user ID of the resource owner at the provider
 	 *
-	 * @var string $user
+	 * @var string $userId
 	 */
-	private $user = null;
+	private $userId = null;
 
 	/**
-	 * Constructs a OAuthSessionValue from an array of session values
+	 * Constructs a OAuthSession object from an array of session values
 	 *
-	 * @param array $oAuthSessionValue array of session values
+	 * @param array $OAuthSession array of session values
 	 */
-	public function __construct($oAuthSessionValue = []) {
-		if (isset($oAuthSessionValue['id']) && !is_null($oAuthSessionValue['id'])) {
-			$this->setId($oAuthSessionValue['id']);
+	public function __construct($oauthSession = []) {
+		if (isset($oauthSession['id']) && !is_null($oauthSession['id'])) {
+			$this->setId($oauthSession['id']);
 		}
-		if (isset($oAuthSessionValue['session']) && !is_null($oAuthSessionValue['session'])) {
-			$this->setSession($oAuthSessionValue['session']);
+		if (isset($oauthSession['session']) && !is_null($oauthSession['session'])) {
+			$this->setSession($oauthSession['session']);
 		}
-		if (isset($oAuthSessionValue['state']) && !is_null($oAuthSessionValue['state'])) {
-			$this->setState($oAuthSessionValue['state']);
+		if (isset($oauthSession['state']) && !is_null($oauthSession['state'])) {
+			$this->setState($oauthSession['state']);
 		}
-		if (isset($oAuthSessionValue['nonce']) && !is_null($oAuthSessionValue['nonce'])) {
-			$this->setNonce($oAuthSessionValue['nonce']);
+		if (isset($oauthSession['nonce']) && !is_null($oauthSession['nonce'])) {
+			$this->setNonce($oauthSession['nonce']);
 		}
-		if (isset($oAuthSessionValue['access_token']) && !is_null($oAuthSessionValue['access_token'])) {
-			$this->setAccessToken(new AccessToken($oAuthSessionValue['access_token']));
+		if (isset($oauthSession['access_token']) && !is_null($oauthSession['access_token'])) {
+			$this->setAccessToken(new AccessToken($oauthSession['access_token']));
 		}
-		if (isset($oAuthSessionValue['provider']) && !is_null($oAuthSessionValue['provider'])) {
-			$this->setProvider($oAuthSessionValue['provider']);
+		if (isset($oauthSession['provider']) && !is_null($oauthSession['provider'])) {
+			$this->setProvider($oauthSession['provider']);
 		}
-		if (isset($oAuthSessionValue['creation']) && !is_null($oAuthSessionValue['creation'])) {
-			$this->setCreation($oAuthSessionValue['creation']);
+		if (isset($oauthSession['creation']) && !is_null($oauthSession['creation'])) {
+			$this->setCreation($oauthSession['creation']);
 		}
-		if (isset($oAuthSessionValue['user']) && !is_null($oAuthSessionValue['user'])) {
-			$this->setUser($oAuthSessionValue['user']);
+		if (isset($oauthSession['user']) && !is_null($oauthSession['user'])) {
+			$this->setUserId($oauthSession['user']);
 		}
 	}
 
@@ -166,8 +166,8 @@ class OAuthSessionValue {
 	 *
 	 * @return string the user ID
 	 */
-	public function getUser() {
-		return $this->user;
+	public function getUserId() {
+		return $this->userId;
 	}
 
 	/**
@@ -257,17 +257,17 @@ class OAuthSessionValue {
 	/**
 	 * Sets the user ID of the resource owner
 	 *
-	 * @param string $user the user ID
+	 * @param string $userId the user ID
 	 *
 	 * @return self
 	 */
-	public function setUser($user) {
-		$this->user = $user;
+	public function setUserId($userId) {
+		$this->userId = $userId;
 		return $this;
 	}
 
 	/**
-	 * Converts the OAuthSessionValue object to array
+	 * Converts the OAuthSession object to array
 	 * 
 	 * @return array of session values
 	 */
@@ -281,7 +281,7 @@ class OAuthSessionValue {
 			'access_token' => !is_null($accessToken) ? $accessToken->toArray() : [],
 			'provider' => $this->getProvider(),
 			'creation' => $this->getCreation(),
-			'user' => $this->getUser()
+			'user' => $this->getUserId()
 		];
 	}
 }

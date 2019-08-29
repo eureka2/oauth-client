@@ -5,8 +5,23 @@ namespace eureka2\OAuth\Client;
 use eureka2\OAuth\Exception\OAuthClientException;
 use eureka2\OAuth\Provider\OAuthBuiltinProviders;
 
+/**
+ * This class provides a factory method for creating an OAuth client instance
+ * based on the provider name, protocol, and version of this protocol.
+ *
+ * If the provider is not a buit-in provider, protocol and version are required.
+ */
 class OAuthClientFactory {
 
+	/**
+	 * Creates a OAuth instance according to the given parameters.
+	 *
+	 * @param string $provider the provider's name
+	 * @param string $protocol protocol name among 'oauth' or 'openid'
+	 * @param string $version protocol version among '1.0', '1.0a' or '2.0'
+	 *
+	 * @throws \eureka2\OAuth\Exception\OAuthClientException if an error occurs
+	 */
 	public static function create($provider, $protocol = null, $version = null) {
 		if (isset(OAuthBuiltinProviders::PROVIDERS[$provider])) {
 			$pprotocol = OAuthBuiltinProviders::PROVIDERS[$provider]['protocol']['name'];

@@ -64,7 +64,7 @@ class AccessToken {
 	protected $id_token = null;
 
 	/**
-	 * @var array|null $response
+	 * @var string|null $response
 	 * the access token response as returned by the authorization server
 	 */
 	protected $response = null;
@@ -170,7 +170,7 @@ class AccessToken {
 	/**
 	 * Returns the access token response as returned by the authorization server
 	 * 
-	 * @return array|null the access token response
+	 * @return string|null the access token response
 	 */
 	public function getResponse() {
 		return $this->response;

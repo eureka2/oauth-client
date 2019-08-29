@@ -87,8 +87,7 @@ class PdoTokenStorage
 	 * {@inheritdoc}
 	 */
 	public function createOAuthSession(&$session) {
-		$session = null;
-		$this->initializeOAuthSession($session);
+		$session = $this->initializeOAuthSession();
 		$parameters = [
 			$session->getSessionId(), \PDO::PARAM_STR,
 			$session->getState(), \PDO::PARAM_STR,
@@ -142,7 +141,7 @@ class PdoTokenStorage
 			$token->getScope(), \PDO::PARAM_STR,
 			"".$token->getIdToken(), \PDO::PARAM_STR,
 			json_encode($token->getResponse()), \PDO::PARAM_STR,
-			$session->getUser(), \PDO::PARAM_STR,
+			$session->getUserId(), \PDO::PARAM_STR,
 			$session->getid(), \PDO::PARAM_INT
 		];
 		return $this->query('UPDATE oauth_session SET session=?, state=?, nonce=?, access_token=?, access_token_secret=?, expiry=?, authorized=?, type=?, provider=?, creation=?, refresh_token=?, scope=?, id_token=?, access_token_response=?, user=? WHERE id=?', $parameters, $results);
@@ -170,11 +169,11 @@ class PdoTokenStorage
 	}
 
 	/**
-	 * Creates an OAuthSessionValue object from an array of session variables.
+	 * Creates an OAuthSession object from an array of session variables.
 	 *
 	 * @param array $session the array of session variables
 	 *
-	 * @return \eureka2\OAuth\Storage\OAuthSessionValue the OAuthSessionValue object to create
+	 * @return \eureka2\OAuth\Storage\OAuthSession the OAuthSession object to create
 	 */
 	private function setOAuthSession($session) {
 		$accessToken = new AccessToken([
@@ -188,7 +187,7 @@ class PdoTokenStorage
 			'id_token' => $session[13],
 			'response' => (isset($session[14]) ? json_decode($session[14]) : null)
 		]);
-		$oauthSession = new OAuthSessionValue();
+		$oauthSession = new OAuthSession();
 		$oauthSession->setId($session[0]);
 		$oauthSession->setSession($session[1]);
 		$oauthSession->setState($session[2]);
@@ -196,7 +195,7 @@ class PdoTokenStorage
 		$oauthSession->setAccessToken($accessToken);
 		$oauthSession->setProvider($session[9]);
 		$oauthSession->setCreation($session[10]);
-		$oauthSession->setUser($session[15]);
+		$oauthSession->setUserId($session[15]);
 		return $oauthSession;
 	}
 

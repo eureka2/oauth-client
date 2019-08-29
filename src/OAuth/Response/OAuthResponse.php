@@ -68,7 +68,7 @@ abstract class OAuthResponse implements \Iterator {
 	 * @param string $method the name of the getter.
 	 * @param array $arguments arguments passed to the getter, ignored.
 	 *
-	 * @return bool true if the property exists, false otherwise
+	 * @return mixed|null the value of the property or null
 	 */
 	public function __call($method, $arguments) {
 		$m = [];

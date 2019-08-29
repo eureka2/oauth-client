@@ -23,8 +23,7 @@ class SessionTokenStorage
 	 * {@inheritdoc}
 	 */
 	public function createOAuthSession(&$session) {
-		$session = null;
-		$this->initializeOAuthSession($session);
+		$session = $this->initializeOAuthSession();
 		$this->startSession();
 		return $this->saveOAuthSession($session);
 	}

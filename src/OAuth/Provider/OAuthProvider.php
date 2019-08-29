@@ -278,7 +278,7 @@ class OAuthProvider {
 	private $claims_supported = [];
 
 	/**
-	 * @var string $mapping
+	 * @var array $mapping
 	 * Match between OAuth client fields and
 	 * fields returned by the provider's UserInfo endpoint.
 	 * By default, contains the mapping of user_id_field

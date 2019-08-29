@@ -30,9 +30,9 @@ class ResourceOwner extends OAuthResponse {
 	}
 
 	/**
-	 * Resourns the ID of the resource owner
+	 * Returns the ID of the resource owner
 	 *
-	 * @return string;
+	 * @return string the ID of the resource owner
 	 */
 	public function getId() {
 		return $this->id;

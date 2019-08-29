@@ -204,16 +204,16 @@ class OAuth2Client extends AbstractOAuthClient implements OAuthClientInterface {
 				throw new OAuthClientException('the claims of the returned id_token is not valid');
 			}
 			if (property_exists($claims, 'sub')) {
-				$this->storage->storeUser($claims->sub);
+				$this->storage->storeUserid($claims->sub);
 			}
 		} 
-		if (empty($this->storage->getStoredUser()) &&
+		if (empty($this->storage->getStoredUserId()) &&
 			!empty($this->provider->getUserIdField()) &&
 			!empty($this->provider->getUserinfoEndpoint())) {
 			if (($user = $this->callAPI($this->provider->getUserinfoEndpoint(), 'GET', [], ['fail_on_access_error' => true, 'convert_json_to_array' => true])) !== false) {
 				$field = $this->provider->getUserIdField();
 				if (isset($user[$field])) {
-					$this->storage->storeUser($user[$field]);
+					$this->storage->storeUserid($user[$field]);
 				}
 			}
 		}

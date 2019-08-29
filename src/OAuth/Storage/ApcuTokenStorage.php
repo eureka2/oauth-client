@@ -21,8 +21,7 @@ class ApcuTokenStorage
 	 * {@inheritdoc}
 	 */
 	public function createOAuthSession(&$session) {
-		$session = null;
-		$this->initializeOAuthSession($session);
+		$session = $this->initializeOAuthSession();
 		apcu_add($session->getSessionId(), $session);
 		return true;
 	}

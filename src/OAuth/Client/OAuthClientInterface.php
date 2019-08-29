@@ -270,7 +270,7 @@ interface OAuthClientInterface {
 	 *
 	 * Call this function if the OAuth server returns id_token values.
 	 *
-	 * @return string
+	 * @return \eureka2\OAuth\Token\IdToken the obtained ID token 
 	 */
 	public function getIdToken();
 

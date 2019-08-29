@@ -20,25 +20,55 @@ class CookieTokenStorage
 	extends AbstractTokenStorage
 	implements TokenStorageInterface, TokenStorageManagementInterface {
 
+	/**
+	 * Holds the decrypted value of the cookie storing the OAuth session
+	 *
+	 * @var \eureka2\OAuth\Storage\OAuthSession the decrypted OAuth session
+	 */
 	private $cookieValue = null;
 
+	/**
+	 * Returns the name of the cookie used to store the OAuth session
+	 *
+	 * @var string the name of the cookie
+	 */
 	public function getCookieName() {
 		return $this->getSessionCookieName() . '_storage';
 	}
 
+	/**
+	 * Returns the encrypted OAuth session stored in the cookie
+	 *
+	 * @var string the encrypted OAuth session
+	 */
 	protected function getCookie() {
 		return $_COOKIE[$this->getCookieName()] ?? '';
 	}
 
+	/**
+	 * Returns the decrypted value of the cookie storing the OAuth session
+	 *
+	 * @return \eureka2\OAuth\Storage\OAuthSession|null
+	 */
 	protected function getCookieValue() {
 		return $this->cookieValue;
 	}
 
+	/**
+	 * Sets the decrypted value of the cookie storing the OAuth session
+	 *
+	 * @param \eureka2\OAuth\Storage\OAuthSession|null $cookieValue
+	 *
+	 * @return self
+	 */
 	protected function setCookieValue($cookieValue) {
 		$this->cookieValue = $cookieValue;
 		return $this;
 	}
 
+	/**
+	 * Deletes the cookie that stores the OAuth session
+	 */
 	protected function deleteCookie() {
 		unset($_COOKIE[$this->getCookieName()]);
 		setcookie($this->getCookieName(), '', time() - 3600);
@@ -48,8 +78,7 @@ class CookieTokenStorage
 	 * {@inheritdoc}
 	 */
 	public function createOAuthSession(&$session) {
-		$session = null;
-		$this->initializeOAuthSession($session);
+		$session = $this->initializeOAuthSession();
 		if (!$this->serialize($session)) {
 			return false;
 		}
@@ -88,7 +117,17 @@ class CookieTokenStorage
 		return true;
 	}
 
-	protected function encrypt($text, &$encrypted) {
+	/**
+	 * Encrypts a string using the cookie encryption key provided
+	 * at initialization of this class.
+	 *
+	 * @param string $text
+	 *
+	 * @return string the encrypted string
+	 *
+	 * @throws \eureka2\OAuth\Exception\OAuthClientException if the cookie encryption key is missing
+	 */
+	protected function encrypt($text) {
 		if (!isset($this->parameters['key']) || empty($this->parameters['key'])) {
 			throw new OAuthClientException('the cookie encryption key is missing');
 		}
@@ -99,19 +138,28 @@ class CookieTokenStorage
 		$iv = openssl_random_pseudo_bytes($ivlen);
 		$cipher = openssl_encrypt($text, $method, $key, OPENSSL_RAW_DATA, $iv);
 		$hmac = hash_hmac('sha256', $cipher, $key, true);
-		$encrypted = base64_encode( $iv.$hmac.$cipher) . ':' . $encodeTime;
-		return true;
+		return base64_encode( $iv.$hmac.$cipher) . ':' . $encodeTime;
 	}
 
-	protected function decrypt($encoded, &$encodeTime, &$decrypted) {
+	/**
+	 * Decrypts a string using the cookie encryption key provided
+	 * at initialization of this class.
+	 *
+	 * @param string $encrypted the encrypted string
+	 *
+	 * @return string|null the decrypted string or null
+	 *
+	 * @throws \eureka2\OAuth\Exception\OAuthClientException if the cookie encryption key is missing
+	 */
+	protected function decrypt($encrypted) {
 		if (!isset($this->parameters['key']) || empty($this->parameters['key'])) {
-			throw new OAuthClientException('the cookie encryption key is empty');
+			throw new OAuthClientException('the cookie encryption key is missing');
 		}
-		if (gettype($colon = strpos($encoded, ':')) != 'integer'
-			|| ($encodeTime = intval(substr($encoded, $colon + 1))) == 0 
+		if (gettype($colon = strpos($encrypted, ':')) != 'integer'
+			|| ($encodeTime = intval(substr($encrypted, $colon + 1))) == 0 
 			|| $encodeTime > time() 
-			|| !($encrypted = base64_decode(substr($encoded, 0, $colon)))) {
-			throw new OAuthClientException('invalid encrypted data to decode: ' . $encoded);
+			|| !($encrypted = base64_decode(substr($encrypted, 0, $colon)))) {
+			throw new OAuthClientException('invalid encrypted data to decode: ' . $encrypted);
 		}
 		$key = $encodeTime . $this->parameters['key'];
 		$method = 'AES-128-CBC';
@@ -121,9 +169,15 @@ class CookieTokenStorage
 		$cipher = substr($encrypted, $ivlen + 32);
 		$decrypted = openssl_decrypt($cipher, $method, $key, OPENSSL_RAW_DATA, $iv);
 		$calcmac = hash_hmac('sha256', $cipher, $key, true);
-		return hash_equals($hmac, $calcmac);
+		return hash_equals($hmac, $calcmac) ? $decrypted : null;
 	}
 
+	/**
+	 * Unserializes, after decryption, the OAuth session stored in cookie
+	 * then creates a OAuthSession object and returns it.
+	 *
+	 * @return \eureka2\OAuth\Storage\OAuthSession|null the unserialized OAuth session or null
+	 */
 	private function unserialize() {
 		if (!is_null($this->getCookieValue())) {
 			return $this->getCookieValue();
@@ -131,17 +185,27 @@ class CookieTokenStorage
 		if (empty($this->getCookie())) {
 			return null;
 		}
-		if (!$this->decrypt($this->getCookie(), $encodeTime, $serialized)) {
+		$decrypted = $this->decrypt($this->getCookie());
+		if ($decrypted === null) {
 			return null;
 		}
-		$value = unserialize($serialized);
-		$value = new OAuthSessionValue($value);
+		$value = unserialize($decrypted);
+		$value = new OAuthSession($value);
 		$this->setCookieValue($value);
 		return $value;
 	}
 
+	/**
+	 * Serializes, after encryption, the OAuthSession object given in argument
+	 * then stores it in a cookie.
+	 *
+	 * @param \eureka2\OAuth\Storage\OAuthSession $value the OAuthSession object to serialize
+	 *
+	 * @return bool true if success, false if the OAuthSession object cannot be encrypted
+	 */
 	private function serialize($value) {
-		if (!$this->encrypt(serialize($value->toArray()), $encrypted)) {
+		$encrypted = $this->encrypt(serialize($value->toArray()));
+		if ($encrypted === null) {
 			return false;
 		}
 		$this->setCookieValue($value);
