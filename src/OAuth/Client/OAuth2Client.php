@@ -176,7 +176,7 @@ class OAuth2Client extends AbstractOAuthClient implements OAuthClientInterface {
 				break;
 			case '':
 				$values['client_id'] = $this->provider->getClientId();
-				$values['client_secret'] = ($this->strategy->getTokenWithApiKey() ? $this->provider->getApiKey() : $this->provider->getClientSecret());
+				$values['client_secret'] = ($this->strategy->shouldGetTokenWithApiKey() ? $this->provider->getApiKey() : $this->provider->getClientSecret());
 				break;
 			default:
 				throw new OAuthClientException($authentication . ' is not a supported authentication mechanism to retrieve an access token');

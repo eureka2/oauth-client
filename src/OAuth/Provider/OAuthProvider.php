@@ -36,7 +36,7 @@ class OAuthProvider {
 
 	/**
 	 * @var string $client_id
-	 * Identifier of your application registered with the OAuth provider.
+	 * Identifier of the application registered with the OAuth provider.
 	 *
 	 * Set this variable to the application identifier that is
 	 * provided by the OAuth provider when you register the application.
@@ -46,7 +46,7 @@ class OAuthProvider {
 
 	/**
 	 * @var string $client_secret
-	 * Secret value assigned to your application when it is registered with the OAuth provider.
+	 * Secret value assigned to the application when it is registered with the OAuth provider.
 	 *
 	 * Set this variable to the application secret that is provided
 	 * by the OAuth server when you register the application.
@@ -1023,7 +1023,8 @@ class OAuthProvider {
 			$port = $scheme === 'https' ? 443 : 80;
 		}
 		$port = (443 == $port) || (80 == $port) ? '' : ':' . $port;
-		$requestUri = trim(strtok($server['REQUEST_URI'], '?'), '/');
+		$requestUri = strtok($server['REQUEST_URI'] ?? '', '?');
+		$requestUri = $requestUri === false ? '' : trim($requestUri, '/');
 		return sprintf('%s://%s%s/%s', $scheme, $host, $port, $requestUri);
 	}
 

@@ -293,7 +293,7 @@ class OAuth1Client extends AbstractOAuthClient implements OAuthClientInterface {
 		if ($hasFiles) {
 			$valueParameters = [];
 		} else {
-			if (($this->strategy->isUrlParameters() || $method !== 'POST') && $requestContentType === 'application/x-www-form-urlencoded' && count($parameters) > 0) {
+			if (($this->strategy->isParametersInUrl() || $method !== 'POST') && $requestContentType === 'application/x-www-form-urlencoded' && count($parameters) > 0) {
 				$url .= (strpos($url, '?') === false ? '?' : '&') . http_build_query($parameters);
 				$parameters = [];
 			}

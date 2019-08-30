@@ -43,19 +43,19 @@ class OAuthClientStrategy {
 	 * Determines if the API call parameters should be moved to the
 	 * calling URL.
 	 *
-	 * @var bool $url_parameters
+	 * @var bool $parameters_in_url
 	 *
 	 */
-	private $url_parameters = false;
+	private $parameters_in_url = false;
 
 	/**
 	 * Determines if the OAuth parameters should be passed via HTTP
 	 * Authorization request header.
 	 *
-	 * @var bool $authorization_header
+	 * @var bool $authorization_in_header
 	 *
 	 */
-	private $authorization_header = true;
+	private $authorization_in_header = true;
 
 	/**
 	 * Define the HTTP method that should be used to request
@@ -233,8 +233,8 @@ class OAuthClientStrategy {
 	 *
 	 * @return bool 
 	 */
-	public function isUrlParameters() {
-		return $this->url_parameters;
+	public function isParametersInUrl() {
+		return $this->parameters_in_url;
 	}
 
 	/**
@@ -244,7 +244,7 @@ class OAuthClientStrategy {
 	 * @return bool 
 	 */
 	public function isAuthorizationInHeader() {
-		return $this->authorization_header;
+		return $this->authorization_in_header;
 	}
 
 	/**
@@ -397,7 +397,7 @@ class OAuthClientStrategy {
 	 *
 	 * @return bool 
 	 */
-	public function getTokenWithApiKey() {
+	public function shouldGetTokenWithApiKey() {
 		return $this->get_token_with_api_key;
 	}
 
@@ -462,12 +462,12 @@ class OAuthClientStrategy {
 	 * API you need to call requires that the call parameters always be
 	 * passed via the API URL.
 	 *
-	 * @param bool $url_parameters
+	 * @param bool $parameters_in_url
 	 *
 	 * @return self
 	 */
-	public function setUrlParameters($url_parameters) {
-		$this->url_parameters = $url_parameters;
+	public function setParametersInUrl($parameters_in_url) {
+		$this->parameters_in_url = $parameters_in_url;
 		return $this;
 	}
 
@@ -479,12 +479,12 @@ class OAuthClientStrategy {
 	 * OAuth server requires that the OAuth parameters be passed using
 	 * the HTTP Authorization instead of the request URI parameters.
 	 *
-	 * @param bool $authorization_header
+	 * @param bool $authorization_in_header
 	 *
 	 * @return self
 	 */
-	public function setAuthorizationHeader($authorization_header) {
-		$this->authorization_header = $authorization_header;
+	public function setAuthorizationHeader($authorization_in_header) {
+		$this->authorization_in_header = $authorization_in_header;
 		return $this;
 	}
 
@@ -763,8 +763,8 @@ class OAuthClientStrategy {
 			'offline_access' => 'boolean',
 			'offline_access_parameter' => 'string',
 			'append_state_to_redirect_uri' => 'string',
-			'authorization_header' => 'boolean',
-			'url_parameters' => 'boolean',
+			'authorization_in_header' => 'boolean',
+			'parameters_in_url' => 'boolean',
 			'token_request_method' => 'string',
 			'signature_method' => 'string',
 			'signature_certificate_file' => 'string',

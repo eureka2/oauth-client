@@ -231,7 +231,7 @@ class OAuthBuiltinProviders {
 				'token_endpoint' => 'https://api.twitter.com/oauth/access_token'
 			],
 			'strategy' => [
-				'url_parameters' => false
+				'parameters_in_url' => false
 			]
 		],
 		'Yahoo' => [
@@ -245,7 +245,7 @@ class OAuthBuiltinProviders {
 				'token_endpoint' => 'https://api.login.yahoo.com/oauth/v2/get_token'
 			],
 			'strategy' => [
-				'authorization_header' => false
+				'authorization_in_header' => false
 			]
 		]
 	];

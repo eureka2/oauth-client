@@ -37,8 +37,8 @@ use eureka2\OAuth\Storage\TokenStorageFactory;
  *
  * - protocol
  * - version
- * - url_parameters
- * - authorization_header
+ * - parameters_in_url
+ * - authorization_in_header
  * - request_token_endpoint
  * - authorization_endpoint
  * - reauthentication_parameter
@@ -1034,7 +1034,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 		$requestHeaders['Accept-Language'] = $options['accept_language'] ?? '*';
 		switch ($authentication = (isset($options['authentication']) ? strtolower($options['authentication']) : '')) {
 			case 'basic':
-				$requestHeaders['Authorization'] = 'Basic ' . base64_encode($this->provider->getClientId() . ':' . ($this->strategy->getTokenWithApiKey() ? $this->provider->getApiKey() : $this->provider->getClientSecret()));
+				$requestHeaders['Authorization'] = 'Basic ' . base64_encode($this->provider->getClientId() . ':' . ($this->strategy->shouldGetTokenWithApiKey() ? $this->provider->getApiKey() : $this->provider->getClientSecret()));
 				break;
 			case '':
 				if (!empty($authorization)) {
