@@ -230,13 +230,13 @@ $options = [
 |[logOut](http://eureka2.github.io/oauth-client/eureka2/OAuth/Client/OAuthClientInterface.html#method_logOut)| Calls the end-session endpoint to notify the provider that the end-user has logged out of the relying party site. |
 |[shouldExit](http://eureka2.github.io/oauth-client/eureka2/OAuth/Client/OAuthClientInterface.html#method_shouldExit)| Determine if the current script should be exited. |
 |[getAccessToken](http://eureka2.github.io/oauth-client/eureka2/OAuth/Client/OAuthClientInterface.html#method_getAccessToken)| Returns the obtained access token upon successful OAuth authentication. |
-|[getRefreshToken](http://eureka2.github.io/oauth-client/eureka2/OAuth/Client/OAuthClientInterface.html#method_getRefreshToken| Returns the obtained refresh token upon successful OAuth authentication. |
+|[getRefreshToken](http://eureka2.github.io/oauth-client/eureka2/OAuth/Client/OAuthClientInterface.html#method_getRefreshToken)| Returns the obtained refresh token upon successful OAuth authentication. |
 |[getIdToken](http://eureka2.github.io/oauth-client/eureka2/OAuth/Client/OAuthClientInterface.html#method_getIdToken)| Returns the obtained ID token upon successful OpenID authentication. |
 |[getProvider](http://eureka2.github.io/oauth-client/eureka2/OAuth/Client/OAuthClientInterface.html#method_getProvider)| Returns the current instance of the OAuthProvider class. |
 
 ### API documentation
 
-[Documentation](http://eureka2.github.io/oauth-client/)
+[Documentation of oauth-client classes](http://eureka2.github.io/oauth-client/)
 
 # Copyright and license
 
