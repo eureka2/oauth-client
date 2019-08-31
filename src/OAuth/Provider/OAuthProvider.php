@@ -178,25 +178,25 @@ class OAuthProvider {
 	private $end_session_endpoint = '';
 
 	/**
-	 * 	@var string $pin_dialog_url
-	 * 	URL of the OAuth provider to redirect the browser so the user
-	 * 	can grant access to your application.
+	 * @var string $pin_dialog_url
+	 * URL of the OAuth provider to redirect the browser so the user
+	 * can grant access to your application.
 	 *
-	 * 	Set this variable when using the pin based authorization and
-	 * 	the format of the of the authorization dialog page URL is
-	 * 	different than the one set to the authorization_endpoint variable.
+	 * Set this variable when using the pin based authorization and
+	 * the format of the of the authorization dialog page URL is
+	 * different than the one set to the authorization_endpoint variable.
 	 *
 	 */
 	private $pin_dialog_url = '';
 
 	/**
-	 * 	@var string $pin
-	 * 	Value of the pin code for pin based authorization.
+	 * @var string $pin
+	 * Value of the pin code for pin based authorization.
 	 *
-	 * 	Set this value to the pin informed by the user when
-	 * 	implementing the pin based authorization.
-	 * 	Make sure the  redirect_uri variable
-	 * 	is set to 'oob'.
+	 * Set this value to the pin informed by the user when
+	 * implementing the pin based authorization.
+	 * Make sure the  redirect_uri variable
+	 * is set to 'oob'.
 	 *
 	 */
 	private $pin = '';
@@ -308,12 +308,12 @@ class OAuthProvider {
 	private $oauth_username = '';
 
 	/**
-	 * 	@var string $oauth_password
-	 * 	Define the user name to obtain authorization using a password.
+	 * @var string $oauth_password
+	 * Define the password to obtain authorization using a password.
 	 *
-	 * 	Set this variable to the user password of the account to
-	 * 	authorize instead of going through the interactive user
-	 * 	authorization process.
+	 * Set this variable to the user password of the account to
+	 * authorize instead of going through the interactive user
+	 * authorization process.
 	 *
 	 */
 	private $oauth_password = '';

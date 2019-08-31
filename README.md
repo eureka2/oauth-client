@@ -52,7 +52,7 @@ use eureka2\OAuth\Client\OAuthClientFactory;
 
 try {
     $client = OAuthClientFactory::create('Google');
-    $user = $client->fetchResourceOwner([
+    $options = [ // See the full list of options below
         'provider' => [
             'registration' => [
                 'keys' => [
@@ -65,7 +65,8 @@ try {
         'strategy' => [
             'offline_access' => true
         ]
-    ]);
+    ];
+    $user = $client->fetchResourceOwner($options);
     ....
     // Do something with $user
 } catch (\Exception $e) {
@@ -78,8 +79,8 @@ try {
 $options = [
   'provider' => [
     'protocol' => [
-      'name' => 'string',     // 'oauth' or 'openid' (default: 'oauth')
-      'version' => 'string'   // '1.0', '1.0a', '2.0' for 'oauth' or '1.0' for 'openid' (default: '2.0')
+      'name' => 'string',
+      'version' => 'string'
     ],
     'endpoints' => [
       'discovery_endpoint' => 'string',
@@ -95,7 +96,7 @@ $options = [
       'jwks_uri' => 'string'
     ],
     'mapping' => [
-      'user_id_field' => 'string', // default: 'sub'
+      'user_id_field' => 'string',
       'address_field' => 'string',
       'birthdate_field' => 'string',
       'email_field' => 'string',
@@ -132,7 +133,7 @@ $options = [
     'authorization_in_header' => 'boolean',
     'parameters_in_url' => 'boolean',
     'token_request_method' => 'string',
-    'signature_method' => 'string',              // values : 'PLAINTEXT', 'HMAC-SHA1' and 'RSA-SHA1'
+    'signature_method' => 'string',
     'signature_certificate_file' => 'string',
     'access_token_authentication' => 'string',
     'access_token_parameter' => 'string',
@@ -145,10 +146,10 @@ $options = [
     'access_token_language' => 'string',
     'scope' => 'string'
   ],
-  'storage' => [         // token storage
-     'type' => 'string', // 'session', 'cookie', 'apcu' or 'pdo' (default : 'session')
-     'key' => 'string',  // if type == 'cookie'
-     'dsn' => 'string'   // if type == 'pdo'
+  'storage' => [
+     'type' => 'string',
+     'key' => 'string',
+     'dsn' => 'string'
   ]
 ];
 ```
@@ -158,36 +159,36 @@ $options = [
 |provider.protocol.version                       |string|1.0, 1.0a, 2.0                                |2.0               |Version of the protocol supported by the OAuth provider                                              |
 |provider.endpoints.discovery_endpoint           |string|                                              |                  |URL that returns a JSON list of the OpenID/OAuth endpoints, supported scopes and claims, public keys |
 |provider.endpoints.authorization_endpoint       |string|                                              |                  |URL of the OAuth provider to redirect the browser so the user can grant access to the application.   |
-|provider.endpoints.token_endpoint               |string|                                              |                  |URL of the OAuth provider used to obtain an ID token, access token, and refresh token                |
-|provider.endpoints.registration_endpoint        |string|                                              |                  |URL of an  administrator managed service that is used to dynamically register, update, delete, and retrieve information about an OAuth client |
-|provider.endpoints.introspection_endpoint       |string|                                              |                  |URL of the OAuth provider used to inspect the underlying authorisation properties of a token.|
-|provider.endpoints.revocation_endpoint          |string|                                              |                  |URL of the OAuth provider that enables clients to notify that an issued token is no longer needed and must be revoked |
-|provider.endpoints.request_token_endpoint       |string|                                              |                  |URL of the OAuth provider to request the initial token for OAuth 1.0 and 1.0a servers. |
-|provider.endpoints.userinfo_endpoint            |string|                                              |                  ||
-|provider.endpoints.end_session_endpoint         |string|                                              |                  ||
-|provider.endpoints.pin_dialog_url               |string|                                              |                  ||
-|provider.endpoints.jwks_uri                     |string|                                              |                  ||
-|provider.mapping.user_id_field                  |string|                                              |sub               ||
-|provider.mapping.address_field                  |string|                                              |                  ||
-|provider.mapping.birthdate_field                |string|                                              |                  ||
-|provider.mapping.email_field                    |string|                                              |                  ||
-|provider.mapping.family_name_field              |string|                                              |                  ||
-|provider.mapping.gender_field                   |string|                                              |                  ||
-|provider.mapping.given_name_field               |string|                                              |                  ||
-|provider.mapping.locale_field                   |string|                                              |                  ||
-|provider.mapping.middle_name_field              |string|                                              |                  ||
-|provider.mapping.name_field                     |string|                                              |                  ||
-|provider.mapping.nickname_field                 |string|                                              |                  ||
-|provider.mapping.phone_number_field             |string|                                              |                  ||
-|provider.mapping.picture_field                  |string|                                              |                  ||
-|provider.registration.keys.client_id            |string|                                              |                  ||
-|provider.registration.keys.client_secret        |string|                                              |                  ||
-|provider.registration.keys.redirect_uri         |string|                                              |                  ||
-|provider.registration.keys.realm                |string|                                              |                  ||
-|provider.registration.keys.api_key              |string|                                              |                  ||
-|provider.registration.keys.pin                  |string|                                              |                  ||
-|provider.registration.credentials.oauth_username|string|                                              |                  ||
-|provider.registration.credentials.oauth_password|string|                                              |                  ||
+|provider.endpoints.token_endpoint               |string|                                              |                  |URL of the OAuth provider endpoint used to obtain an ID token, access token, and refresh token                |
+|provider.endpoints.registration_endpoint        |string|                                              |                  |URL of an administrator managed service that is used to dynamically register, update, delete, and retrieve information about an OAuth client |
+|provider.endpoints.introspection_endpoint       |string|                                              |                  |URL of the OAuth provider endpoint used to inspect the underlying authorisation properties of a token.|
+|provider.endpoints.revocation_endpoint          |string|                                              |                  |URL of the OAuth provider endpoint that enables clients to notify that an issued token is no longer needed and must be revoked |
+|provider.endpoints.request_token_endpoint       |string|                                              |                  |URL of the OAuth provider endpoint to request the initial token for OAuth 1.0 and 1.0a servers. |
+|provider.endpoints.userinfo_endpoint            |string|                                              |                  |URL of the OAuth provider endpoint that returns Claims about the authenticated user.|
+|provider.endpoints.end_session_endpoint         |string|                                              |                  |URL of the OAuth provider endpoint that allow a client to clear the provider-side session and cookies for a web browser.|
+|provider.endpoints.pin_dialog_url               |string|                                              |                  |URL of the OAuth provider to redirect the browser so the user can grant access to your application for pin based authorization.|
+|provider.endpoints.jwks_uri                     |string|                                              |                  |URL for the OAuth Provider's JWK Set used for JSON Web Signature and/or JSON Web Encryption keys (JWK).|
+|provider.mapping.user_id_field                  |string|                                              |sub               |The field name received from the userinfo endpoint corresponding to the user identifier.|
+|provider.mapping.address_field                  |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user address.|
+|provider.mapping.birthdate_field                |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user birth date.|
+|provider.mapping.email_field                    |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user email.|
+|provider.mapping.family_name_field              |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user family name.|
+|provider.mapping.gender_field                   |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user gender.|
+|provider.mapping.given_name_field               |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user given name.|
+|provider.mapping.locale_field                   |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user locale.|
+|provider.mapping.middle_name_field              |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user middle name.|
+|provider.mapping.name_field                     |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user name.|
+|provider.mapping.nickname_field                 |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user nickname.|
+|provider.mapping.phone_number_field             |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user phone number.|
+|provider.mapping.picture_field                  |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user picture.|
+|provider.registration.keys.client_id            |string|                                              |                  |Identifier of the application registered with the OAuth provider.|
+|provider.registration.keys.client_secret        |string|                                              |                  |Secret value assigned to the application when it is registered with the OAuth provider.|
+|provider.registration.keys.redirect_uri         |string|                                              |                  |The URL registered with the OAuth provider that it must use after user authentication. For pin based authorization, set this variable to 'oob'|
+|provider.registration.keys.realm                |string|                                              |                  |Realm of authorization for OpenID Connect|
+|provider.registration.keys.api_key              |string|                                              |                  |Identifier of the API key provided by the OAuth provider if it is required for authentication|
+|provider.registration.keys.pin                  |string|                                              |                  |Value of the pin code for pin based authorization (redirect_uri = 'oob').|
+|provider.registration.credentials.oauth_username|string|                                              |                  |The user name to use to obtain authorization using a password (grant_type = 'password').|
+|provider.registration.credentials.oauth_password|string|                                              |                  |The password to use to obtain authorization using a password (grant_type = 'password').|
 |strategy.reauthentication_parameter             |string|                                              |                  |The parameters to add to the OAuth provider authorization endpoint URL in case of new authentication.|
 |strategy.offline_access                         |bool  |true, false                                   |false             |Specify whether it will be necessary to call the API when the user is not present and the provider supports renewing expired access tokens using refresh tokens.|
 |strategy.offline_access_parameter               |string|                                              |                  |The parameter to add to the OAuth provider authorization endpoint URL when offline access is requested|
@@ -207,7 +208,7 @@ $options = [
 |strategy.access_token_content_type              |string|                                              |                  |Content type to be assumed when retrieving the response to a request to retrieve the access token. |
 |strategy.access_token_language                  |string|                                              |                  |Language to be assumed when retrieving the response to a request to retrieve the access token. |
 |strategy.scope                                  |string|                                              |                  |Permissions that your application needs to call the OAuth provider APIs |
-|storage.type                                    |string|session, cookie, apcu, pdo                    |session           |The session storage mode (session: in $_SESSion, cookie: in browser cookies, apcu: in APC user store, pdo: in a PDO database)|
+|storage.type                                    |string|session, cookie, apcu, pdo                    |session           |The session storage mode (session: in $_SESSion, cookie: in browser encrypted cookies, apcu: in APC user store, pdo: in a PDO database)|
 |storage.key                                     |string|                                              |                  |A key used to encrypt the cookies when the storage mode is 'cookie'|
 |storage.dsn                                     |string|                                              |                  |The Data Source Name, or DSN, contains the information required to connect to the database if the storage mode is 'pdo'|
 
