@@ -61,7 +61,7 @@ class OAuthProvider {
 	 * Set this variable to the current script page URL
 	 * before proceeding the the OAuth authorization process.
 	 * This url must be registered with the identity provider.
-	 * For pin based authorization, set this variable to 'oob'.
+	 * For PIN-based authorization, set this variable to 'oob'.
 	 *
 	 */
 	private $redirect_uri = '';
@@ -182,7 +182,7 @@ class OAuthProvider {
 	 * URL of the OAuth provider to redirect the browser so the user
 	 * can grant access to your application.
 	 *
-	 * Set this variable when using the pin based authorization and
+	 * Set this variable when using the PIN-based authorization and
 	 * the format of the of the authorization dialog page URL is
 	 * different than the one set to the authorization_endpoint variable.
 	 *
@@ -191,12 +191,11 @@ class OAuthProvider {
 
 	/**
 	 * @var string $pin
-	 * Value of the pin code for pin based authorization.
+	 * Value of the PIN code for PIN-based authorization.
 	 *
-	 * Set this value to the pin informed by the user when
-	 * implementing the pin based authorization.
-	 * Make sure the  redirect_uri variable
-	 * is set to 'oob'.
+	 * Set this value to the PIN code informed by the user when
+	 * implementing the PIN-based authorization.
+	 * Make sure the redirect_uri variable is set to 'oob'.
 	 *
 	 */
 	private $pin = '';
@@ -493,7 +492,7 @@ class OAuthProvider {
 	}
 
 	/**
-	 * Returns the value of the pin code
+	 * Returns the value of the PIN code
 	 *
 	 * @return string
 	 */
@@ -778,7 +777,7 @@ class OAuthProvider {
 	}
 
 	/**
-	 * Sets the value of the pin code
+	 * Sets the value of the PIN code
 	 *
 	 * @return self
 	 */
