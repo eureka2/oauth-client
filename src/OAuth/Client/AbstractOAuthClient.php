@@ -58,10 +58,10 @@ use eureka2\OAuth\Storage\TokenStorageFactory;
  * *client_id* and *client_secret*.
  * Some servers also provide an additional value to set the *api_key* variable.
  * You also need to set the variable *redirect_uri* before calling the authenticate function
- * to make the class perform the necessary interactions with the OAuth server.
+ * to make the class perform the necessary interactions with the OAuth provider.
  *
  * The OAuth protocol involves multiple steps that include redirection
- * to the OAuth server. There it asks permission to the current user to
+ * to the OAuth provider. There it asks permission to the current user to
  * grant your application access to APIs on his/her behalf.
  *
  * When there is a redirection, the class will set the *exit* variable,
@@ -108,7 +108,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	 * should also be logged.
 	 *
 	 * Set this variable to true if you
-	 * want to inspect the data exchange with the OAuth server.
+	 * want to inspect the data exchange with the OAuth provider.
 	 *
 	 * @var bool $debugHttp
 	 *
@@ -159,7 +159,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	protected $debugPrefix = 'OAuth client: ';
 
 	/**
-	 * Access token obtained from the OAuth server
+	 * Access token obtained from the OAuth provider
 	 *
 	 * @var string $accessToken
 	 *
@@ -167,7 +167,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	protected $accessToken = '';
 
 	/**
-	 * Access token secret obtained from the OAuth server
+	 * Access token secret obtained from the OAuth provider
 	 *
 	 * @var string $accessTokenSecret
 	 *
@@ -176,7 +176,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 
 	/**
 	 * Timestamp of the expiry of the access token obtained from
-	 * the OAuth server.
+	 * the OAuth provider.
 	 *
 	 * @var string $accessTokenExpiry
 	 *
@@ -184,7 +184,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	protected $accessTokenExpiry = '';
 
 	/**
-	 * Type of access token obtained from the OAuth server.
+	 * Type of access token obtained from the OAuth provider.
 	 *
 	 * @var string $accessTokenType
 	 *
@@ -208,7 +208,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	protected $refreshToken = '';
 
 	/**
-	 * The id_token value from OAuth servers compatible with OpenID Connect.
+	 * The id_token value from OAuth providers compatible with OpenID Connect.
 	 *
 	 * @var object $idToken
 	 *
@@ -312,7 +312,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	}
 
 	/**
-	 * Returns the access token secret obtained from the OAuth server.
+	 * Returns the access token secret obtained from the OAuth provider.
 	 *
 	 * If the OAuth protocol version is 1.0 or 1.0a, check this
 	 * variable to get the obtained access token secret upon successful
@@ -326,7 +326,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 
 	/**
 	 * Returns the timestamp of the expiry of the access token obtained from
-	 * the OAuth server.
+	 * the OAuth provider.
 	 *
 	 * Check this variable to get the obtained access token expiry
 	 * time upon successful OAuth authorization. If this variable is
@@ -339,7 +339,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	}
 
 	/**
-	 * Returns the type of access token obtained from the OAuth server.
+	 * Returns the type of access token obtained from the OAuth provider.
 	 *
 	 * Check this variable to get the obtained access token type
 	 * upon successful OAuth authorization.
@@ -353,7 +353,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	/**
 	 * Returns the original response for the access token request
 	 *
-	 * Check this variable if the OAuth server returns custom
+	 * Check this variable if the OAuth provider returns custom
 	 * parameters in the request to obtain the access token.
 	 *
 	 * @return array
@@ -481,7 +481,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	 * Enables or disables logging of the dialog with the remote Web server.
 	 *
 	 * Set this variable to true if you
-	 * want to inspect the data exchange with the OAuth server.
+	 * want to inspect the data exchange with the OAuth provider.
 	 *
 	 * @param bool $debugHttp
 	 *
@@ -582,7 +582,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 
 	/**
 	 * Sets the timestamp of the expiry of the access token obtained from
-	 * the OAuth server.
+	 * the OAuth provider.
 	 *
 	 * @param string $accessTokenExpiry
 	 *
@@ -594,7 +594,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	}
 
 	/**
-	 * Sets the type of access token obtained from the OAuth server.
+	 * Sets the type of access token obtained from the OAuth provider.
 	 *
 	 * @param string $accessTokenType
 	 *
@@ -630,7 +630,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	}
 
 	/**
-	 * Sets the id_token object from OAuth servers compatible with OpenID Connect.
+	 * Sets the id_token object from OAuth providers compatible with OpenID Connect.
 	 *
 	 * @param \eureka2\OAuth\Token\IdToken|null $idToken
 	 *

@@ -49,7 +49,7 @@ class OAuthProvider {
 	 * Secret value assigned to the application when it is registered with the OAuth provider.
 	 *
 	 * Set this variable to the application secret that is provided
-	 * by the OAuth server when you register the application.
+	 * by the OAuth provider when you register the application.
 	 *
 	 */
 	private $client_secret = '';
@@ -81,7 +81,7 @@ class OAuthProvider {
 	 * 	can grant access to your application.
 	 *
 	 * 	Set this variable to the OAuth request token URL when you are
-	 * 	not accessing one of the built-in supported OAuth servers.
+	 * 	not accessing one of the built-in supported OAuth providers.
 	 *
 	 * 	For OAuth 1.0a servers that return the login dialog URL
 	 * 	automatically, set this variable to 'automatic'
@@ -98,7 +98,7 @@ class OAuthProvider {
 	 * 	{CLIENT_ID} - client application identifier registered at the
 	 * 	server
 	 * 	{SCOPE} - scope of the requested permissions to the granted by the
-	 * 	OAuth server with the user permissions
+	 * 	OAuth provider with the user permissions
 	 * 	{STATE} - identifier of the OAuth session state
 	 * 	{API_KEY} - API key to access the server
 	 * 	{REALM} - realm name for OpenID Connect
@@ -147,16 +147,16 @@ class OAuthProvider {
 
 	/**
 	 * 	@var string $request_token_endpoint
-	 * 	URL of the OAuth server to request the initial token for OAuth 1.0 and 1.0a servers.
+	 * 	URL of the OAuth provider to request the initial token for OAuth 1.0 and 1.0a servers.
 	 *
 	 * 	Set this variable to the OAuth request token URL when you are
-	 * 	not accessing one of the built-in supported OAuth servers.
+	 * 	not accessing one of the built-in supported OAuth providers.
 	 *
 	 * 	For OAuth 1.0 and 1.0a servers, the request token URL can have
 	 * 	certain marks that will act as template placeholders which will be
 	 * 	replaced with given values before requesting the authorization
 	 * 	token. Currently it supports the following placeholder marks:
-	 * 	{SCOPE} - scope of the requested permissions to the granted by the OAuth server with the user permissions
+	 * 	{SCOPE} - scope of the requested permissions to the granted by the OAuth provider with the user permissions
 	 *
 	 */
 	private $request_token_endpoint = '';
@@ -179,7 +179,7 @@ class OAuthProvider {
 
 	/**
 	 * 	@var string $pin_dialog_url
-	 * 	URL of the OAuth server to redirect the browser so the user
+	 * 	URL of the OAuth provider to redirect the browser so the user
 	 * 	can grant access to your application.
 	 *
 	 * 	Set this variable when using the pin based authorization and

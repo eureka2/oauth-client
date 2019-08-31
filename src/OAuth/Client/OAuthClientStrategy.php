@@ -59,7 +59,7 @@ class OAuthClientStrategy {
 
 	/**
 	 * Define the HTTP method that should be used to request
-	 * tokens from the server.
+	 * tokens from the provider.
 	 *
 	 * @var string $token_request_method
 	 *
@@ -67,10 +67,10 @@ class OAuthClientStrategy {
 	private $token_request_method = 'GET';
 
 	/**
-	 * 	If Oauth 1.0 or 1.0a, define the method to generate the signature for API request
-	 * 	parameters values.
+	 * If Oauth 1.0 or 1.0a, define the method to generate the signature for API request
+	 * parameters values.
 	 *
-	 * 	@var string $signature_method
+	 * @var string $signature_method
 	 *
 	 */
 	private $signature_method = 'HMAC-SHA1';
@@ -86,7 +86,7 @@ class OAuthClientStrategy {
 
 	/**
 	 * Permissions that your application needs to call the OAuth
-	 * server APIs
+	 * provider APIs
 	 *
 	 * @var string $scope
 	 *
@@ -114,7 +114,7 @@ class OAuthClientStrategy {
 	private $reauthenticate = false;
 
 	/**
-	 * Type of access token to be assumed when the OAuth server
+	 * Type of access token to be assumed when the OAuth provider
 	 * does not specify an access token type.
 	 *
 	 * @var string $default_access_token_type
@@ -279,7 +279,7 @@ class OAuthClientStrategy {
 
 	/**
 	 * Returns the permissions that your application needs to call
-	 * the OAuth server APIs
+	 * the OAuth provider APIs
 	 *
 	 * @return string 
 	 */
@@ -310,7 +310,7 @@ class OAuthClientStrategy {
 	}
 
 	/**
-	 * Returns the type of access token to be assumed when the OAuth server
+	 * Returns the type of access token to be assumed when the OAuth provider
 	 * does not specify an access token type.
 	 *
 	 * @return string 
@@ -424,7 +424,7 @@ class OAuthClientStrategy {
 	 *
 	 * Set this variable to the OAuth request token URL when you are
 	 * not accessing one of the built-in OAuth providers and the
-	 * OAuth server supports offline access.
+	 * OAuth provider supports offline access.
 	 * It should have the same format as the authorization_endpoint variable.
 	 *
 	 * @param string $offline_access_parameter the parameter to add to the OAuth provider authorization endpoint URL
@@ -442,7 +442,7 @@ class OAuthClientStrategy {
 	 * to work around the implementation bugs of some OAuth providers.
 	 *
 	 * Set this variable when you are not accessing one of the
-	 * built-in supported OAuth providers if the OAuth server has a bug
+	 * built-in supported OAuth providers if the OAuth provider has a bug
 	 * that makes it not pass back the OAuth state identifier in a
 	 * request variable named state.
 	 *
@@ -476,7 +476,7 @@ class OAuthClientStrategy {
 	 * Authorization request header.
 	 *
 	 * Set this variable to true if the
-	 * OAuth server requires that the OAuth parameters be passed using
+	 * OAuth provider requires that the OAuth parameters be passed using
 	 * the HTTP Authorization instead of the request URI parameters.
 	 *
 	 * @param bool $authorization_in_header
@@ -490,10 +490,10 @@ class OAuthClientStrategy {
 
 	/**
 	 * Sets the HTTP method that should be used to request
-	 * tokens from the server.
+	 * tokens from the provider.
 	 *
 	 * Set this variable to 'POST' if the
-	 * OAuth server does not support requesting tokens using the HTTP GET
+	 * OAuth provider does not support requesting tokens using the HTTP GET
 	 * method.
 	 *
 	 * @param string $token_request_method the HTTP method
@@ -585,10 +585,10 @@ class OAuthClientStrategy {
 	}
 
 	/**
-	 * Sets the type of access token to be assumed when the OAuth server
+	 * Sets the type of access token to be assumed when the OAuth provider
 	 * does not specify an access token type.
 	 *
-	 * Set this variable if the server requires a certain type of
+	 * Set this variable if the provider requires a certain type of
 	 * access token to be used but it does not specify a token type
 	 * when the access token is returned.
 	 *
@@ -697,7 +697,7 @@ class OAuthClientStrategy {
 	 * client ID and secret.
 	 *
 	 * Leave this value with an empty string to make it use the same
-	 * as the @link access_token_authentication variable.
+	 * as the access_token_authentication variable.
 	 *
 	 * Set this variable to 'none' to
 	 * avoid that the Authorization header be set in the request to get

@@ -6,7 +6,7 @@ interface TokenStorageInterface {
 
 	/**
 	 * Store the values of the access token when it is succefully
-	 * retrieved from the OAuth server.
+	 * retrieved from the OAuth provider.
 	 *
 	 * This method is meant to be only be called from inside the class.
 	 *
@@ -48,7 +48,7 @@ interface TokenStorageInterface {
 
 	/**
 	 * Reset the access token to a state back when the user has
-	 * not yet authorized the access to the OAuth server API.
+	 * not yet authorized the access to the OAuth provider API.
 	 *
 	 * Call this method if for some reason the token to access
 	 * the API was revoked and you need to ask the user to authorize

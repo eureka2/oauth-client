@@ -152,64 +152,64 @@ $options = [
   ]
 ];
 ```
-|Name                                            | Description                                                                                          | Values | Default   |
-|------------------------------------------------|------------------------------------------------------------------------------------------------------|--------|-----------|
-|provider.protocol.name                          | The OAuth-based protocol supported by the OAuth provider                                             |        |           |
-|provider.protocol.version                       | Version of the protocol supported by the OAuth provider                                              |        |           |
-|provider.endpoints.discovery_endpoint           | URL that returns a JSON list of the OpenID/OAuth endpoints, supported scopes and claims, public keys |        |           |
-|provider.endpoints.authorization_endpoint       | URL of the OAuth provider to redirect the browser so the user can grant access to the application.   |        |           |
-|provider.endpoints.token_endpoint               | URL of the OAuth provider used to obtain an ID token, access token, and refresh token                |        |           |
-|provider.endpoints.registration_endpoint        |  |
-|provider.endpoints.introspection_endpoint       |  |
-|provider.endpoints.revocation_endpoint          |  |
-|provider.endpoints.request_token_endpoint       |  |
-|provider.endpoints.userinfo_endpoint            |  |
-|provider.endpoints.end_session_endpoint         |  |
-|provider.endpoints.pin_dialog_url               |  |
-|provider.endpoints.jwks_uri                     |  |
-|provider.mapping.user_id_field                  |  |
-|provider.mapping.address_field                  |  |
-|provider.mapping.birthdate_field                |  |
-|provider.mapping.email_field                    |  |
-|provider.mapping.family_name_field              |  |
-|provider.mapping.gender_field                   |  |
-|provider.mapping.given_name_field               |  |
-|provider.mapping.locale_field                   |  |
-|provider.mapping.middle_name_field              |  |
-|provider.mapping.name_field                     |  |
-|provider.mapping.nickname_field                 |  |
-|provider.mapping.phone_number_field             |  |
-|provider.mapping.picture_field                  |  |
-|provider.registration.keys.client_id            |  |
-|provider.registration.keys.client_secret        |  |
-|provider.registration.keys.redirect_uri         |  |
-|provider.registration.keys.realm                |  |
-|provider.registration.keys.api_key              |  |
-|provider.registration.keys.pin                  |  |
-|provider.registrationcredentials.oauth_username |  |
-|provider.registrationcredentials.oauth_password |  |
-|strategy.reauthentication_parameter             |  |
-|strategy.offline_access                         |  |
-|strategy.offline_access_parameter               |  |
-|strategy.append_state_to_redirect_uri           |  |
-|strategy.authorization_in_header                |  |
-|strategy.parameters_in_url                      |  |
-|strategy.token_request_method                   |  |
-|strategy.signature_method                       |  |
-|strategy.signature_certificate_file             |  |
-|strategy.access_token_authentication            |  |
-|strategy.access_token_parameter                 |  |
-|strategy.default_access_token_type              |  |
-|strategy.store_access_token_response            |  |
-|strategy.refresh_token_authentication           |  |
-|strategy.grant_type                             |  |
-|strategy.get_token_with_api_key                 |  |
-|strategy.access_token_content_type              |  |
-|strategy.access_token_language                  |  |
-|strategy.scope                                  |  |
-|storage.type                                    |  |
-|storage.key                                     |  |
-|storage.dsn                                     |  |
+|Name                                            |Type  |Values                                        |Default           |Description                                                                      |
+|------------------------------------------------|------|----------------------------------------------|------------------|---------------------------------------------------------------------------------|
+|provider.protocol.name                          |string|openid,oauth                                  |oauth             |The OAuth-based protocol supported by the OAuth provider                                             |
+|provider.protocol.version                       |string|1.0,1.0a,2.0                                  |2.0               |Version of the protocol supported by the OAuth provider                                              |
+|provider.endpoints.discovery_endpoint           |string|                                              |                  |URL that returns a JSON list of the OpenID/OAuth endpoints, supported scopes and claims, public keys |
+|provider.endpoints.authorization_endpoint       |string|                                              |                  |URL of the OAuth provider to redirect the browser so the user can grant access to the application.   |
+|provider.endpoints.token_endpoint               |string|                                              |                  |URL of the OAuth provider used to obtain an ID token, access token, and refresh token                |
+|provider.endpoints.registration_endpoint        |string|                                              |                  |URL of an  administrator managed service that is used to dynamically register, update, delete, and retrieve information about an OAuth client |
+|provider.endpoints.introspection_endpoint       |string|                                              |                  |URL of the OAuth provider used to inspect the underlying authorisation properties of a token.|
+|provider.endpoints.revocation_endpoint          |string|                                              |                  |URL of the OAuth provider that enables clients to notify that an issued token is no longer needed and must be revoked |
+|provider.endpoints.request_token_endpoint       |string|                                              |                  |URL of the OAuth provider to request the initial token for OAuth 1.0 and 1.0a servers. |
+|provider.endpoints.userinfo_endpoint            |string|                                              |                  ||
+|provider.endpoints.end_session_endpoint         |string|                                              |                  ||
+|provider.endpoints.pin_dialog_url               |string|                                              |                  ||
+|provider.endpoints.jwks_uri                     |string|                                              |                  ||
+|provider.mapping.user_id_field                  |string|                                              |sub               ||
+|provider.mapping.address_field                  |string|                                              |                  ||
+|provider.mapping.birthdate_field                |string|                                              |                  ||
+|provider.mapping.email_field                    |string|                                              |                  ||
+|provider.mapping.family_name_field              |string|                                              |                  ||
+|provider.mapping.gender_field                   |string|                                              |                  ||
+|provider.mapping.given_name_field               |string|                                              |                  ||
+|provider.mapping.locale_field                   |string|                                              |                  ||
+|provider.mapping.middle_name_field              |string|                                              |                  ||
+|provider.mapping.name_field                     |string|                                              |                  ||
+|provider.mapping.nickname_field                 |string|                                              |                  ||
+|provider.mapping.phone_number_field             |string|                                              |                  ||
+|provider.mapping.picture_field                  |string|                                              |                  ||
+|provider.registration.keys.client_id            |string|                                              |                  ||
+|provider.registration.keys.client_secret        |string|                                              |                  ||
+|provider.registration.keys.redirect_uri         |string|                                              |                  ||
+|provider.registration.keys.realm                |string|                                              |                  ||
+|provider.registration.keys.api_key              |string|                                              |                  ||
+|provider.registration.keys.pin                  |string|                                              |                  ||
+|provider.registration.credentials.oauth_username|string|                                              |                  ||
+|provider.registration.credentials.oauth_password|string|                                              |                  ||
+|strategy.reauthentication_parameter             |string|                                              |                  |The parameters to add to the OAuth provider authorization endpoint URL in case of new authentication.|
+|strategy.offline_access                         |bool  |true,false                                    |false             |Specify whether it will be necessary to call the API when the user is not present and the provider supports renewing expired access tokens using refresh tokens.|
+|strategy.offline_access_parameter               |string|                                              |                  |The parameter to add to the OAuth provider authorization endpoint URL when offline access is requested|
+|strategy.append_state_to_redirect_uri           |string|                                              |state             |The name of the OAuth session state variable, if different from the standard name|
+|strategy.authorization_in_header                |bool  |true,false                                    |true              |Determines if the OAuth parameters should be passed via HTTP Authorization request header.|
+|strategy.parameters_in_url                      |bool  |true,false                                    |false             |Determines if the API call parameters should be moved to the calling URL.|
+|strategy.token_request_method                   |string|GET,POST                                      |GET               |The HTTP method that should be used to request tokens from the provider|
+|strategy.signature_method                       |string|PLAINTEXT,HMAC-SHA1,RSA-SHA1                  |HMAC-SHA1         |The method to generate the signature for API request parameters values (Oauth 1.0 or 1.0a)|
+|strategy.signature_certificate_file             |string|                                              |                  |The full path of the file containing a PEM encoded certificate/private key if signature_method is 'RSA-SHA1'|
+|strategy.access_token_authentication            |string|basic,none                                    |                  |Determines if the requests to obtain a new access token should use authentication to pass the application client ID and secret.|
+|strategy.access_token_parameter                 |string|                                              |oauth_token,access_token|The name of the access token parameter to be passed in API call requests.|
+|strategy.default_access_token_type              |string|                                              |                  |The type of access token to be assumed when the OAuth provider does not specify an access token type.|
+|strategy.store_access_token_response            |bool  |true,false                                    |false             |Option to determine if the original response for the access token request should be stored |
+|strategy.refresh_token_authentication           |string|no                                            |                  |Option to determine if the requests to refresh an expired access token should use authentication to pass the application client ID and secret. |
+|strategy.grant_type                             |string|client_credentials,password,authorization_code|authorization_code|The type of grant to obtain the OAuth 2 access token. |
+|strategy.get_token_with_api_key                 |bool  |true,false                                    |false             |Option to determine if the access token should be retrieved using the API key value instead of the client secret. |
+|strategy.access_token_content_type              |string|                                              |                  |Content type to be assumed when retrieving the response to a request to retrieve the access token. |
+|strategy.access_token_language                  |string|                                              |                  |Language to be assumed when retrieving the response to a request to retrieve the access token. |
+|strategy.scope                                  |string|                                              |                  |Permissions that your application needs to call the OAuth provider APIs |
+|storage.type                                    |string|session,cookie,apcu,pdo                       |session           |The session storage mode (session: in $_SESSion, cookie: in browser cookies, apcu: in APC user store, pdo: in a PDO database)|
+|storage.key                                     |string|                                              |                  |A key used to encrypt the cookies when the storage mode is 'cookie'|
+|storage.dsn                                     |string|                                              |                  |The Data Source Name, or DSN, contains the information required to connect to the database if the storage mode is 'pdo'|
 
 # Methods
 
