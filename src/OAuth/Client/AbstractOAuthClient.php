@@ -1267,7 +1267,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 				$userId = $user[$field];
 			}
 		}
-		return new ResourceOwner($userId, $user);
+		return new ResourceOwner($userId, $user, $this->provider->getMapping());
 	}
 
 	/**

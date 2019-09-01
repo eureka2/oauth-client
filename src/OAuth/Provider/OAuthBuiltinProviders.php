@@ -70,6 +70,9 @@ class OAuthBuiltinProviders {
 				'userinfo_endpoint' => 'https://gitlab.com/api/v4/user'
 
 			],
+			'mapping' => [
+				'picture_field' => 'avatar_url'
+			],
 			'strategy' => [
 				'scope' => 'openid read_user'
 			]

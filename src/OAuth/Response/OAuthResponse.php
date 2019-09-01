@@ -20,9 +20,21 @@ abstract class OAuthResponse implements \Iterator {
 	 * Constructs a OAuthResponse object
 	 *
 	 * @param array|object $values the properties of the resource.
+	 * @param array $mapping Match between OAuth client fields and fields returned by the provider.
 	 */
-	public function __construct($values) {
-		$this->values = is_object($values) ? (array)$values : $values;
+	public function __construct($values, $mapping = []) {
+		if (is_object($values)) {
+			$values = (array)$values;
+		}
+		$mapping = array_flip(array_merge([ 'user_id_field' => 'sub' ], $mapping));
+		foreach($values as $property => $value) {
+			if (isset($mapping[$property])) {
+				$mapped = preg_replace("/_field$/", "", $mapping[$property]);
+				$this->values[$mapped] = $value;
+			} else {
+				$this->values[$property] = $value;
+			}
+		}
 	}
 
 	/**

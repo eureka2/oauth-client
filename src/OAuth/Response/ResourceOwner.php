@@ -23,10 +23,12 @@ class ResourceOwner extends OAuthResponse {
 	 *
 	 * @param string $id The ID of the resource owner
 	 * @param array $values The properties of the resource owner
+	 * @param array $mapping Match between OAuth client fields
+	 * and fields returned by the provider's UserInfo endpoint.
 	 */
-	public function __construct($id, $values) {
+	public function __construct($id, $values, $mapping) {
 		$this->id = $id;
-		parent::__construct($values);
+		parent::__construct($values, $mapping);
 	}
 
 	/**
