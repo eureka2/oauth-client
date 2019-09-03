@@ -114,11 +114,11 @@ class OAuth2Client extends AbstractOAuthClient implements OAuthClientInterface {
 	 */
 	protected function requestAnOAuthToken($code = null, $refresh = false) {
 		$authentication = $this->strategy->getAccessTokenAuthentication();
-		if (!empty($this->provider->getOauthUsername())) {
+		if (!empty($this->provider->getUsername())) {
 			$values = [
 				'grant_type' => 'password',
-				'username' => $this->provider->getOauthUsername(),
-				'password' => $this->provider->getOauthPassword(),
+				'username' => $this->provider->getUsername(),
+				'password' => $this->provider->getPassword(),
 				'redirect_uri' => $this->provider->getRedirectUri()
 			];
 			$authentication = 'Basic';
@@ -340,7 +340,7 @@ class OAuth2Client extends AbstractOAuthClient implements OAuthClientInterface {
 						return false;
 					}
 					return true;
-				} elseif (empty($this->provider->getOauthUsername())) {
+				} elseif (empty($this->provider->getUsername())) {
 					break;
 				}
 			case 'password':

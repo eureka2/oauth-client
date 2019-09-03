@@ -47,8 +47,8 @@ use eureka2\OAuth\Storage\TokenStorageFactory;
  * - append_state_to_redirect_uri
  * - token_endpoint
  * - scope
- * - oauth_username
- * - oauth_password
+ * - username
+ * - password
  * - grant_type and
  * - token_endpoint
  *
@@ -1411,11 +1411,11 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 				}
 			}
 			if (isset($options['provider']['registration']['credentials'])) {
-				if (isset($options['provider']['registration']['credentials']['oauth_username'])) {
-					$this->provider->setOauthUsername($options['provider']['registration']['credentials']['oauth_username']);
+				if (isset($options['provider']['registration']['credentials']['username'])) {
+					$this->provider->setUsername($options['provider']['registration']['credentials']['username']);
 				}
-				if (isset($options['provider']['registration']['credentials']['oauth_password'])) {
-					$this->provider->setOauthPassword($options['provider']['registration']['credentials']['oauth_password']);
+				if (isset($options['provider']['registration']['credentials']['password'])) {
+					$this->provider->setPassword($options['provider']['registration']['credentials']['password']);
 				}
 			}
 		}

@@ -296,7 +296,7 @@ class OAuthProvider {
 	private $api_key = '';
 
 	/**
-	 * 	@var string $oauth_username
+	 * 	@var string $username
 	 * 	Define the user name to obtain authorization using a password.
 	 *
 	 * 	Set this variable to the user name of the account to
@@ -304,10 +304,10 @@ class OAuthProvider {
 	 * 	authorization process.
 	 *
 	 */
-	private $oauth_username = '';
+	private $username = '';
 
 	/**
-	 * @var string $oauth_password
+	 * @var string $password
 	 * Define the password to obtain authorization using a password.
 	 *
 	 * Set this variable to the user password of the account to
@@ -315,7 +315,7 @@ class OAuthProvider {
 	 * authorization process.
 	 *
 	 */
-	private $oauth_password = '';
+	private $password = '';
 
 	/**
 	 * 	@var string $realm
@@ -604,8 +604,8 @@ class OAuthProvider {
 	 *
 	 * @return string
 	 */
-	public function getOauthUsername() : string {
-		return $this->oauth_username;
+	public function getUsername() : string {
+		return $this->username;
 	}
 
 	/**
@@ -613,8 +613,8 @@ class OAuthProvider {
 	 *
 	 * @return string
 	 */
-	public function getOauthPassword() : string {
-		return $this->oauth_password;
+	public function getPassword() : string {
+		return $this->password;
 	}
 
 	/**
@@ -901,8 +901,8 @@ class OAuthProvider {
 	 *
 	 * @return self
 	 */
-	public function setOauthUsername(string $oauth_username) {
-		$this->oauth_username = $oauth_username;
+	public function setUsername(string $username) {
+		$this->username = $username;
 		return $this;
 	}
 
@@ -911,8 +911,8 @@ class OAuthProvider {
 	 *
 	 * @return self
 	 */
-	public function setOauthPassword(string $oauth_password) {
-		$this->oauth_password = $oauth_password;
+	public function setPassword(string $password) {
+		$this->password = $password;
 		return $this;
 	}
 

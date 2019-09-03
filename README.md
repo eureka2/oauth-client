@@ -120,8 +120,8 @@ $options = [
         'pin' => 'string'
       ],
       'credentials' => [
-        'oauth_username' => 'string',
-        'oauth_password' => 'string'
+        'username' => 'string',
+        'password' => 'string'
       ]
     ]
   ],
@@ -187,8 +187,8 @@ $options = [
 |provider.registration.keys.realm                |string|                                              |                  |Realm of authorization for OpenID Connect|
 |provider.registration.keys.api_key              |string|                                              |                  |Identifier of the API key provided by the OAuth provider if it is required for authentication|
 |provider.registration.keys.pin                  |string|                                              |                  |Value of the PIN code for PIN-based authorization (redirect_uri = 'oob').|
-|provider.registration.credentials.oauth_username|string|                                              |                  |The user name to use to obtain authorization using a password (grant_type = 'password').|
-|provider.registration.credentials.oauth_password|string|                                              |                  |The password to use to obtain authorization using a password (grant_type = 'password').|
+|provider.registration.credentials.username      |string|                                              |                  |The user name to use to obtain authorization using a password (grant_type = 'password').|
+|provider.registration.credentials.password      |string|                                              |                  |The password to use to obtain authorization using a password (grant_type = 'password').|
 |strategy.reauthentication_parameter             |string|                                              |                  |The parameters to add to the OAuth provider authorization endpoint URL in case of new authentication.|
 |strategy.offline_access                         |bool  |true, false                                   |false             |Specify whether it will be necessary to call the API when the user is not present and the provider supports renewing expired access tokens using refresh tokens.|
 |strategy.offline_access_parameter               |string|                                              |                  |The parameter to add to the OAuth provider authorization endpoint URL when offline access is requested|
