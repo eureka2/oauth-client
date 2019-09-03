@@ -8,7 +8,7 @@ This library can be configured to work with any platform providing services or r
 
 The configuration of some providers is integrated in the library (built-in providers) which allows to use their services with a minimum of parameters.
 
-For those who are not integrated, an array of [options](#user-content-options) allows you to control access to services and resources. This array contains the list of endpoints, the mapping of non-standard fields, the identifiers registered in the provider as well as the way (strategy) to compose access requests.
+For those who are not integrated, an array of [options](#user-content-options) allows you to control access to services and resources. This array contains the list of endpoints, the mapping of non-standard fields, the identifiers registered with the provider as well as the way (strategy) to compose access requests.
 
 # Requirements
 - PHP >=7.1.3
