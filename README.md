@@ -4,11 +4,11 @@ This library is a multi-protocol client based on OAuth.
 
 Supported protocols are: OAuth 1.0, OAuth 1.0a, OAuth 2.0 and OpenID 1.0
 
-This library can be configured to work with any platform providing services or resourcee based on these protocols.
+This library can be configured to work with any platform providing services or resources based on these protocols.
 
 The configuration of some providers is integrated in the library (built-in providers) which allows to use their services with a minimum of parameters.
 
-For those who are not integrated, an array of [options](#user-content-options) allows you to control access to services and resources. This table contains the list of endpoints, the mapping of non-standard fields, the identifiers registered in the provider as well as the way (strategy) to compose access requests.
+For those who are not integrated, an array of [options](#user-content-options) allows you to control access to services and resources. This array contains the list of endpoints, the mapping of non-standard fields, the identifiers registered in the provider as well as the way (strategy) to compose access requests.
 
 # Requirements
 - PHP >=7.1.3
