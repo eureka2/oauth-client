@@ -16,16 +16,17 @@ For those who are not integrated, an array of [options](#user-content-options) a
 
 # Installation
 
+From the root directory of your application, run:
 `composer require eureka2/oauth-client`
 
 # Usage
 
 ## Low-level requests to a builtin OAuth provider
  ```php
-use eureka2\OAuth\Client\OAuthClientFactory;
+use eureka2\OAuth\Client\OAuthClient;
 
 try {
-    $client = OAuthClientFactory::create('Google');
+    $client = OAuthClient::create('Google');
     $client->setClientId('<YOUR CLIENT ID>');
     $client->setClientSecret('<YOUR CLIENT SECRET>');
     $client->setRedirectUri('http://' . $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME']);
@@ -54,10 +55,10 @@ try {
 
 ## High-level request to a builtin OAuth provider
  ```php
-use eureka2\OAuth\Client\OAuthClientFactory;
+use eureka2\OAuth\Client\OAuthClient;
 
 try {
-    $client = OAuthClientFactory::create('Google');
+    $client = OAuthClient::create('Google');
     $options = [ // See the full list of options below
         'provider' => [
             'registration' => [
@@ -101,20 +102,32 @@ $options = [
       'pin_dialog_url' => 'string',
       'jwks_uri' => 'string'
     ],
-    'mapping' => [
+    'mapping' => [ // see https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims and https://openid.net/specs/openid-connect-core-1_0.html#AddressClaim
       'user_id_field' => 'string',
-      'address_field' => 'string',
-      'birthdate_field' => 'string',
-      'email_field' => 'string',
-      'family_name_field' => 'string',
-      'gender_field' => 'string',
-      'given_name_field' => 'string',
-      'locale_field' => 'string',
-      'middle_name_field' => 'string',
       'name_field' => 'string',
+      'given_name_field' => 'string',
+      'family_name_field' => 'string',
+      'middle_name_field' => 'string',
       'nickname_field' => 'string',
+      'preferred_username_field' => 'string',
+      'profile_field' => 'string',
+      'picture_field' => 'string',
+      'website_field' => 'string'
+      'email_field' => 'string',
+      'email_verified_field' => 'string',
+      'gender_field' => 'string',
+      'birthdate_field' => 'string',
+      'zoneinfo_field' => 'string',
+      'locale_field' => 'string',
       'phone_number_field' => 'string',
-      'picture_field' => 'string'
+      'phone_number_verified_field' => 'string',
+      'updated_at_field' => 'string',
+      'formatted_field' => 'string',
+      'street_address_field' => 'string',
+      'locality_field' => 'string',
+      'region_field' => 'string',
+      'postal_code_field' => 'string',
+      'country_field' => 'string'
     ],
     'registration' => [
       'keys' => [
@@ -175,18 +188,30 @@ $options = [
 |provider.endpoints.pin_dialog_url               |string|                                              |                  |URL of the OAuth provider to redirect the browser so the user can grant access to your application for PIN-based authorization.|
 |provider.endpoints.jwks_uri                     |string|                                              |                  |URL for the OAuth Provider's JWK Set used for JSON Web Signature and/or JSON Web Encryption keys (JWK).|
 |provider.mapping.user_id_field                  |string|                                              |sub               |The field name received from the userinfo endpoint corresponding to the user identifier.|
-|provider.mapping.address_field                  |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user address.|
+|provider.mapping.name_field                     |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user full name.|
+|provider.mapping.given_name_field               |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user given name(s).|
+|provider.mapping.family_name_field              |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user family name(s).|
+|provider.mapping.middle_name_field              |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user middle name(s).|
+|provider.mapping.nickname_field                 |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user casual name.|
+|provider.mapping.preferred_username_field       |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user preferred username.|
+|provider.mapping.profile_field                  |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the URL of the user profile.|
+|provider.mapping.picture_field                  |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the URL of the user picture.|
+|provider.mapping.website_field                  |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the URL of the user website.|
+|provider.mapping.email_field                    |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user preferred email address.|
+|provider.mapping.email_verified_field           |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user email verified flag.|
+|provider.mapping.gender_field                   |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user gender (female or male).|
 |provider.mapping.birthdate_field                |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user birth date.|
-|provider.mapping.email_field                    |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user email.|
-|provider.mapping.family_name_field              |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user family name.|
-|provider.mapping.gender_field                   |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user gender.|
-|provider.mapping.given_name_field               |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user given name.|
+|provider.mapping.zoneinfo_field                 |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user zoneinfo.|
 |provider.mapping.locale_field                   |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user locale.|
-|provider.mapping.middle_name_field              |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user middle name.|
-|provider.mapping.name_field                     |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user name.|
-|provider.mapping.nickname_field                 |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user nickname.|
 |provider.mapping.phone_number_field             |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user phone number.|
-|provider.mapping.picture_field                  |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user picture.|
+|provider.mapping.phone_number_verified_field    |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user phone number verified flag.|
+|provider.mapping.updated_at_field               |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user update datetime.|
+|provider.mapping.formatted_field                |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user full mailing address.|
+|provider.mapping.street_address_field           |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user full street address.|
+|provider.mapping.locality_field                 |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user city or locality.|
+|provider.mapping.region_field                   |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user state, province, prefecture or region.|
+|provider.mapping.postal_code_field              |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user zip code or postal code.|
+|provider.mapping.country_field                  |string|                                              |                  |The field name received from the userinfo endpoint corresponding to the user country name.|
 |provider.registration.keys.client_id            |string|                                              |                  |Identifier of the application registered with the OAuth provider.|
 |provider.registration.keys.client_secret        |string|                                              |                  |Secret value assigned to the application when it is registered with the OAuth provider.|
 |provider.registration.keys.redirect_uri         |string|                                              |                  |The URL registered with the OAuth provider that it must use after user authentication. For PIN-based authorization, set this variable to 'oob' (out-of-box)|
@@ -218,11 +243,19 @@ $options = [
 |storage.key                                     |string|                                              |                  |A key used to encrypt the cookies when the storage mode is 'cookie'|
 |storage.dsn                                     |string|                                              |                  |The Data Source Name, or DSN, contains the information required to connect to the database if the storage mode is 'pdo'|
 
+# Static methods
+
+|Name              |Description |
+|------------------|------------|
+|[OAuthClient::create](http://eureka2.github.io/oauth-client/eureka2/OAuth/Client/OAuthClient.html#method_create)| Creates a OAuth client instance according to the given parameters. |
+|[OAuthClient::getConnectedResourceOwner](http://eureka2.github.io/oauth-client/eureka2/OAuth/Client/OAuthClient.html#method_getConnectedResourceOwner)| Returns the last connected resource owner if there is one. |
+
 # Methods
 
 |Name              |Description |
 |------------------|------------|
 |[initialize](http://eureka2.github.io/oauth-client/eureka2/OAuth/Client/OAuthClientInterface.html#method_initialize)| Initialize the class variables and internal state. It must be called before calling other class functions. |
+|[isAuthenticated](http://eureka2.github.io/oauth-client/eureka2/OAuth/Client/OAuthClientInterface.html#method_isAuthenticated)| Checks if the user is authenticated with the current OAuth provider. |
 |[authenticate](http://eureka2.github.io/oauth-client/eureka2/OAuth/Client/OAuthClientInterface.html#method_authenticate)| Process the OAuth protocol interaction with the OAuth provider. |
 |[callAPI](http://eureka2.github.io/oauth-client/eureka2/OAuth/Client/OAuthClientInterface.html#method_callAPI)| Send a HTTP request to the Web services API using a previously obtained access token via OAuth. |
 |[getResourceOwner](http://eureka2.github.io/oauth-client/eureka2/OAuth/Client/OAuthClientInterface.html#method_getResourceOwner)| Returns the information about the resource owner using a previously obtained access token via OAuth. |
@@ -240,6 +273,7 @@ $options = [
 |[getRefreshToken](http://eureka2.github.io/oauth-client/eureka2/OAuth/Client/OAuthClientInterface.html#method_getRefreshToken)| Returns the obtained refresh token upon successful OAuth authentication. |
 |[getIdToken](http://eureka2.github.io/oauth-client/eureka2/OAuth/Client/OAuthClientInterface.html#method_getIdToken)| Returns the obtained ID token upon successful OpenID authentication. |
 |[getProvider](http://eureka2.github.io/oauth-client/eureka2/OAuth/Client/OAuthClientInterface.html#method_getProvider)| Returns the current instance of the OAuthProvider class. |
+|[getStrategy](http://eureka2.github.io/oauth-client/eureka2/OAuth/Client/OAuthClientInterface.html#method_getStrategy)| Returns the current instance of the OAuthClientStrategy class. |
 
 ### API documentation
 
