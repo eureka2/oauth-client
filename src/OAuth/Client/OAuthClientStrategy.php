@@ -11,6 +11,28 @@ use eureka2\OAuth\Exception\OAuthClientException;
  */
 class OAuthClientStrategy {
 
+	const TYPES = [
+		'reauthentication_parameter' => 'string',
+		'offline_access' => 'boolean',
+		'offline_access_parameter' => 'string',
+		'append_state_to_redirect_uri' => 'string',
+		'authorization_in_header' => 'boolean',
+		'parameters_in_url' => 'boolean',
+		'token_request_method' => 'string',
+		'signature_method' => 'string',
+		'signature_certificate_file' => 'string',
+		'access_token_authentication' => 'string',
+		'access_token_parameter' => 'string',
+		'default_access_token_type' => 'string',
+		'store_access_token_response' => 'boolean',
+		'refresh_token_authentication' => 'string',
+		'grant_type' => 'string',
+		'get_token_with_api_key' => 'boolean',
+		'access_token_content_type' => 'string',
+		'access_token_language' => 'string',
+		'scope' => 'string'
+	];
+
 	/**
 	 * The parameters to add to the OAuth provider authorization endpoint URL
 	 * in case of new authentication.
@@ -758,38 +780,54 @@ class OAuthClientStrategy {
 	 * throws \eureka2\OAuth\Exception\OAuthClientException
 	 */
 	public function bind($properties) {
-		$types = [
-			'reauthentication_parameter' => 'string',
-			'offline_access' => 'boolean',
-			'offline_access_parameter' => 'string',
-			'append_state_to_redirect_uri' => 'string',
-			'authorization_in_header' => 'boolean',
-			'parameters_in_url' => 'boolean',
-			'token_request_method' => 'string',
-			'signature_method' => 'string',
-			'signature_certificate_file' => 'string',
-			'access_token_authentication' => 'string',
-			'access_token_parameter' => 'string',
-			'default_access_token_type' => 'string',
-			'store_access_token_response' => 'boolean',
-			'refresh_token_authentication' => 'string',
-			'grant_type' => 'string',
-			'get_token_with_api_key' => 'boolean',
-			'access_token_content_type' => 'string',
-			'access_token_language' => 'string',
-			'scope' => 'string'
-		];
 		foreach ($properties as $property => $value) {
-			if (!isset($types[$property])) {
+			if (!isset(self::TYPES[$property])) {
 				throw new OAuthClientException('OAuthClientStrategy: ' . $property . ' is not a supported property');
 			}
 			$type = gettype($value);
-			$expected = $types[$property];
+			$expected = self::TYPES[$property];
 			if ($type !== $expected) {
 				throw new OAuthClientException('OAuthClientStrategy: the property "' . $property . '" is not of type "' . $expected . '", it is of type "' . $type);
 			}
 			$this->{$property} = $value;
 		}
+	}
+
+	/**
+	 * Returns the OAuth strategy as an array
+	 *
+	 * @return array
+	 */
+	public function toArray() {
+		$config = [
+			'reauthentication_parameter' => '',
+			'offline_access' => 'boolean',
+			'offline_access_parameter' => '',
+			'append_state_to_redirect_uri' => '',
+			'authorization_in_header' => false,
+			'parameters_in_url' => false,
+			'token_request_method' => '',
+			'signature_method' => '',
+			'signature_certificate_file' => '',
+			'access_token_authentication' => '',
+			'access_token_parameter' => '',
+			'default_access_token_type' => '',
+			'store_access_token_response' => false,
+			'refresh_token_authentication' => '',
+			'grant_type' => '',
+			'get_token_with_api_key' => false,
+			'access_token_content_type' => '',
+			'access_token_language' => '',
+			'scope' => ''
+		];
+		$self = $this;
+		array_walk($config, function(&$value, $property) use ($self) {
+			$value = $self->{$property};
+		});
+		$config = array_filter($config, function($value) {
+			return $value != '';
+		});
+		return $config;
 	}
 
 }

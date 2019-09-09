@@ -165,6 +165,7 @@ class PdoTokenStorage
 			}
 		}
 		$this->deleteSessionCookie();
+		$this->removeProviderFromCookie();
 		return true;
 	}
 

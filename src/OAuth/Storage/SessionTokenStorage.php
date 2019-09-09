@@ -61,6 +61,7 @@ class SessionTokenStorage
 		$this->startSession();
 		unset($_SESSION[$provider]);
 		$this->deleteSessionCookie();
+		$this->removeProviderFromCookie();
 		return true;
 	}
 

@@ -11,6 +11,30 @@ use eureka2\OAuth\Exception\OAuthClientException;
  */
 class OAuthProvider {
 
+	const TYPES= [
+		'protocol' => 'string',
+		'version' => 'string',
+		'discovery_endpoint' => 'string',
+		'authorization_endpoint' => 'string',
+		'token_endpoint' => 'string',
+		'registration_endpoint' => 'string',
+		'introspection_endpoint' => 'string',
+		'revocation_endpoint' => 'string',
+		'request_token_endpoint' => 'string',
+		'userinfo_endpoint' => 'string',
+		'end_session_endpoint' => 'string',
+		'pin_dialog_url' => 'string',
+		'jwks_uri' => 'string',
+		'scopes_supported' => 'array',
+		'response_types_supported' => 'array',
+		'response_modes_supported' => 'array',
+		'token_endpoint_auth_methods_supported' => 'array',
+		'subject_types_supported' => 'array',
+		'id_token_signing_alg_values_supported' => 'array',
+		'claims_supported' => 'array',
+		'mapping' => 'array'
+	];
+
 	/**
 	 * @var string $name the name of the provider
 	 *
@@ -935,29 +959,6 @@ class OAuthProvider {
 	 * throws \eureka2\OAuth\Exception\OAuthClientException
 	 */
 	public function bind(array $configuration) {
-		$types = [
-			'protocol' => 'string',
-			'version' => 'string',
-			'discovery_endpoint' => 'string',
-			'authorization_endpoint' => 'string',
-			'token_endpoint' => 'string',
-			'registration_endpoint' => 'string',
-			'introspection_endpoint' => 'string',
-			'revocation_endpoint' => 'string',
-			'request_token_endpoint' => 'string',
-			'userinfo_endpoint' => 'string',
-			'end_session_endpoint' => 'string',
-			'pin_dialog_url' => 'string',
-			'jwks_uri' => 'string',
-			'scopes_supported' => 'array',
-			'response_types_supported' => 'array',
-			'response_modes_supported' => 'array',
-			'token_endpoint_auth_methods_supported' => 'array',
-			'subject_types_supported' => 'array',
-			'id_token_signing_alg_values_supported' => 'array',
-			'claims_supported' => 'array',
-			'mapping' => 'array'
-		];
 		$required = [
 			'protocol' => '',
 			'version' => '',
@@ -965,11 +966,11 @@ class OAuthProvider {
 			'token_endpoint' => []
 		];
 		foreach ($configuration as $property => $value) {
-			if (!isset($types[$property])) {
+			if (!isset(self::TYPES[$property])) {
 				throw new OAuthClientException('OAuthProvider: ' . $property . ' is not a supported property');
 			}
 			$type = gettype($value);
-			$expected = $types[$property];
+			$expected = self::TYPES[$property];
 			if ($type !== $expected) {
 				throw new OAuthClientException('OAuthProvider: the property "' . $property . '" is not of type "' . $expected . '", it is of type "' . $type);
 			}
@@ -981,6 +982,42 @@ class OAuthProvider {
 				throw new OAuthClientException('OAuthProvider: the property "' . $property . '" must be defined');
 			}
 		}
+	}
+
+	/**
+	 * Returns the OAuth provider configuration as an array
+	 *
+	 * @return array
+	 */
+	public function toArray() {
+		$config = [
+			'protocol' => [
+				'name' => $this->protocol,
+				'version' => $this->version
+			],
+			'endpoints' => [
+				'discovery_endpoint' => '',
+				'authorization_endpoint' => '',
+				'token_endpoint' => '',
+				'registration_endpoint' => '',
+				'introspection_endpoint' => '',
+				'revocation_endpoint' => '',
+				'request_token_endpoint' => '',
+				'userinfo_endpoint' => '',
+				'end_session_endpoint' => '',
+				'pin_dialog_url' => '',
+				'jwks_uri' => ''
+			]
+		];
+		$self = $this;
+		array_walk($config['endpoints'], function(&$value, $property) use ($self) {
+			$value = $self->{$property};
+		});
+		$config['endpoints'] = array_filter($config['endpoints'], function($value) {
+			return $value != '';
+		});
+		$config['mapping'] = $this->mapping;
+		return $config;
 	}
 
 	/**

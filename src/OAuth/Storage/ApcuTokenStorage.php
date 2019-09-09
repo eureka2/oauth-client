@@ -57,6 +57,7 @@ class ApcuTokenStorage
 		$this->client->trace('Resetting the access token status for OAuth provider ' . $provider);
 		apcu_delete($this->getSessionCookie());
 		$this->deleteSessionCookie();
+		$this->removeProviderFromCookie();
 		return true;
 	}
 

@@ -2,6 +2,7 @@
 
 namespace eureka2\OAuth\Client;
 
+use eureka2\OAuth\Client\OAuthClient;
 use eureka2\OAuth\Exception\OAuthClientException;
 use eureka2\OAuth\Provider\OAuthBuiltinProviders;
 
@@ -10,11 +11,13 @@ use eureka2\OAuth\Provider\OAuthBuiltinProviders;
  * based on the provider name, protocol, and version of this protocol.
  *
  * If the provider is not a buit-in provider, protocol and version are required.
+ *
+ * It also provides a static function to find the last resource owner who logged in.
  */
-class OAuthClientFactory {
+class OAuthClient {
 
 	/**
-	 * Creates a OAuth instance according to the given parameters.
+	 * Creates a OAuth client instance according to the given parameters.
 	 *
 	 * @param string $provider the provider's name
 	 * @param string $protocol protocol name among 'oauth' or 'openid'
@@ -75,4 +78,35 @@ class OAuthClientFactory {
 				);
 		}
 	}
+
+	/**
+	 * Returns the last connected resource owner if there is one.
+	 *
+	 * @return \eureka2\OAuth\Response\ResourceOwner|null
+	 */
+	public static function getConnectedResourceOwner() {
+		$providers_conf = $_COOKIE['oauth_client_providers'] ?? '';
+		$providers_conf = unserialize(base64_decode($providers_conf));
+		if (!is_array($providers_conf)) {
+			$providers_conf = [];
+		}
+		$providers = array_reverse(array_keys($providers_conf));
+		$user = null;
+		foreach ($providers as $provider) {
+			try {
+				$client = OAuthClient::create($provider);
+				if ($client->initialize($providers_conf[$provider])) {
+					if ($client->isAuthenticated() && !empty($client->getAccessToken())) {
+						$user = $client->getResourceOwner();
+						$client->finalize();
+						break;
+					}
+					$client->finalize();
+				}
+			} catch (\Exception $e){
+			}
+		}
+		return $user;
+	}
+
 }

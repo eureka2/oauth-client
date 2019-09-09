@@ -7,7 +7,7 @@ use eureka2\OAuth\Request\OAuthRequest;
 use eureka2\OAuth\Response\ResourceOwner;
 use eureka2\OAuth\Exception\{OAuthClientException, OAuthClientAccessTokenException};
 use eureka2\OAuth\Provider\{OAuthProvider, OAuthBuiltinProviders};
-use eureka2\OAuth\Storage\TokenStorageFactory;
+use eureka2\OAuth\Storage\TokenStorage;
 
 /**
  * Base class for all Oauth clients :
@@ -461,6 +461,13 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	}
 
 	/**
+	 * {@inheritdoc}
+	 */
+	public function getStrategy() {
+		return $this->strategy;
+	}
+
+	/**
 	 * Enables or disables the debug mode.
 	 *
 	 * Set this variable to true if you
@@ -897,8 +904,8 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	 */
 	protected function sendHttpRequest($oauthRequest, $options = []) {
 		try {
-			$http = HttpClient::create(
-				['headers' => [
+			$http = HttpClient::create([
+				'headers' => [
 					'User-Agent' => $this->oauthUserAgent,
 				],
 				'max_redirects' => $options['max_redirects'] ?? 0
@@ -1267,7 +1274,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 				$userId = $user[$field];
 			}
 		}
-		return new ResourceOwner($userId, $user, $this->provider->getMapping());
+		return new ResourceOwner($this->provider->getName(), $userId, $user, $this->provider->getMapping());
 	}
 
 	/**
@@ -1312,7 +1319,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 	 * {@inheritdoc}
 	 */
 	public function initialize($options = []) {
-		$this->storage = TokenStorageFactory::create($this, $options['storage'] ?? [ 'type' => 'session' ]);
+		$this->storage = TokenStorage::create($this, $options['storage'] ?? [ 'type' => 'session' ]);
 		if (strlen($this->provider->getName()) === 0) {
 			return true;
 		}
@@ -1449,6 +1456,23 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 		if (!empty($this->getAccessToken()) || !empty($this->getAccessTokenSecret())) {
 			$this->trace('The authenticate function should not be called again if the OAuth token was already set manually');
 			throw new OAuthClientException('the OAuth token was already set');
+		}
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
+	public function isAuthenticated() {
+		try {
+			if (!$this->checkAccessToken($redirectUrl)) {
+				return true;
+			}
+			if (!isset($redirectUrl)) {
+				return true;
+			}
+			return false;
+		} catch (OAuthClientException $e) {
+			return false;
 		}
 	}
 

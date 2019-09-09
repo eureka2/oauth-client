@@ -10,6 +10,13 @@ namespace eureka2\OAuth\Response;
 abstract class OAuthResponse implements \Iterator {
 
 	/**
+	 * The name of the provider
+	 *
+	 * @var string $provider
+	 */
+	private $provider = '';
+
+	/**
 	 * The properties of the resource
 	 *
 	 * @var array $values
@@ -19,22 +26,54 @@ abstract class OAuthResponse implements \Iterator {
 	/**
 	 * Constructs a OAuthResponse object
 	 *
+	 * @param string $provider the provider name.
 	 * @param array|object $values the properties of the resource.
 	 * @param array $mapping Match between OAuth client fields and fields returned by the provider.
 	 */
-	public function __construct($values, $mapping = []) {
+	public function __construct($provider, $values, $mapping = []) {
+		$this->provider = $provider;
 		if (is_object($values)) {
 			$values = (array)$values;
 		}
 		$mapping = array_flip(array_merge([ 'user_id_field' => 'sub' ], $mapping));
 		foreach($values as $property => $value) {
-			if (isset($mapping[$property])) {
-				$mapped = preg_replace("/_field$/", "", $mapping[$property]);
-				$this->values[$mapped] = $value;
+			if (is_object($value)) {
+				$value = (array)$value;
+			}
+			if (is_array($value)) {
+				foreach($value as $vproperty => $vvalue) {
+					$this->setPropertyValue($property . '.' . $vproperty, $vvalue, $mapping);
+				}
 			} else {
-				$this->values[$property] = $value;
+				$this->setPropertyValue($property, $value, $mapping);
 			}
 		}
+	}
+
+	/**
+	 * Sets the value of a property
+	 *
+	 * @param string $property the property name.
+	 * @param string $value the value of the property.
+	 * @param array $mapping Match between OAuth client fields and fields returned by the provider.
+	 */
+	protected function setPropertyValue($property, $value, &$mapping) {
+		if (isset($mapping[$property])) {
+			$mapped = preg_replace("/_field$/", "", $mapping[$property]);
+			$this->values[$mapped] = $value;
+		} else {
+			$property = str_replace('.', '_', $property);
+			$this->values[$property] = $value;
+		}
+	}
+
+	/**
+	 * Returns the name of the provider
+	 *
+	 * @return string the provider name.
+	 */
+	public function getProvider() {
+		return $this->provider;
 	}
 
 	/**
@@ -84,7 +123,7 @@ abstract class OAuthResponse implements \Iterator {
 	 */
 	public function __call($method, $arguments) {
 		$m = [];
-		if (!preg_match("/^get(.+)$/", $method, $m)) {
+		if (!preg_match("/^(get|is|has|should)(.+)$/", $method, $m)) {
 			trigger_error(
 				sprintf(
 					'Unknown response method %s',
@@ -94,11 +133,12 @@ abstract class OAuthResponse implements \Iterator {
 			);
 			return null;
 		}
-		if (isset($arguments)) {
+		if (isset($arguments) && count($arguments) > 0) {
 			trigger_error(
 				sprintf(
-					"The method %s doesn't accept any argument",
-					$method
+					"The method %s doesn't accept any argument : %s",
+					$method,
+					var_export($arguments, true)
 				),
 				E_USER_NOTICE
 			);
@@ -108,9 +148,9 @@ abstract class OAuthResponse implements \Iterator {
 			function($c) {
 				return '_' . strtolower($c[1]);
 			}, 
-			lcfirst($m[1])
+			lcfirst($m[2])
 		);
-		return $this->values[$property];
+		return $this->values[$property] ?? null;
 	}
 
 	/**

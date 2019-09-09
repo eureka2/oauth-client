@@ -4,7 +4,7 @@ namespace eureka2\OAuth\Storage;
 
 use eureka2\OAuth\Exception\OAuthClientException;
 
-class TokenStorageFactory {
+class TokenStorage {
 
 	/**
 	 * Create a Token Storage instance according to the given storage options.
@@ -18,11 +18,9 @@ class TokenStorageFactory {
 		if (!isset($storage['type'])) {
 			throw new OAuthClientException('The token storage type is required');
 		}
-		$type = $storage['type'];
-		unset($storage['type']);
-		switch ($type) {
+		switch ($storage['type']) {
 			case 'session':
-				return new SessionTokenStorage($client);
+				return new SessionTokenStorage($client, $storage);
 			case 'cookie':
 				return new CookieTokenStorage($client, $storage);
 			case 'pdo':
@@ -30,7 +28,7 @@ class TokenStorageFactory {
 				return new PdoTokenStorage($client, $storage);
 			case 'apcu':
 				if (function_exists('apcu_store')) {
-					return new ApcuTokenStorage($client);
+					return new ApcuTokenStorage($client, $storage);
 				}
 			default:
 				throw new OAuthClientException(

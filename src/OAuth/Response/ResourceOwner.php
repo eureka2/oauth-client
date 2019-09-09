@@ -11,6 +11,15 @@ namespace eureka2\OAuth\Response;
  */
 class ResourceOwner extends OAuthResponse {
 
+	const ADDRESS_MAPPING = [
+		'street_address' => 'address.street_address',
+		'postal_code' => 'address.postal_code',
+		'locality' => 'address.locality',
+		'region' => 'address.region',
+		'country' => 'address.country',
+		'formatted' => 'address.formatted'
+	];
+
 	/**
 	 * The ID of the resource owner
 	 *
@@ -21,14 +30,15 @@ class ResourceOwner extends OAuthResponse {
 	/**
 	 * Constructs a ResourceOwner object
 	 *
+	 * @param string $property the property name.
 	 * @param string $id The ID of the resource owner
 	 * @param array $values The properties of the resource owner
 	 * @param array $mapping Match between OAuth client fields
 	 * and fields returned by the provider's UserInfo endpoint.
 	 */
-	public function __construct($id, $values, $mapping) {
+	public function __construct($provider, $id, $values, $mapping) {
 		$this->id = $id;
-		parent::__construct($values, $mapping);
+		parent::__construct($provider, $values, array_merge(self::ADDRESS_MAPPING, $mapping));
 	}
 
 	/**

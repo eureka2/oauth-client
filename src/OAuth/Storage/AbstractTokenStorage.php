@@ -170,9 +170,60 @@ abstract class AbstractTokenStorage
 				throw new OAuthClientException('OAuth session error');
 			}
 			setcookie($this->getSessionCookieName(), $session->getSessionId(), 0, $this->getSessionPath());
+			$this->addProviderInCookie();
 		}
 		$this->setSessionId($session->getSessionId());
 		return $session;
+	}
+
+	/**
+	 * Returns the OAuth configuration for all providers
+	 * where the user has logged on.
+	 *
+	 * @return array the OAuth configuration by provider
+	 */
+	protected function getProvidersInCookie() {
+		$providers = $_COOKIE['oauth_client_providers'] ?? '';
+		$providers = unserialize(base64_decode($providers));
+		if (!is_array($providers)) {
+			$providers = [];
+		}
+		return $providers;
+	}
+
+	/**
+	 * Adds the OAuth configuration of the current provider
+	 * to the list of providers where the user has logged on.
+	 *
+	 * @return void
+	 */
+	protected function addProviderInCookie() {
+		$providers = $this->getProvidersInCookie();
+		$provider = $this->client->getProvider()->getName();
+		$providers[$provider] = [
+			'provider' => $this->client->getProvider()->toArray(),
+			'strategy' => $this->client->getStrategy()->toArray(),
+			'storage' => $this->parameters
+		];
+		$providers = base64_encode(serialize($providers));
+		setcookie('oauth_client_providers', $providers, 0, $this->getSessionPath());
+	}
+
+	/**
+	 * Removes the OAuth configuration of the current provider
+	 * from the list of providers where the user has logged on.
+	 *
+	 * @return void
+	 */
+	protected function removeProviderFromCookie() {
+		$providers = $this->getProvidersInCookie();
+		$provider = $this->client->getProvider()->getName();
+		if (array_key_exists($provider, $providers)) {
+			unset($providers[$provider]);
+			$providers = base64_encode(serialize($providers));
+			$_COOKIE['oauth_client_providers'] = $providers;
+			setcookie('oauth_client_providers', $providers, 0, $this->getSessionPath());
+		}
 	}
 
 	/**

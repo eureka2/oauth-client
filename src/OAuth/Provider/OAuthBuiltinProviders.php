@@ -35,7 +35,9 @@ class OAuthBuiltinProviders {
 				'userinfo_endpoint' => 'https://graph.facebook.com/v2.3/me?fields=id,first_name,gender,last_name,link,locale,name,timezone,updated_time,verified,email'
 			],
 			'mapping' => [
-				'user_id_field' => 'id'
+				'user_id_field' => 'id',
+				'given_name_field' => 'first_name',
+				'family_name_field' => 'last_name'
 			],
 			'strategy' => [
 				'scope' => 'public_profile,email,user_gender',
@@ -48,12 +50,14 @@ class OAuthBuiltinProviders {
 				'version' => '2.0'
 			],
 			'endpoints' => [
-				'authorization_endpoint' => 'https://github.com/login/oauth/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={SCOPE}&state={STATE}',
+				'authorization_endpoint' => 'https://github.com/login/oauth/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&scope={SCOPE}&state={STATE}',
 				'token_endpoint' => 'https://github.com/login/oauth/access_token',
 				'userinfo_endpoint' => 'https://api.github.com/user'
 			],
 			'mapping' => [
-				'user_id_field' => 'id'
+				'user_id_field' => 'id',
+				'picture_field' => 'avatar_url',
+				'website_field' => 'html_url'
 			],
 			'strategy' => [
 				'scope' => 'openid read:user',
@@ -159,6 +163,12 @@ class OAuthBuiltinProviders {
 				'discovery_endpoint' => 'https://login.microsoftonline.com/common/v2.0',
 				'userinfo_endpoint' => 'https://apis.live.net/v5.0/me'
 			],
+			'mapping' => [
+				'given_name_field' => 'first_name',
+				'family_name_field' => 'last_name',
+				'email_field' => 'emails.preferred',
+				'updated_at_field' => 'updated_time'
+			],
 			'strategy' => [
 				'offline_access' => true,
 				'scope' => 'openid wl.basic wl.emails'
@@ -173,9 +183,11 @@ class OAuthBuiltinProviders {
 				'authorization_endpoint' => 'https://api.orange.com/openidconnect/fr/v1/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={SCOPE}&response_type=code&state={STATE}',
 				// 'token_endpoint' => 'https://api.orange.com/oauth/v2/token',
 				'token_endpoint' => 'https://api.orange.com/openidconnect/fr/v1/token',
-				'userinfo_endpoint' => 'https://api.orange.com/openidconnect/v1/userinfo'
+				// 'userinfo_endpoint' => 'https://api.orange.com/openidconnect/v1/userinfo'
+				'userinfo_endpoint' => 'https://api.orange.com/userdetails/fr/v2/userinfo'
 			],
 			'strategy' => [
+				'scope' => 'openid profile address phone email profile_limited'
 			]
 		],
 		'Paypal' => [

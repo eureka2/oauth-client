@@ -24,6 +24,16 @@ interface OAuthClientInterface {
 	public function initialize($options = []);
 
 	/**
+	 * Checks if the user is authenticated with the current OAuth provider.
+	 *
+	 * Call this function if you want to know if the user needs to log in to access the resources he owns without doing so.
+	 *
+	 * @return bool This function returns true if the user is authenticated, false otherwise.
+	 *
+	 */
+	public function isAuthenticated();
+
+	/**
 	 * Process the OAuth protocol interaction with the OAuth provider.
 	 *
 	 * Call this function when you need to retrieve the OAuth access token.
@@ -282,6 +292,15 @@ interface OAuthClientInterface {
 	 * @return \eureka2\OAuth\Provider\OAuthProvider
 	 */
 	public function getProvider();
+
+	/**
+	 *
+	 * Returns the current instance
+	 * of the OAuthClientStrategy class.
+	 *
+	 * @return \eureka2\OAuth\Client\OAuthClientStrategy
+	 */
+	public function getStrategy();
 
 
 }

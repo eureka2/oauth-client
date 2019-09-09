@@ -114,6 +114,7 @@ class CookieTokenStorage
 		$this->client->trace('Resetting the access token status for the OAuth provider ' . $this->client->getProvider()->getName());
 		$this->deleteCookie();
 		$this->deleteSessionCookie();
+		$this->removeProviderFromCookie();
 		return true;
 	}
 
