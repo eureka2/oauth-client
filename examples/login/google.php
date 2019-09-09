@@ -1,6 +1,6 @@
 <?php require('../../vendor/autoload.php');
 
-use eureka2\OAuth\Client\OAuthClientFactory;
+use eureka2\OAuth\Client\OAuthClient;
 use eureka2\OAuth\Exception\OAuthClientAccessTokenException;
 use eureka2\OAuth\Exception\OAuthClientAuthorizationException;
 use eureka2\OAuth\Exception\OAuthClientException;
@@ -9,7 +9,7 @@ use eureka2\OAuth\Exception\OAuthClientPHPException;
 include 'display-results-inc.php';
 
 try {
-	$client = OAuthClientFactory::create('Google');
+	$client = OAuthClient::create('Google');
 	$client->setDebug(false);
 	$client->setDebugHttp(true);
 
@@ -49,7 +49,7 @@ try {
 	failed('OAuth PHP error', $e->getMessage());
 } catch (OAuthClientException $e) {
 	failed('OAuth client error', $e->getMessage());
-} catch (Exception $e) {
+} catch (\Exception $e) {
 	failed('OAuth error', $e->getMessage());
 }
 
