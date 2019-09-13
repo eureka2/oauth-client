@@ -284,7 +284,7 @@ class OAuth1Client extends AbstractOAuthClient implements OAuthClientInterface {
 			}
 		}
 		ksort($signValues);
-		$baseString .= str_replace(['%7E', '+'], ['~', ' '], http_build_query($signValues));
+		$baseString .= str_replace(['%7E', '+'], ['~', ' '], rawurlencode(http_build_query($signValues)));
 		return $baseString;
 	}
 
@@ -296,7 +296,7 @@ class OAuth1Client extends AbstractOAuthClient implements OAuthClientInterface {
 			'oauth_consumer_key' => $this->provider->getClientId(),
 			'oauth_nonce' => md5(uniqid(''.rand(), true)),
 			'oauth_signature_method' => $this->strategy->getSignatureMethod(),
-			'oauth_timestamp' => time(),
+			'oauth_timestamp' => (string)time(),
 			'oauth_version' => '1.0',
 		];
 		if ($hasFiles) {
@@ -310,15 +310,17 @@ class OAuth1Client extends AbstractOAuthClient implements OAuthClientInterface {
 		}
 		$headerValues = ($method === 'GET' ? array_merge($values, $oauth, $valueParameters) : array_merge($values, $oauth));
 		$values = array_merge($values, $oauth, $valueParameters);
-		$key  = str_replace(['%7E', '+'], ['~', ' '], rawurlencode($this->provider->getClientSecret()));
-		$key .= '&' . str_replace(['%7E', '+'], ['~', ' '], rawurlencode($this->getAccessTokenSecret()));
+		$key = implode('&', [
+			str_replace(['%7E', '+'], ['~', ' '], rawurlencode($this->provider->getClientSecret())),
+			str_replace(['%7E', '+'], ['~', ' '], rawurlencode($this->getAccessTokenSecret()))
+		]);
 		switch ($this->strategy->getSignatureMethod()) {
 			case 'PLAINTEXT':
-				$values['oauth_signature'] = $key;
+				$headerValues['oauth_signature'] = $values['oauth_signature'] = $key;
 				break;
 			case 'HMAC-SHA1':
 				$baseString = $this->buildBaseString($url, $method, $values);
-				$signature = hash_hmac ('sha1', $baseString, $key);
+				$signature = hash_hmac('sha1', $baseString, $key, true);
 				$headerValues['oauth_signature'] = $values['oauth_signature'] = base64_encode($signature);
 				break;
 			case 'RSA-SHA1':
@@ -345,9 +347,13 @@ class OAuth1Client extends AbstractOAuthClient implements OAuthClientInterface {
 				);
 		}
 		if ($this->strategy->isAuthorizationInHeader()) {
-			$authorization = 'OAuth';
+			$authorization = 'OAuth ';
 			if (!empty($headerValues)) {
-				$authorization .= ' ' . str_replace(['%7E', '+'], ['~', ' '], http_build_query($headerValues, '', ','));
+				ksort($headerValues);
+				foreach($headerValues as $header => &$values) {
+					$values = '"'.$values.'"';
+				}
+				$authorization .= str_replace('%22', '"', http_build_query($headerValues, '', ', '));
 			}
 			$postData = $parameters;
 		} else {

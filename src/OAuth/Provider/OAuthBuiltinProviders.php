@@ -254,7 +254,14 @@ class OAuthBuiltinProviders {
 				'request_token_endpoint' => 'https://api.twitter.com/oauth/request_token',
 				'token_endpoint' => 'https://api.twitter.com/oauth/access_token'
 			],
+			'mapping' => [
+				'user_id_field' => 'id',
+				'nickname_field' => 'screen_name',
+				'picture_field' => 'profile_image_url_https',
+				'website_field' => 'url'
+			],
 			'strategy' => [
+				'token_request_method' => 'POST',
 				'parameters_in_url' => false
 			]
 		],
