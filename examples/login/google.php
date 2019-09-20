@@ -13,33 +13,20 @@ try {
 	$client->setDebug(false);
 	$client->setDebugHttp(true);
 
-	$client->setRedirectUri('http://' . $_SERVER['HTTP_HOST'] .
-			dirname(strtok($_SERVER['REQUEST_URI'], '?')) . '/google.php');
-
-	// see http://code.google.com/apis/console
-	$client->setClientId('');
-	$client->setClientSecret('');
-
-	$user = (object) [];
-	if ($client->initialize([
-			'strategy' => [
-				'offline' => true,
-				'scope' => 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile'
+	$user = $client->fetchResourceOwner([
+		'provider' => [
+			'registration' => [
+				'keys' => [
+					'client_id' => '',
+					'client_secret' => '',
+					'redirect_uri' => 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME']
+				]
 			]
-		])) {
-		if ($client->authenticate()) {
-			if (!empty($client->getAccessToken())) {
-				$user = $client->callAPI(
-					'https://www.googleapis.com/oauth2/v1/userinfo',
-					'GET', [], ['fail_on_access_error' => true]
-				);
-			}
-		}
-		$client->finalize();
-	}
-	if ($client->shouldExit()) {
-		exit;
-	}
+		],
+		'strategy' => [
+			'offline_access' => true
+		]
+	]);
 	connected('Google', $user, '../logout/google.php');
 } catch (OAuthClientAccessTokenException $e) {
 	failed('OAuth access token error', $e->getMessage());

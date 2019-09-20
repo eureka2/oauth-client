@@ -46,16 +46,40 @@ abstract class OAuthResponse implements \Iterator {
 		}
 		$mapping = array_flip(array_merge([ 'user_id_field' => 'sub' ], $mapping));
 		foreach($values as $property => $value) {
-			if (is_object($value)) {
-				$value = (array)$value;
+			$this->map($property, $value, $mapping);
+		}
+	}
+
+	protected function map($property, $value, &$mapping) {
+		if (is_object($value)) {
+			$value = (array)$value;
+		}
+		if (is_array($value)) {
+			foreach($value as $vproperty => $vvalue) {
+				$this->map($property . '.' . $vproperty, $vvalue, $mapping);
 			}
-			if (is_array($value)) {
-				foreach($value as $vproperty => $vvalue) {
-					$this->setPropertyValue($property . '.' . $vproperty, $vvalue, $mapping);
-				}
-			} else {
-				$this->setPropertyValue($property, $value, $mapping);
+		} else {
+			$this->setPropertyValue($property, $value, $mapping);
+		}
+	}
+
+	/**
+	 * Restores a non-standard property that is not mapped.
+	 *
+	 * @param string $property the property name.
+	 * @param string $value the value of the property.
+	 * @param array $values the item of $this->values where the value of the property should be inserted
+	 */
+	protected function unmap($property, $value, &$values) {
+		$properties = explode('.', $property);
+		$prop = array_shift($properties);
+		if (count($properties) > 0) {
+			if (!isset($values[$prop])) {
+				$values[$prop] = [];
 			}
+			$this->unmap(implode('.', $properties), $value, $values[$prop]);
+		} else {
+			$values[$prop] = $value;
 		}
 	}
 
@@ -71,8 +95,7 @@ abstract class OAuthResponse implements \Iterator {
 			$mapped = preg_replace("/_field$/", "", $mapping[$property]);
 			$this->values[$mapped] = $value;
 		} else {
-			$property = str_replace('.', '_', $property);
-			$this->values[$property] = $value;
+			$this->unmap($property, $value, $this->values);
 		}
 	}
 

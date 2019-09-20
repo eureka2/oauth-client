@@ -22,6 +22,8 @@ try {
 			dirname(dirname(strtok($_SERVER['REQUEST_URI'], '?'))) . '/index.php');
 		} elseif ($client->canRevokeToken()) {
 			$valid_token = $client->revokeToken();
+		} else {
+			$valid_token = $client->resetAccessToken();
 		}
 		$client->finalize();
 	}

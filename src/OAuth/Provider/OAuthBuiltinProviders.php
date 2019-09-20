@@ -65,6 +65,7 @@ class OAuthBuiltinProviders {
 			],
 			'mapping' => [
 				'user_id_field' => 'id',
+				'nickname_field' => 'login',
 				'picture_field' => 'avatar_url',
 				'website_field' => 'html_url'
 			],
@@ -84,6 +85,9 @@ class OAuthBuiltinProviders {
 
 			],
 			'mapping' => [
+				'user_id_field' => 'id',
+				'nickname_field' => 'username',
+				'website_field' => 'web_url',
 				'picture_field' => 'avatar_url'
 			],
 			'strategy' => [
@@ -145,6 +149,14 @@ class OAuthBuiltinProviders {
 				'end_session_endpoint' => 'https://fcp.integ01.dev-franceconnect.fr/api/v1/logout',
 				'userinfo_endpoint' => 'https://fcp.integ01.dev-franceconnect.fr/api/v1/userinfo?schema=openid'
 			],
+			'mapping' => [
+				'user_id_field' => 'sub',
+				'formatted_field' => 'address.formatted',
+				'country_field' => 'address.country',
+				'locality_field' => 'address.locality',
+				'postal_code_field' => 'address.postal_code',
+				'street_address_field' => 'address.street_address'
+			],
 			'strategy' => [
 				'scope' => 'openid identite_pivot address email phone',
 				'offline_access' => true
@@ -205,10 +217,15 @@ class OAuthBuiltinProviders {
 				'version' => '2.0'
 			],
 			'endpoints' => [
-				'authorization_endpoint' => 'https://www.paypal.com/webapps/auth/protocol/openidconnect/v1/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&state={STATE}&scope={SCOPE}',
-				'token_endpoint' => 'https://api.paypal.com/v1/identity/openidconnect/tokenservice'
+				'authorization_endpoint' => 'https://www.paypal.com/connect?flowEntry=static&response_type=code&client_id={CLIENT_ID}&scope={SCOPE}&redirect_uri={REDIRECT_URI}&state={STATE}',
+				'token_endpoint' => 'https://api.paypal.com/v1/oauth2/token',
+				'userinfo_endpoint' => 'https://api.paypal.com/v1/identity/oauth2/userinfo?schema=paypalv1.1'
 			],
 			'strategy' => [
+				'authorization_in_header' => true,
+				'grant_type' => 'client_credentials',
+				'access_token_language' => 'fr_FR',
+				'access_token_content_type' => 'application/json',
 				'scope' => 'openid profile email address'
 			]
 		],
@@ -218,32 +235,22 @@ class OAuthBuiltinProviders {
 				'version' => '2.0'
 			],
 			'endpoints' => [
-				'authorization_endpoint' => 'https://www.sandbox.paypal.com/webapps/auth/protocol/openidconnect/v1/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&state={STATE}&scope={SCOPE}',
-				'token_endpoint' => 'https://api.sandbox.paypal.com/v1/identity/openidconnect/tokenservice',
-				'userinfo_endpoint' => 'https://api.sandbox.paypal.com/v1/identity/openidconnect/userinfo?schema=openid'
+				'authorization_endpoint' => 'https://www.sandbox.paypal.com/connect?flowEntry=static&response_type=code&client_id={CLIENT_ID}&scope={SCOPE}&redirect_uri={REDIRECT_URI}&state={STATE}',
+				'token_endpoint' => 'https://api.sandbox.paypal.com/v1/oauth2/token',
+				'userinfo_endpoint' => 'https://api.sandbox.paypal.com/v1/identity/oauth2/userinfo?schema=paypalv1.1'
+			],
+			'mapping' => [
+				'user_id_field' => 'user_id',
+				'email_field' => 'emails.0.value'
 			],
 			'strategy' => [
-				'scope' => 'openid profile email address'
+				'authorization_in_header' => true,
+				'scope' => 'openid https://uri.paypal.com/services/applications/webhooks',
+				'grant_type' => 'client_credentials',
+				'access_token_language' => 'fr_FR',
+				'access_token_content_type' => 'application/json',
 			]
 		],
-		// 'PaypalSandbox' => [
-			// 'protocol' => [
-				// 'name' => 'oauth',
-				// 'version' => '2.0'
-			// ],
-			// 'endpoints' => [
-				// 'authorization_endpoint' => 'https://www.sandbox.paypal.com/connect?flowEntry=static&response_type=code&client_id={CLIENT_ID}&scope={SCOPE}&redirect_uri={REDIRECT_URI}&state={STATE}',
-				// 'token_endpoint' => 'https://api.sandbox.paypal.com/v1/oauth2/token',
-				// 'authorization_endpoint' => 'https://api.sandbox.paypal.com/v1/identity/oauth2/userinfo?schema=paypalv1.1'
-			// ],
-			// 'strategy' => [
-				// 'scope' => 'openid profile email address',
-				// 'access_token_content_type' => 'application/json',
-				// 'grant_type' => 'authorization_code',
-				// 'access_token_authentication' => 'basic',
-				// 'access_token_language' => 'fr-FR'
-			// ]
-		// ],
 		'Twitter' => [
 			'protocol' => [
 				'name' => 'oauth',
@@ -252,7 +259,8 @@ class OAuthBuiltinProviders {
 			'endpoints' => [
 				'authorization_endpoint' => 'https://api.twitter.com/oauth/authenticate',
 				'request_token_endpoint' => 'https://api.twitter.com/oauth/request_token',
-				'token_endpoint' => 'https://api.twitter.com/oauth/access_token'
+				'token_endpoint' => 'https://api.twitter.com/oauth/access_token',
+				'userinfo_endpoint' => 'https://api.twitter.com/1.1/account/verify_credentials.json'
 			],
 			'mapping' => [
 				'user_id_field' => 'id',

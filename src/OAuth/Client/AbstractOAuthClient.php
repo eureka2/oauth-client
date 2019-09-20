@@ -917,7 +917,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 				'headers' => [
 					'User-Agent' => $this->oauthUserAgent,
 				],
-				'max_redirects' => $options['max_redirects'] ?? 0
+				'max_redirects' => $options['max_redirects'] ?? 20
 			]);
 			$response = $http->request(
 				$oauthRequest->getMethod(),
@@ -1046,7 +1046,7 @@ abstract class AbstractOAuthClient implements OAuthClientInterface {
 				$requestBody = $options['body'];
 				break;
 		}
-		$requestHeaders['Accept'] = $options['accept'] ?? '*/**';
+		$requestHeaders['Accept'] = $options['accept'] ?? '*/*';
 		$requestHeaders['Accept-Language'] = $options['accept_language'] ?? '*';
 		switch ($authentication = (isset($options['authentication']) ? strtolower($options['authentication']) : '')) {
 			case 'basic':

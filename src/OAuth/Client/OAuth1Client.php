@@ -349,10 +349,8 @@ class OAuth1Client extends AbstractOAuthClient implements OAuthClientInterface {
 		if ($this->strategy->isAuthorizationInHeader()) {
 			$authorization = 'OAuth ';
 			if (!empty($headerValues)) {
+				array_walk($headerValues, function(&$a, $b) { $a = '"'.$a.'"'; });
 				ksort($headerValues);
-				foreach($headerValues as $header => &$values) {
-					$values = '"'.$values.'"';
-				}
 				$authorization .= str_replace('%22', '"', http_build_query($headerValues, '', ', '));
 			}
 			$postData = $parameters;
